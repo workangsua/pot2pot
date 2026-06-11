@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>POT2POT (팟투팟) - 반려식물 아카이빙 및 돌봄 기록</title>
+    
+    <!-- Meta tags for search optimization -->
+    <meta name="description" content="식물별 개별 관리를 통한 건강한 반려식물 케어, AI 누끼 배경 제거를 통한 감성적인 화분 성장 아카이빙 서비스 팟투팟(POT2POT)">
+    <meta name="keywords" content="반려식물, 식물 관리, 물주기 알림, 누끼 따기, 화분 아카이빙, 식집사 커뮤니티">
+    
+    <!-- CSS Design File -->
+    <link rel="stylesheet" href="css/style.css?v=1.2">
+</head>
+<body>
+
+    <!-- Desktop Presentation Wrapper (Provides context and stunning look on desktop screens) -->
+    <div class="desktop-wrapper">
+        <div class="intro-panel">
+            <div class="logo">
+                <span class="logo-icon">🌱</span>
+                <span style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--forest-deep);">POT2POT</span>
+            </div>
+            <h1>반려식물의 성장을<br><span>감성적인 기록</span>으로.</h1>
+            <p>
+                POT2POT(팟투팟)은 복잡한 입력 없이 식물을 돌본 행동을 아카이빙하는 모바일 라이프 스타일 플랫폼입니다. 
+                스캔 한 번으로 완성되는 투명 누끼 이미지와 손쉬운 관리 갱신, 식집사 동료들과의 공유로 더욱 풍성한 원예 라이프를 즐겨보세요!
+            </p>
+            <ul class="intro-features">
+                <li>원터치 식물 스캔 & AI 배경 제거(누끼) 아카이빙</li>
+                <li>식물별 커스텀 물주기 주기와 자동 덮어쓰기 알림</li>
+                <li>성취감을 자극하는 XP 레벨 및 타이틀 업적 시스템</li>
+                <li>나의 자랑스러운 초록이들을 소개하는 피드 커뮤니티</li>
+            </ul>
+            <div style="margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                💡 오른쪽 모바일 기기 프레임에서 직접 촬영 및 편집, 등록을 진행하실 수 있습니다.
+            </div>
+        </div>
+
+        <!-- Mobile Device Frame -->
+        <div class="device-container">
+            <div class="device-screen-bezel">
+                
+                <!-- Dynamic Island Notching -->
+                <div class="dynamic-island"></div>
+                
+                <!-- iOS Status Bar -->
+                <div class="status-bar">
+                    <span class="time">11:28</span>
+                    <div class="icons">
+                        <span>📶</span>
+                        <span>🔋</span>
+                    </div>
+                </div>
+
+                <!-- Custom Toast Alert popup -->
+                <div id="custom-alert" class="custom-alert">
+                    <span id="custom-alert-message">알림 메시지</span>
+                    <button id="custom-alert-close" class="custom-alert-close">&times;</button>
+                </div>
+
+                <!-- Main App Viewport -->
+                <div class="app-viewport">
+                    
+                    <!-- ==========================================
+                         VIEW 1: Archive (Dashboard)
+                         ========================================== -->
+                    <div id="screen-archive" class="screen-view active">
+                        <header class="app-header">
+                            <div class="app-logo">
+                                <span style="font-size: 1.35rem;">🌱</span>
+                                <span class="logo-text">POT2POT</span>
+                            </div>
+                            <div class="user-badge">
+                                <span id="user-lvl" class="level">1</span>
+                                <span id="user-title" class="title">초보 식집사</span>
+                            </div>
+                        </header>
+
+                        <div class="scrollable-content">
+                            <div class="dashboard-hero">
+                                <h2>나의 식물 정원 🌿</h2>
+                                <p>사랑스런 초록이들과 함께한 감성 아카이빙 다이어리</p>
+                            </div>
+                            
+                            <!-- Plants Card Grid -->
+                            <div id="plants-grid" class="plants-grid">
+                                <!-- Generated Dynamically by app.js -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================
+                         VIEW 2: Community Feed
+                         ========================================== -->
+                    <div id="screen-community" class="screen-view">
+                        <header class="app-header">
+                            <h2 class="dummy-screen-title">식집사 피드 💬</h2>
+                        </header>
+                        <div class="scrollable-content">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; padding-left: 2px;">
+                                다른 식집사님들의 소중한 식물 자랑과 관리 팁을 확인해 보세요.
+                            </p>
+                            <div id="feed-container">
+                                <!-- Generated Dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================
+                         VIEW 3: Badges Center
+                         ========================================== -->
+                    <div id="screen-badges" class="screen-view">
+                        <header class="app-header">
+                            <h2 class="dummy-screen-title">내 업적 & 레벨 🏆</h2>
+                        </header>
+                        <div class="scrollable-content">
+                            <div class="dashboard-hero" style="background: linear-gradient(135deg, var(--gold-pastel) 0%, rgba(253,246,231,0.5) 100%); border-color: rgba(223, 177, 91, 0.15); margin-bottom: 20px;">
+                                <h3 style="font-size: 1.05rem; font-weight: 700; color: #92400e; margin-bottom: 4px;">활동 마일스톤</h3>
+                                <p style="font-size: 0.8rem; color: #b45309;">식물을 스캔하고, 물을 주고, 기록을 남겨 등급을 올리세요!</p>
+                            </div>
+                            
+                            <div id="badges-container">
+                                <!-- Generated Dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================
+                         VIEW 4: Settings
+                         ========================================== -->
+                    <div id="screen-settings" class="screen-view">
+                        <header class="app-header">
+                            <h2 class="dummy-screen-title">설정 ⚙️</h2>
+                        </header>
+                        <div class="scrollable-content" style="padding-top: 10px;">
+                            <div style="background: var(--sand-light); border-radius: 20px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 14px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
+                                    <span style="font-size: 0.85rem; font-weight: 600;">알림 푸시 서비스 활성화</span>
+                                    <input type="checkbox" checked style="accent-color: var(--forest-primary); width: 18px; height: 18px;">
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
+                                    <span style="font-size: 0.85rem; font-weight: 600;">AI 카메라 보정 활성화</span>
+                                    <input type="checkbox" checked style="accent-color: var(--forest-primary); width: 18px; height: 18px;">
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
+                                    <span style="font-size: 0.85rem; font-weight: 600;">다크 모드 적용</span>
+                                    <input type="checkbox" style="accent-color: var(--forest-primary); width: 18px; height: 18px;">
+                                </div>
+                                <button style="background: var(--terracotta); border: none; border-radius: 12px; color: white; padding: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-top: 10px;" onclick="if(confirm('모든 반려식물 데이터와 업적 정보가 초기화됩니다. 진행하시겠습니까?')){ localStorage.clear(); location.reload(); }">
+                                    데이터 전체 초기화
+                                </button>
+                            </div>
+                            <div style="margin-top: 30px; text-align: center; font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">
+                                POT2POT v1.0.0-prototype<br>© 2026 POT2POT Corp.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================
+                         Floating Bottom Navigation
+                         ========================================== -->
+                    <nav id="bottom-nav" class="bottom-nav">
+                        <button class="nav-item active" data-view="archive">
+                            <span class="nav-icon">🪴</span>
+                            <span>내 화분</span>
+                        </button>
+                        <button class="nav-item" data-view="community">
+                            <span class="nav-icon">💬</span>
+                            <span>피드</span>
+                        </button>
+                        
+                        <!-- Floating FAB to open registration flow -->
+                        <button class="nav-item add-pot" aria-label="화분 등록">
+                            <span class="nav-icon">+</span>
+                        </button>
+                        
+                        <button class="nav-item" data-view="badges">
+                            <span class="nav-icon">🏆</span>
+                            <span>업적</span>
+                        </button>
+                        <button class="nav-item" data-view="settings">
+                            <span class="nav-icon">⚙️</span>
+                            <span>설정</span>
+                        </button>
+                    </nav>
+
+                </div><!-- app-viewport -->
+
+                <!-- ==========================================
+                     Modal Overlay: Plant Registration (3-step Slider Flow)
+                     ========================================== -->
+                <div id="register-modal" class="modal-overlay">
+                    <div class="modal-sheet">
+                        
+                        <!-- Drag bar simulation -->
+                        <div class="modal-drag-handle"></div>
+                        
+                        <header class="modal-header">
+                            <h3 id="modal-title">반려식물 동행 등록</h3>
+                            <button id="modal-close" class="modal-close-btn">&times;</button>
+                        </header>
+
+                        <!-- Step indicator bar -->
+                        <div class="step-indicator-bar">
+                            <div class="step-indicator-dot active"></div>
+                            <div class="step-indicator-dot"></div>
+                            <div class="step-indicator-dot"></div>
+                        </div>
+
+                        <!-- Horizontal slider steps container -->
+                        <div id="step-container" class="modal-step-container">
+                            
+                            <!-- ---------------------------------------
+                                 STEP 1: Camera Scan & Image Selection
+                                 --------------------------------------- -->
+                             <div id="step-1-view" class="modal-step-view">
+                                <div class="scan-scanner-box">
+                                    <!-- Neon scanning beam -->
+                                    <div class="laser-line"></div>
+                                    <!-- Dashed scanner target overlay -->
+                                    <div class="scanner-target-overlay"></div>
+                                    
+                                    <!-- Camera streaming feed -->
+                                    <video id="camera-stream" autoplay playsinline></video>
+
+                                    <!-- Fallback message for HTTP/No-camera environments -->
+                                    <div class="camera-fallback-msg" style="display: none;">
+                                        <span class="warn-icon">⚠️</span>
+                                        <h4>카메라 권한 / 보안 오류</h4>
+                                        <p>HTTP 환경(또는 모바일 권한 제한)에서는 보안 정책상 카메라를 직접 켤 수 없습니다.</p>
+                                        <p class="desc-sub">대신 하단의 <strong>[사진 올리기]</strong> 버튼을 통해 사진을 업로드하거나, <strong>[간편 프리셋]</strong> 식물들을 터치하여 등록 및 누끼 편집 단계를 테스트해보실 수 있습니다! ⚡️</p>
+                                    </div>
+                                </div>
+
+                                <div class="scanner-actions">
+                                    <!-- Fallback Gallery Select -->
+                                    <label class="btn-upload-file">
+                                        <div class="upload-icon">📁</div>
+                                        <span>사진 올리기</span>
+                                        <input type="file" id="file-upload-input" accept="image/*" style="display: none;">
+                                    </label>
+
+                                    <!-- Camera capture trigger -->
+                                    <button id="btn-capture-shutter" class="btn-shutter" aria-label="셔터 촬영">
+                                        <div class="btn-shutter-inner"></div>
+                                    </button>
+
+                                    <!-- Helper label alignment dummy -->
+                                    <div style="width: 44px; text-align: center; font-size: 0.75rem; color: var(--text-muted); opacity: 0.5;">
+                                        <span>실시간 스캔</span>
+                                    </div>
+                                </div>
+
+                                <!-- Pre-made High Quality Presets for Quick Testing -->
+                                <div class="presets-section">
+                                    <p>간편 프리셋으로 빠르게 촬영하기 ⚡</p>
+                                    <div class="preset-chips-list">
+                                        <button class="preset-chip" data-preset="monstera">
+                                            <span>🌿</span> 몬스테라
+                                        </button>
+                                        <button class="preset-chip" data-preset="cactus">
+                                            <span>🌵</span> 꽃선인장
+                                        </button>
+                                        <button class="preset-chip" data-preset="snake">
+                                            <span>🐍</span> 산세베리아
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ---------------------------------------
+                                 STEP 2: AI BG Remove (Canvas masking)
+                                 --------------------------------------- -->
+                            <div id="step-2-view" class="modal-step-view">
+                                <div class="editor-canvas-container checkerboard-bg">
+                                    <!-- Laser processing animated overlay -->
+                                    <div id="editor-processing" class="editor-processing-overlay">
+                                        <div class="loading-spinner"></div>
+                                        <h4>AI 배경 인지 분리 중...</h4>
+                                        <p>피사체 탐색 중... 0%</p>
+                                    </div>
+                                    
+                                    <!-- Drawing interactive canvas -->
+                                    <canvas id="editor-canvas"></canvas>
+                                </div>
+
+                                <!-- Edit tool controls -->
+                                <div class="editor-toolbar">
+                                    <div class="brush-controls">
+                                        <div class="brush-modes">
+                                            <button id="btn-tool-erase" class="btn-brush-mode active">지우개</button>
+                                            <button id="btn-tool-restore" class="btn-brush-mode">그림 복원</button>
+                                            <button id="btn-tool-magic-tap" class="btn-brush-mode">마법봉</button>
+                                        </div>
+                                        <div class="brush-sizes">
+                                            <span>크기</span>
+                                            <input type="range" id="brush-size" class="brush-size-slider" min="5" max="60" value="24">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="editor-actions-row">
+                                        <button id="btn-tool-magic" class="btn-editor-util" title="흰색 배경 자동 지우기">
+                                            자동 누끼
+                                        </button>
+                                        <button id="btn-tool-reset" class="btn-editor-util" title="초기 상태로 복구">
+                                            초기화
+                                        </button>
+                                        <button id="btn-cutout-next" class="btn-editor-next">
+                                            확인
+                                        </button>
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: -5px; line-height:1.4;">
+                                    💡 <b>지우개/복원</b>으로 지저분한 테두리를 드래그하여 다듬으실 수 있습니다.<br>
+                                    스마트폰/모우스 드래그를 대어 직접 쓱싹 지워보세요!
+                                </p>
+                            </div>
+
+                            <!-- ---------------------------------------
+                                 STEP 3: Profile Setup Form
+                                 --------------------------------------- -->
+                            <div id="step-3-view" class="modal-step-view">
+                                <form id="register-plant-form" class="form-scroll-container">
+                                    
+                                    <!-- Preview cutout box -->
+                                    <div class="form-plant-preview-box">
+                                        <div class="form-plant-preview-img-wrapper checkerboard-bg">
+                                            <img id="preview-cutout-img" src="assets/monstera.png" alt="식물 누끼 이미지">
+                                        </div>
+                                        <div class="form-plant-preview-info">
+                                            <h4>스캔 식물 프로필화</h4>
+                                            <p>성장 기록용 투명 누끼본 생성 완료</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Inputs -->
+                                    <div class="form-group">
+                                        <label for="plant-nickname">반려식물 별칭 (닉네임)</label>
+                                        <input type="text" id="plant-nickname" class="form-input-text" placeholder="예: 몬몬이, 초록이, 무럭이" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="plant-species">식물 종류 (품종)</label>
+                                        <input type="text" id="plant-species" class="form-input-text" placeholder="예: 몬스테라 델리시오사, 아레카야자" required>
+                                    </div>
+
+                                    <!-- Circular Slider (Water Interval) -->
+                                    <div class="water-period-slider-container">
+                                        <div class="water-period-header">
+                                            <span class="water-period-label">💧 물 주기 주기 설정</span>
+                                            <span id="water-val" class="water-period-value">7일</span>
+                                        </div>
+                                        <input type="range" id="water-slider" class="water-range-slider" min="1" max="30" value="7">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="plant-adoption">입양 및 메이트 시작일</label>
+                                        <input type="date" id="plant-adoption" class="form-input-text" required>
+                                    </div>
+
+                                    <button type="submit" class="btn-submit-plant">
+                                        정원에 아카이빙 하기
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div><!-- modal-step-container -->
+                        
+                    </div><!-- modal-sheet -->
+                </div><!-- modal-overlay -->
+
+                <!-- ==========================================
+                     Modal Overlay: Plant Details & Archive Timeline
+                     ========================================== -->
+                <div id="detail-modal" class="modal-overlay">
+                    <div class="modal-sheet detail-sheet">
+                        
+                        <!-- Drag bar simulation -->
+                        <div class="modal-drag-handle"></div>
+                        
+                        <header class="modal-header">
+                            <div class="detail-header-title">
+                                <h3 id="detail-nickname">초록이</h3>
+                                <span id="detail-species" class="detail-subtitle">몬스테라</span>
+                            </div>
+                            <div class="detail-header-actions">
+                                <button id="btn-share-post" class="btn-share-icon" title="커뮤니티에 자랑하기">📢</button>
+                                <button id="detail-modal-close" class="modal-close-btn">&times;</button>
+                            </div>
+                        </header>
+
+                        <div class="scrollable-content detail-scroll-content">
+                            <!-- Plant Hero/Card Section -->
+                            <div class="detail-hero-card">
+                                <div class="detail-img-container checkerboard-bg">
+                                    <img id="detail-img" src="" alt="식물 이미지">
+                                </div>
+                                <div class="detail-stats">
+                                    <div class="stat-badge d-day" id="detail-dday">D-Day</div>
+                                    <div class="stat-badge age" id="detail-age">함께한 지 1일</div>
+                                    <div class="stat-badge cycle" id="detail-cycle">물주기: 7일</div>
+                                </div>
+                                
+                                <!-- Progress Bar for Water D-Day -->
+                                <div class="water-progress-bar-wrapper">
+                                    <div class="water-progress-label">
+                                        <span>수분 지수</span>
+                                        <span id="water-progress-percent">80%</span>
+                                    </div>
+                                    <div class="water-progress-track">
+                                        <div id="water-progress-fill" class="water-progress-fill"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Care Quick Action Row -->
+                            <div class="care-quick-actions">
+                                <button class="care-action-btn water" id="btn-care-water">물주기</button>
+                                <button class="care-action-btn nutrient" id="btn-care-nutrient">영양제</button>
+                                <button class="care-action-btn repot" id="btn-care-repot">분갈이</button>
+                                <button class="care-action-btn prune" id="btn-care-prune">가지치기</button>
+                            </div>
+
+                            <!-- Tabs: Timeline vs Calendar -->
+                            <div class="detail-tabs">
+                                <button class="tab-btn active" data-tab="timeline">📜 성장 다이어리</button>
+                                <button class="tab-btn" data-tab="calendar">📅 관리 캘린더</button>
+                            </div>
+
+                            <!-- Tab Content: Timeline -->
+                            <div id="tab-content-timeline" class="tab-content active">
+                                <!-- Add Growth Log Inline Trigger -->
+                                <button id="btn-open-log-form" class="btn-open-log-form">
+                                    ✍️ 오늘 하루 성장 일지 남기기
+                                </button>
+
+                                <!-- Growth Log Form (Hidden by default) -->
+                                <form id="growth-log-form" class="growth-log-form" style="display: none;">
+                                    <h4>🌱 오늘의 기록 추가</h4>
+                                    
+                                    <div class="form-row-2">
+                                        <div class="form-group">
+                                            <label for="log-date">기록일</label>
+                                            <input type="date" id="log-date" class="form-input-text" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="log-care-type">돌봄 활동</label>
+                                            <select id="log-care-type" class="form-input-text">
+                                                <option value="none">기록만 (활동 없음)</option>
+                                                <option value="water">💧 물주기</option>
+                                                <option value="nutrient">💊 영양제 투여</option>
+                                                <option value="repot">🪴 분갈이</option>
+                                                <option value="prune">✂️ 가지치기</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="log-memo">돌봄 메모</label>
+                                        <textarea id="log-memo" class="form-input-text" rows="2" placeholder="식물의 변화나 메모를 적어주세요."></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>식물 사진 추가 (선택)</label>
+                                        <div class="log-photo-upload-row">
+                                            <label class="btn-log-photo-upload">
+                                                <span>📷 사진 선택</span>
+                                                <input type="file" id="log-photo-input" accept="image/*" style="display: none;">
+                                            </label>
+                                            <div id="log-photo-preview" class="log-photo-preview checkerboard-bg" style="display: none;">
+                                                <img id="log-preview-img" src="" alt="미리보기">
+                                                <button type="button" id="btn-remove-log-photo" class="btn-remove-photo">&times;</button>
+                                            </div>
+                                            <!-- AI Bg Remove toggle for logs -->
+                                            <label id="log-bg-remove-label" class="log-bg-remove-toggle" style="display: none;">
+                                                <input type="checkbox" id="log-bg-remove-checkbox"> AI 누끼 적용
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions-row">
+                                        <button type="button" id="btn-cancel-log-form" class="btn-secondary-sm">취소</button>
+                                        <button type="submit" class="btn-primary-sm">기록하기</button>
+                                    </div>
+                                </form>
+
+                                <!-- Timeline Vertical Stream -->
+                                <div id="timeline-stream" class="timeline-stream">
+                                    <!-- Dynamic elements -->
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Calendar -->
+                            <div id="tab-content-calendar" class="tab-content">
+                                <div class="calendar-header-row">
+                                    <button id="btn-cal-prev" class="btn-cal-nav">&lt;</button>
+                                    <h4 id="calendar-title">2026년 6월</h4>
+                                    <button id="btn-cal-next" class="btn-cal-nav">&gt;</button>
+                                </div>
+                                <div class="calendar-grid-header">
+                                    <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+                                </div>
+                                <div id="calendar-grid-body" class="calendar-grid-body">
+                                    <!-- Dynamic Calendar cells -->
+                                </div>
+                                <div class="calendar-legend">
+                                    <span>💧 물주기</span>
+                                    <span>💊 영양제</span>
+                                    <span>🪴 분갈이</span>
+                                    <span>✂️ 가지치기</span>
+                                    <span>📝 일지</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Home Safe Bar Indicator -->
+                <div class="home-indicator"></div>
+
+            </div><!-- bezel -->
+        </div><!-- device-container -->
+    </div><!-- desktop-wrapper -->
+
+    <!-- Plant Canvas Segmenter script -->
+    <script src="js/canvas-segmenter.js?v=1.4"></script>
+    <!-- Application Logic script -->
+    <script src="js/app.js?v=1.4"></script>
+
+</body>
+</html>
