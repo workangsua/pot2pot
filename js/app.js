@@ -17,7 +17,8 @@ const AppState = {
     capturedImageSrc: null,
     selectedPreset: null,
     segmenter: null,
-    stream: null
+    stream: null,
+    geminiKey: null
 };
 
 // Preset Plant Definitions
@@ -62,6 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
+    
+    // Load and bind Gemini Key
+    const keyInput = document.getElementById('settings-gemini-key');
+    if (keyInput) {
+        keyInput.value = localStorage.getItem('pot2pot_gemini_key') || '';
+        keyInput.addEventListener('change', (e) => {
+            const val = e.target.value.trim();
+            localStorage.setItem('pot2pot_gemini_key', val);
+            AppState.geminiKey = val;
+            showAlert("⚙️ Gemini API Key가 저장되었습니다.");
+        });
+    }
 });
 
 // --- Local Storage Handlers ---
@@ -137,6 +150,11 @@ function loadDataFromStorage() {
             unlockedBadges: []
         };
         saveUserToStorage();
+    }
+    
+    const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key');
+    if (savedGeminiKey) {
+        AppState.geminiKey = savedGeminiKey;
     }
 }
 
@@ -433,6 +451,12 @@ function initRegistrationFlow() {
         e.preventDefault();
         saveNewPlant();
     });
+
+    // Step 3: AI Analyze Button click
+    const btnAnalyze = document.getElementById('btn-ai-analyze');
+    if (btnAnalyze) {
+        btnAnalyze.addEventListener('click', analyzePlantWithAI);
+    }
 }
 
 function updateWaterIntervalValue(val) {
@@ -1287,4 +1311,144 @@ function saveGrowthLog(e) {
     showAlert(`🌱 [${plant.nickname}]의 성장 다이어리를 정상적으로 보관했습니다!`);
     closeLogForm();
 }
+
+// --- Gemini API & AI Plant Analysis Helpers ---
+function getImageBase64(imgElement) {
+    if (!imgElement || !imgElement.src) return null;
+    if (imgElement.src.startsWith('data:')) {
+        return imgElement.src.split(',')[1];
+    }
+    // If it is a relative/absolute URL, draw to canvas
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = imgElement.naturalWidth || imgElement.width || 300;
+        canvas.height = imgElement.naturalHeight || imgElement.height || 300;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL('image/png');
+        return dataURL.split(',')[1];
+    } catch (err) {
+        console.error("Base64 conversion failed:", err);
+        return null;
+    }
+}
+
+async function analyzePlantWithAI() {
+    const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
+    if (!apiKey) {
+        showAlert("⚠️ Gemini API Key가 등록되지 않았습니다. 설정 화면에서 입력해 주세요.");
+        closeRegisterModal();
+        switchView('settings');
+        setTimeout(() => {
+            const keyInput = document.getElementById('settings-gemini-key');
+            if (keyInput) keyInput.focus();
+        }, 300);
+        return;
+    }
+
+    const imgElement = document.getElementById('preview-cutout-img');
+    const base64Data = getImageBase64(imgElement);
+    if (!base64Data) {
+        showAlert("⚠️ 식물 이미지를 변환할 수 없습니다. 이미지를 다시 선택해 주세요.");
+        return;
+    }
+
+    const btnAnalyze = document.getElementById('btn-ai-analyze');
+    const loadingIndicator = document.getElementById('ai-loading-indicator');
+
+    if (btnAnalyze) {
+        btnAnalyze.disabled = true;
+        btnAnalyze.style.display = 'none';
+    }
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'flex';
+    }
+
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const prompt = "이 식물 사진을 분석하여 다음 JSON 구조로만 정확하게 응답해주세요. 다른 부연 설명이나 마크다운 백틱(```json)을 절대 포함하지 마십시오.\n" +
+                       "{\n" +
+                       "  \"species\": \"식물의 정확한 종류/품종 국문명 (예: 몬스테라 델리시오사, 아레카야자 등)\",\n" +
+                       "  \"nickname\": \"식물의 생김새나 특징에 어울리는 귀여운 4글자 이내의 한글 별명 추천 (예: 초록이, 선선이, 몬몬이 등)\",\n" +
+                       "  \"waterInterval\": 식물의 품종별 권장 물주기 주기 (1에서 30 사이의 정수 일수)\n" +
+                       "}";
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: "image/png",
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            const errMsg = errData.error?.message || `HTTP 에러 ${response.status}`;
+            throw new Error(errMsg);
+        }
+
+        const resData = await response.json();
+        const textResponse = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!textResponse) {
+            throw new Error("API로부터 올바른 분석 결과를 받지 못했습니다.");
+        }
+
+        // Parse JSON response safely
+        let result;
+        const cleanedText = textResponse.trim();
+        try {
+            result = JSON.parse(cleanedText);
+        } catch (e) {
+            // Fallback: search for JSON block using regex if parsing failed
+            const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                result = JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error("응답 결과 형식을 분석할 수 없습니다.");
+            }
+        }
+
+        if (result.species) {
+            document.getElementById('plant-species').value = result.species;
+        }
+        if (result.nickname) {
+            document.getElementById('plant-nickname').value = result.nickname;
+        }
+        if (result.waterInterval) {
+            const intervalVal = Math.min(30, Math.max(1, parseInt(result.waterInterval) || 7));
+            document.getElementById('water-slider').value = intervalVal;
+            updateWaterIntervalValue(intervalVal);
+        }
+
+        showAlert("✨ AI 분석이 완료되어 식물 프로필 정보가 자동 입력되었습니다!");
+    } catch (error) {
+        console.error("AI Analysis failed:", error);
+        showAlert(`❌ AI 분석 실패: ${error.message}`);
+    } finally {
+        if (btnAnalyze) {
+            btnAnalyze.disabled = false;
+            btnAnalyze.style.display = 'flex';
+        }
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+}
+
 

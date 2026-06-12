@@ -2132,3 +2132,35 @@ body {
     gap: 4px;
 }
 
+/* ==========================================
+   Gemini API & AI Plant Analysis UI
+   ========================================== */
+#settings-gemini-key:focus {
+    border-color: var(--forest-primary) !important;
+    box-shadow: 0 0 8px rgba(191, 255, 67, 0.2);
+}
+
+.btn-ai-analyze:hover {
+    background: linear-gradient(135deg, #32322e 0%, #252522 100%) !important;
+    border-color: var(--forest-light) !important;
+    transform: translateY(-1px);
+}
+
+.btn-ai-analyze:active {
+    transform: scale(0.98);
+}
+
+.btn-ai-analyze:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--sand-dark) !important;
+    color: var(--text-muted) !important;
+    background: rgba(0,0,0,0.1) !important;
+}
+
+@keyframes ai-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
