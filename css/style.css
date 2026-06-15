@@ -477,8 +477,9 @@ body {
 }
 
 .plant-card .quick-care-btn:hover {
-    background: var(--forest-deep);
-    color: white;
+    background: #d8ff7a; /* Gently glowing neon lime instead of solid white */
+    box-shadow: 0 6px 14px rgba(205, 255, 98, 0.4); /* Subtle glow shadow */
+    color: #000000; /* Keep text visible */
 }
 
 .plant-card .quick-care-btn:active {
