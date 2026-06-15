@@ -665,8 +665,9 @@ body {
 }
 
 .nav-item.add-pot:hover {
-    transform: translateX(-50%) scale(1.1) translateY(-2px);
-    background: #ffffff;
+    transform: translateX(-50%) scale(1.08) translateY(-2px);
+    background: #d8ff7a; /* Slightly brighter, glowing neon-lime instead of harsh white */
+    box-shadow: 0 16px 36px rgba(205, 255, 98, 0.65); /* Expanded neon glow shadow */
     color: #222222 !important;
 }
 
@@ -1228,8 +1229,9 @@ body {
 }
 
 .btn-editor-next:hover {
-    background: var(--forest-deep);
-    color: white;
+    background: #d8ff7a; /* Slightly brighter glowing neon-lime */
+    box-shadow: 0 6px 16px rgba(205, 255, 98, 0.45); /* Enhanced shadow instead of harsh white */
+    color: #000000;
 }
 
 .btn-editor-next:active {
@@ -1382,8 +1384,9 @@ body {
 }
 
 .btn-submit-plant:hover {
-    background: var(--forest-deep);
-    color: white;
+    background: #d8ff7a;
+    box-shadow: 0 12px 28px rgba(205, 255, 98, 0.45);
+    color: #000000;
 }
 
 .btn-submit-plant:active {
@@ -2134,8 +2137,8 @@ body {
 }
 
 .btn-primary-sm:hover {
-    background: var(--forest-deep);
-    color: white;
+    background: #d8ff7a;
+    color: #000000;
 }
 
 /* Timeline Layout */
