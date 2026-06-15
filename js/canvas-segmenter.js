@@ -66,7 +66,7 @@ class PlantSegmenter {
      * Densely samples border pixels, clusters them, and performs BFS region growing.
      * Optionally restricts cutout to the plant + pot bounding box detected by Gemini AI.
      */
-    autoRemoveWhiteBackground(tolerance = 22, boundingBox = null) {
+    autoRemoveWhiteBackground(tolerance = 22, boundingBox = null, polygon = null) {
         try {
             // Draw image onto a temp canvas to inspect pixels
             const tempCanvas = document.createElement('canvas');
@@ -270,6 +270,41 @@ class PlantSegmenter {
                     for (let x = 0; x < width; x++) {
                         if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
                             const idx = (y * width + x) * 4;
+                            maskPixels[idx] = 0;
+                            maskPixels[idx + 1] = 0;
+                            maskPixels[idx + 2] = 0;
+                            maskPixels[idx + 3] = 0;
+                        }
+                    }
+                }
+            }
+            
+            // Apply polygon restriction if provided by Gemini AI (keeps only the plant + pot outline)
+            if (polygon && Array.isArray(polygon) && polygon.length >= 3) {
+                const polyCanvas = document.createElement('canvas');
+                polyCanvas.width = width;
+                polyCanvas.height = height;
+                const polyCtx = polyCanvas.getContext('2d');
+                polyCtx.fillStyle = '#000000';
+                polyCtx.fillRect(0, 0, width, height);
+                polyCtx.fillStyle = '#ffffff';
+                polyCtx.beginPath();
+                polygon.forEach((pt, index) => {
+                    const py = pt[0];
+                    const px = pt[1];
+                    const pxX = (px / 1000) * width;
+                    const pyY = (py / 1000) * height;
+                    if (index === 0) polyCtx.moveTo(pxX, pyY);
+                    else polyCtx.lineTo(pxX, pyY);
+                });
+                polyCtx.closePath();
+                polyCtx.fill();
+                
+                const polyData = polyCtx.getImageData(0, 0, width, height).data;
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const idx = (y * width + x) * 4;
+                        if (polyData[idx] === 0) { // If it's black (outside the polygon mask)
                             maskPixels[idx] = 0;
                             maskPixels[idx + 1] = 0;
                             maskPixels[idx + 2] = 0;

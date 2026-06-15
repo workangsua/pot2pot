@@ -17,6 +17,8 @@ const AppState = {
     capturedImageSrc: null,
     selectedPreset: null,
     segmenter: null,
+    aiBoundingBox: null,
+    aiPolygon: null,
     stream: null,
     geminiKey: null,
     naverId: null,
@@ -498,7 +500,7 @@ function initRegistrationFlow() {
     document.getElementById('btn-tool-magic').addEventListener('click', () => {
         if (AppState.segmenter) {
             // Magic-wand key out whatever was near center or general white keying
-            AppState.segmenter.autoRemoveWhiteBackground(22, AppState.aiBoundingBox);
+            AppState.segmenter.autoRemoveWhiteBackground(22, AppState.aiBoundingBox, AppState.aiPolygon);
             showAlert("🪄 마법봉으로 배경을 자동으로 제거했습니다.");
         }
     });
@@ -654,10 +656,11 @@ function setupCanvasEditor() {
     const overlay = document.getElementById('editor-processing');
     overlay.classList.add('active');
     
-    // Clear previous AI Bounding Box
+    // Clear previous AI Bounding Box & Polygon
     AppState.aiBoundingBox = null;
+    AppState.aiPolygon = null;
     
-    // Request plant bounding box in parallel if not preset
+    // Request plant bounding box/polygon in parallel if not preset
     let bboxPromise = Promise.resolve(null);
     if (!AppState.selectedPreset) {
         bboxPromise = detectPlantBoundingBoxWithAI();
@@ -674,18 +677,19 @@ function setupCanvasEditor() {
         if (progress >= 100) {
             clearInterval(interval);
             
-            // Await AI Bounding Box with a timeout safety margin
+            // Await AI Bounding Box/Polygon with a timeout safety margin
             try {
-                const box = await Promise.race([
+                const aiResult = await Promise.race([
                     bboxPromise,
                     new Promise(resolve => setTimeout(() => resolve(null), 2500))
                 ]);
-                if (box) {
-                    console.log("Gemini AI detected bounding box:", box);
-                    AppState.aiBoundingBox = box;
+                if (aiResult) {
+                    console.log("Gemini AI detected result:", aiResult);
+                    AppState.aiBoundingBox = aiResult.box_2d || null;
+                    AppState.aiPolygon = aiResult.polygon || null;
                 }
             } catch (err) {
-                console.error("Error awaiting bounding box:", err);
+                console.error("Error awaiting bounding box/polygon:", err);
             }
             
             overlay.classList.remove('active');
@@ -753,7 +757,7 @@ function initCanvasSegmenter() {
         
         // If it's a preset image or file with clear white background, run autokey
         if (AppState.selectedPreset || AppState.capturedImageSrc.startsWith('data:image')) {
-            AppState.segmenter.autoRemoveWhiteBackground(22, AppState.aiBoundingBox);
+            AppState.segmenter.autoRemoveWhiteBackground(22, AppState.aiBoundingBox, AppState.aiPolygon);
         }
     };
     
@@ -1401,7 +1405,10 @@ async function detectPlantBoundingBoxWithAI() {
         let response;
         if (isLocal || apiKey) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            const prompt = "Identify the plant and its pot (including the foliage/succulent and the container/pot). Return a JSON object with 'box_2d': [ymin, xmin, ymax, xmax] where values are integers normalized to 0-1000 (0 is top/left, 1000 is bottom/right). Do not include any markdown formatting or other text.";
+            const prompt = "Identify the plant and its pot (including the foliage/succulent and the container/pot). Return a JSON object with:\n" +
+                           "\"box_2d\": [ymin, xmin, ymax, xmax],\n" +
+                           "\"polygon\": [[y1, x1], [y2, x2], ..., [yn, xn]] (a list of 20 to 45 points outlining the boundary of the plant and pot in clockwise order, normalized to 0-1000 where 0 is top/left and 1000 is bottom/right).\n" +
+                           "Be extremely precise to ONLY include the plant and pot, excluding any surrounding background, hands, floor, or phone frames/screens. Do not include any markdown formatting or other text, return ONLY the raw JSON.";
 
             response = await fetch(url, {
                 method: 'POST',
@@ -1444,7 +1451,7 @@ async function detectPlantBoundingBoxWithAI() {
             const text = data.candidates[0].content.parts[0].text;
             const parsed = JSON.parse(text.replace(/```json/g, '').replace(/```/g, '').trim());
             if (parsed && parsed.box_2d) {
-                return parsed.box_2d; // [ymin, xmin, ymax, xmax]
+                return parsed; // Return the whole parsed object containing box_2d and polygon
             }
         }
     } catch (err) {
