@@ -778,6 +778,28 @@ body {
 
 .modal-close-btn:hover {
     background: #e2dcd0;
+    color: var(--forest-deep);
+}
+
+.modal-back-btn {
+    background: var(--sand-dark);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    transition: var(--transition-smooth);
+}
+
+.modal-back-btn:hover {
+    background: #e2dcd0;
+    color: var(--forest-deep);
 }
 
 /* Modal Multi-Step Views Container */

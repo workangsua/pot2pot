@@ -65,7 +65,7 @@ class PlantSegmenter {
      * Automatic background removal using border-connected flood-fill
      * Densely samples border pixels, clusters them, and performs BFS region growing.
      */
-    autoRemoveWhiteBackground(tolerance = 35) {
+    autoRemoveWhiteBackground(tolerance = 22) {
         try {
             // Draw image onto a temp canvas to inspect pixels
             const tempCanvas = document.createElement('canvas');
@@ -98,12 +98,14 @@ class PlantSegmenter {
                 });
             };
             
-            // Sample all 4 borders
+            // Sample border colors (only top and upper-sides to avoid pot/soil colors at the bottom)
+            // 1. Sample Top border completely
             for (let x = insetX; x < width - insetX; x += step) {
                 addBorderColor(x, insetY);
-                addBorderColor(x, height - 1 - insetY);
             }
-            for (let y = insetY; y < height - insetY; y += step) {
+            // 2. Sample Left & Right borders but ONLY up to 60% of the height to avoid the pot
+            const maxHeightToSample = Math.floor(height * 0.60);
+            for (let y = insetY; y < maxHeightToSample; y += step) {
                 addBorderColor(insetX, y);
                 addBorderColor(width - 1 - insetX, y);
             }

@@ -412,6 +412,7 @@ function updateUserBadgeUI() {
 function initRegistrationFlow() {
     const modalOverlay = document.getElementById('register-modal');
     const closeBtn = document.getElementById('modal-close');
+    const modalBackBtn = document.getElementById('modal-back');
     const container = document.getElementById('step-container');
     
     // Close modal
@@ -419,6 +420,14 @@ function initRegistrationFlow() {
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) closeRegisterModal();
     });
+    
+    if (modalBackBtn) {
+        modalBackBtn.addEventListener('click', () => {
+            if (AppState.registerStep > 1) {
+                goToStep(AppState.registerStep - 1);
+            }
+        });
+    }
     
     // Camera snap shutter click
     document.getElementById('btn-capture-shutter').addEventListener('click', () => {
@@ -455,24 +464,29 @@ function initRegistrationFlow() {
     });
     
     // Step 2 Canvas toolbar bindings
-    const backBtn = document.getElementById('btn-tool-back');
     const eraserBtn = document.getElementById('btn-tool-erase');
+    const restoreBtn = document.getElementById('btn-tool-restore');
     const magicTapBtn = document.getElementById('btn-tool-magic-tap');
     const brushSlider = document.getElementById('brush-size');
     
-    backBtn.addEventListener('click', () => {
-        goToStep(1);
-    });
-    
     eraserBtn.addEventListener('click', () => {
         eraserBtn.classList.add('active');
+        restoreBtn.classList.remove('active');
         magicTapBtn.classList.remove('active');
         if (AppState.segmenter) AppState.segmenter.brushMode = 'erase';
+    });
+    
+    restoreBtn.addEventListener('click', () => {
+        restoreBtn.classList.add('active');
+        eraserBtn.classList.remove('active');
+        magicTapBtn.classList.remove('active');
+        if (AppState.segmenter) AppState.segmenter.brushMode = 'restore';
     });
     
     magicTapBtn.addEventListener('click', () => {
         magicTapBtn.classList.add('active');
         eraserBtn.classList.remove('active');
+        restoreBtn.classList.remove('active');
         if (AppState.segmenter) AppState.segmenter.brushMode = 'magic';
     });
     
@@ -484,7 +498,7 @@ function initRegistrationFlow() {
     document.getElementById('btn-tool-magic').addEventListener('click', () => {
         if (AppState.segmenter) {
             // Magic-wand key out whatever was near center or general white keying
-            AppState.segmenter.autoRemoveWhiteBackground(35);
+            AppState.segmenter.autoRemoveWhiteBackground(22);
             showAlert("🪄 마법봉으로 배경을 자동으로 제거했습니다.");
         }
     });
@@ -577,6 +591,16 @@ function goToStep(stepNum) {
     const container = document.getElementById('step-container');
     const offset = -(stepNum - 1) * 33.333;
     container.style.transform = `translateX(${offset}%)`;
+    
+    // Toggle header back button visibility
+    const modalBackBtn = document.getElementById('modal-back');
+    if (modalBackBtn) {
+        if (stepNum > 1) {
+            modalBackBtn.style.visibility = 'visible';
+        } else {
+            modalBackBtn.style.visibility = 'hidden';
+        }
+    }
     
     // Update step dots
     document.querySelectorAll('.step-indicator-dot').forEach((dot, idx) => {
@@ -705,7 +729,7 @@ function initCanvasSegmenter() {
         
         // If it's a preset image or file with clear white background, run autokey
         if (AppState.selectedPreset || AppState.capturedImageSrc.startsWith('data:image')) {
-            AppState.segmenter.autoRemoveWhiteBackground(25);
+            AppState.segmenter.autoRemoveWhiteBackground(22);
         }
     };
     
