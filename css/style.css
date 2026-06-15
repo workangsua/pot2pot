@@ -647,7 +647,7 @@ body {
 .nav-item.add-pot {
     position: absolute;
     left: 50%;
-    top: -34px; /* Floated higher to create a distinct, clean gap between circle and cutout bottom */
+    top: -46px; /* Floated even higher to create a generous, spacious gap between circle and cutout bottom */
     transform: translateX(-50%);
     background: var(--forest-primary);
     width: 66px; /* Increased from 54px for a more satisfying and proud size */
