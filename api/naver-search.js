@@ -20,12 +20,12 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Query parameter is required' });
   }
 
-  // Retrieve Naver Client credentials from headers
-  const clientId = req.headers['x-naver-client-id'];
-  const clientSecret = req.headers['x-naver-client-secret'];
+  // Retrieve Naver Client credentials from environment variables first, then fallback to headers
+  const clientId = process.env.NAVER_CLIENT_ID || req.headers['x-naver-client-id'];
+  const clientSecret = process.env.NAVER_CLIENT_SECRET || req.headers['x-naver-client-secret'];
 
   if (!clientId || !clientSecret) {
-    return res.status(401).json({ error: 'Naver API Client ID and Client Secret are required in headers' });
+    return res.status(401).json({ error: 'Naver API Client ID and Client Secret are missing. Please configure them on Vercel Environment Variables or pass them in headers.' });
   }
 
   try {
