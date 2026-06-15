@@ -39,11 +39,11 @@
             <ul class="intro-features">
                 <li>원터치 식물 스캔 & AI 배경 제거(누끼) 아카이빙</li>
                 <li>식물별 커스텀 물주기 주기와 자동 덮어쓰기 알림</li>
-                <li>성취감을 자극하는 XP 레벨 및 타이틀 업적 시스템</li>
-                <li>나의 자랑스러운 초록이들을 소개하는 피드 커뮤니티</li>
+                <li>성취감을 자극하는 XP 레벨 및 그린레벨 시스템</li>
+                <li>나의 자랑스러운 초록이들을 소개하는 팟로그 커뮤니티</li>
             </ul>
             <div style="margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
-                💡 오른쪽 모바일 기기 프레임에서 직접 촬영 및 편집, 등록을 진행하실 수 있습니다.
+                💡 직접 식물 사진 촬영 및 편집, 마이팟 등록을 진행하실 수 있습니다.
             </div>
         </div>
 
@@ -99,7 +99,7 @@
                          ========================================== -->
                     <div id="screen-community" class="screen-view">
                         <header class="app-header">
-                            <h2 class="dummy-screen-title">식집사 피드 💬</h2>
+                            <h2 class="dummy-screen-title">식집사 팟로그 💬</h2>
                         </header>
                         <div class="scrollable-content">
                             <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; padding-left: 2px;">
@@ -116,7 +116,7 @@
                          ========================================== -->
                     <div id="screen-badges" class="screen-view">
                         <header class="app-header">
-                            <h2 class="dummy-screen-title">내 업적 & 레벨 🏆</h2>
+                            <h2 class="dummy-screen-title">그린레벨 센터 🏆</h2>
                         </header>
                         <div class="scrollable-content">
                             <div class="dashboard-hero" style="background: linear-gradient(135deg, var(--gold-pastel) 0%, rgba(253,246,231,0.5) 100%); border-color: rgba(223, 177, 91, 0.15); margin-bottom: 20px;">
@@ -168,7 +168,7 @@
                                     <input type="password" id="settings-naver-secret" placeholder="기본 Client Secret 사용 중 (개별 Secret 사용 시 입력)" style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--sand-dark); border-radius: 10px; color: var(--text-dark); padding: 10px 12px; font-size: 0.8rem; font-family: monospace; width: 100%; outline: none; transition: var(--transition-smooth);">
                                     <span style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3;">서비스에 공용 네이버 API 키가 기본 구성되어 있습니다. 자신만의 개별 API 키를 사용하려는 경우에만 입력해 주세요.</span>
                                 </div>
-                                <button style="background: var(--terracotta); border: none; border-radius: 12px; color: white; padding: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-top: 10px;" onclick="if(confirm('모든 반려식물 데이터와 업적 정보가 초기화됩니다. 진행하시겠습니까?')){ localStorage.clear(); location.reload(); }">
+                                <button style="background: var(--terracotta); border: none; border-radius: 12px; color: white; padding: 10px; font-weight: 700; font-size: 0.8rem; cursor: pointer; margin-top: 10px;" onclick="if(confirm('모든 반려식물 데이터와 그린레벨 정보가 초기화됩니다. 진행하시겠습니까?')){ localStorage.clear(); location.reload(); }">
                                     데이터 전체 초기화
                                 </button>
                             </div>
@@ -184,21 +184,21 @@
                     <nav id="bottom-nav" class="bottom-nav">
                         <button class="nav-item active" data-view="archive">
                             <span class="nav-icon">🪴</span>
-                            <span>내 화분</span>
+                            <span>마이팟</span>
                         </button>
                         <button class="nav-item" data-view="community">
                             <span class="nav-icon">💬</span>
-                            <span>피드</span>
+                            <span>팟로그</span>
                         </button>
                         
                         <!-- Floating FAB to open registration flow -->
-                        <button class="nav-item add-pot" aria-label="화분 등록">
+                        <button class="nav-item add-pot" aria-label="마이팟 등록">
                             <span class="nav-icon">+</span>
                         </button>
                         
                         <button class="nav-item" data-view="badges">
                             <span class="nav-icon">🏆</span>
-                            <span>업적</span>
+                            <span>그린레벨</span>
                         </button>
                         <button class="nav-item" data-view="settings">
                             <span class="nav-icon">⚙️</span>

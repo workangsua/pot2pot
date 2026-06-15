@@ -1634,7 +1634,7 @@ body {
     }
 
     .nav-item.add-pot::after {
-        display: none; /* Hide "화분 등록" text in dock */
+        display: none; /* Hide "마이팟 등록" text in dock */
     }
 
     .nav-item.add-pot:hover {

@@ -48,9 +48,9 @@ const PLANT_PRESETS = {
 
 // Badges list
 const BADGES = [
-    { id: 'first_plant', name: '첫 만남 🌱', desc: '첫 반려식물을 무사히 등록 완료!', icon: '🌱' },
+    { id: 'first_plant', name: '첫 만남 🌱', desc: '첫 마이팟을 무사히 등록 완료!', icon: '🌱' },
     { id: 'oasis', name: '오아시스 💧', desc: '식물에게 첫 물주기 완료', icon: '💧' },
-    { id: 'greenthumb', name: '초록손 👑', desc: '3개 이상의 화분 등록하기', icon: '👑' }
+    { id: 'greenthumb', name: '초록손 👑', desc: '3개 이상의 마이팟 등록하기', icon: '👑' }
 ];
 
 // --- Initializing App ---
@@ -382,7 +382,7 @@ function unlockBadge(badgeId) {
     
     const badge = BADGES.find(b => b.id === badgeId);
     if (badge) {
-        showAlert(`🏆 업적 달성! [${badge.name}] 뱃지를 획득했습니다.`);
+        showAlert(`🏆 그린레벨 배지 획득! [${badge.name}] 배지를 획득했습니다.`);
         addXP(50);
         renderBadges();
     }
@@ -856,7 +856,7 @@ window.waterPlant = function(plantId) {
 
 // Prompt sharing to feed
 function promptShareToCommunity(plant) {
-    const share = confirm(`[${plant.nickname}]의 이쁜 누끼 사진을 식집사 전체 커뮤니티 피드에 자랑하시겠습니까?`);
+    const share = confirm(`[${plant.nickname}]의 이쁜 누끼 사진을 식집사 전체 커뮤니티 팟로그에 자랑하시겠습니까?`);
     if (share) {
         shareToFeed(plant);
     }
@@ -879,7 +879,7 @@ function shareToFeed(plant) {
     posts.unshift(newPost);
     localStorage.setItem('pot2pot_feed', JSON.stringify(posts));
     
-    showAlert("💌 커뮤니티 피드에 식물 자랑글을 게시했습니다!");
+    showAlert("💌 커뮤니티 팟로그에 식물 자랑글을 게시했습니다!");
     addXP(15);
     renderCommunityFeed();
     switchView('community');
