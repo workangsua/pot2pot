@@ -75,6 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showAlert("⚙️ Gemini API Key가 저장되었습니다.");
         });
     }
+    
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered successfully!', reg))
+            .catch(err => console.log('Service Worker registration failed:', err));
+    }
 });
 
 // --- Local Storage Handlers ---
