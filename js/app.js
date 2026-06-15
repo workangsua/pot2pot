@@ -498,7 +498,7 @@ function initRegistrationFlow() {
     document.getElementById('btn-tool-magic').addEventListener('click', () => {
         if (AppState.segmenter) {
             // Magic-wand key out whatever was near center or general white keying
-            AppState.segmenter.autoRemoveWhiteBackground(22);
+            AppState.segmenter.autoRemoveWhiteBackground(22, AppState.aiBoundingBox);
             showAlert("🪄 마법봉으로 배경을 자동으로 제거했습니다.");
         }
     });
@@ -654,16 +654,40 @@ function setupCanvasEditor() {
     const overlay = document.getElementById('editor-processing');
     overlay.classList.add('active');
     
+    // Clear previous AI Bounding Box
+    AppState.aiBoundingBox = null;
+    
+    // Request plant bounding box in parallel if not preset
+    let bboxPromise = Promise.resolve(null);
+    if (!AppState.selectedPreset) {
+        bboxPromise = detectPlantBoundingBoxWithAI();
+    }
+    
     // Simulate AI cutout logic with scanner bar
     let progress = 0;
     const progressText = overlay.querySelector('p');
     
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
         progress += 10;
         progressText.textContent = `피사체 탐색 중... ${progress}%`;
         
         if (progress >= 100) {
             clearInterval(interval);
+            
+            // Await AI Bounding Box with a timeout safety margin
+            try {
+                const box = await Promise.race([
+                    bboxPromise,
+                    new Promise(resolve => setTimeout(() => resolve(null), 2500))
+                ]);
+                if (box) {
+                    console.log("Gemini AI detected bounding box:", box);
+                    AppState.aiBoundingBox = box;
+                }
+            } catch (err) {
+                console.error("Error awaiting bounding box:", err);
+            }
+            
             overlay.classList.remove('active');
             initCanvasSegmenter();
         }
@@ -729,7 +753,7 @@ function initCanvasSegmenter() {
         
         // If it's a preset image or file with clear white background, run autokey
         if (AppState.selectedPreset || AppState.capturedImageSrc.startsWith('data:image')) {
-            AppState.segmenter.autoRemoveWhiteBackground(22);
+            AppState.segmenter.autoRemoveWhiteBackground(22, AppState.aiBoundingBox);
         }
     };
     
@@ -1359,6 +1383,74 @@ function getImageBase64(imgElement) {
         console.error("Base64 conversion failed:", err);
         return null;
     }
+}
+
+async function detectPlantBoundingBoxWithAI() {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+    const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
+    
+    if (isLocal && !apiKey) {
+        console.warn("Local environment has no Gemini API key. Skipping AI bounding box cutout.");
+        return null;
+    }
+
+    const base64Data = AppState.capturedImageSrc.split(',')[1];
+    if (!base64Data) return null;
+
+    try {
+        let response;
+        if (isLocal || apiKey) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const prompt = "Identify the plant and its pot (including the foliage/succulent and the container/pot). Return a JSON object with 'box_2d': [ymin, xmin, ymax, xmax] where values are integers normalized to 0-1000 (0 is top/left, 1000 is bottom/right). Do not include any markdown formatting or other text.";
+
+            response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            {
+                                inlineData: {
+                                    mimeType: "image/png",
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    }
+                })
+            });
+        } else {
+            // Production Vercel Proxy
+            response = await fetch('/api/gemini-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image: base64Data,
+                    mode: 'bbox'
+                })
+            });
+        }
+
+        if (response.ok) {
+            const data = await response.json();
+            const text = data.candidates[0].content.parts[0].text;
+            const parsed = JSON.parse(text.replace(/```json/g, '').replace(/```/g, '').trim());
+            if (parsed && parsed.box_2d) {
+                return parsed.box_2d; // [ymin, xmin, ymax, xmax]
+            }
+        }
+    } catch (err) {
+        console.error("AI bounding box detection error:", err);
+    }
+    return null;
 }
 
 async function analyzePlantWithAI() {

@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
 
-  const { image } = req.body;
+  const { image, mode } = req.body;
   if (!image) {
     return res.status(400).json({ error: 'Image data (base64) is required in the body' });
   }
@@ -33,12 +33,18 @@ module.exports = async (req, res) => {
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-    const prompt = "이 식물 사진을 분석하여 다음 JSON 구조로만 정확하게 응답해주세요. 다른 부연 설명이나 마크다운 백틱(```json)을 절대 포함하지 마십시오.\n" +
-                   "{\n" +
-                   "  \"species\": \"식물의 정확한 종류/품종 국문명 (예: 몬스테라 델리시오사, 아레카야자 등)\",\n" +
-                   "  \"nickname\": \"식물의 생김새나 특징에 어울리는 귀여운 4글자 이내의 한글 별명 추천 (예: 초록이, 선선이, 몬몬이 등)\",\n" +
-                   "  \"waterInterval\": 식물의 품종별 권장 물주기 주기 (1에서 30 사이의 정수 일수)\n" +
-                   "}";
+    
+    let prompt;
+    if (mode === 'bbox') {
+      prompt = "Identify the plant and its pot (including the foliage/succulent and the container/pot). Return a JSON object with 'box_2d': [ymin, xmin, ymax, xmax] where values are integers normalized to 0-1000 (0 is top/left, 1000 is bottom/right). Do not include any markdown formatting or other text.";
+    } else {
+      prompt = "이 식물 사진을 분석하여 다음 JSON 구조로만 정확하게 응답해주세요. 다른 부연 설명이나 마크다운 백틱(```json)을 절대 포함하지 마십시오.\n" +
+               "{\n" +
+               "  \"species\": \"식물의 정확한 종류/품종 국문명 (예: 몬스테라 델리시오사, 아레카야자 등)\",\n" +
+               "  \"nickname\": \"식물의 생김새나 특징에 어울리는 귀여운 4글자 이내의 한글 별명 추천 (예: 초록이, 선선이, 몬몬이 등)\",\n" +
+               "  \"waterInterval\": 식물의 품종별 권장 물주기 주기 (1에서 30 사이의 정수 일수)\n" +
+               "}";
+    }
 
     const response = await fetch(url, {
       method: 'POST',

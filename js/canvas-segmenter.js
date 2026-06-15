@@ -64,8 +64,9 @@ class PlantSegmenter {
     /**
      * Automatic background removal using border-connected flood-fill
      * Densely samples border pixels, clusters them, and performs BFS region growing.
+     * Optionally restricts cutout to the plant + pot bounding box detected by Gemini AI.
      */
-    autoRemoveWhiteBackground(tolerance = 22) {
+    autoRemoveWhiteBackground(tolerance = 22, boundingBox = null) {
         try {
             // Draw image onto a temp canvas to inspect pixels
             const tempCanvas = document.createElement('canvas');
@@ -215,6 +216,27 @@ class PlantSegmenter {
                         maskPixels[mIdx + 1] = 255;
                         maskPixels[mIdx + 2] = 255;
                         maskPixels[mIdx + 3] = 255;
+                    }
+                }
+            }
+
+            // Apply bounding box restriction if provided by Gemini AI (keeps only the plant + pot)
+            if (boundingBox) {
+                const [ymin, xmin, ymax, xmax] = boundingBox;
+                const pxYmin = Math.floor(ymin / 1000 * height);
+                const pxXmin = Math.floor(xmin / 1000 * width);
+                const pxYmax = Math.floor(ymax / 1000 * height);
+                const pxXmax = Math.floor(xmax / 1000 * width);
+                
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
+                            const idx = (y * width + x) * 4;
+                            maskPixels[idx] = 0;
+                            maskPixels[idx + 1] = 0;
+                            maskPixels[idx + 2] = 0;
+                            maskPixels[idx + 3] = 0;
+                        }
                     }
                 }
             }
