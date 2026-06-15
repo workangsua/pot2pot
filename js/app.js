@@ -468,11 +468,20 @@ function initRegistrationFlow() {
                 document.getElementById('plant-nickname').value = preset.name + '이';
                 document.getElementById('water-slider').value = preset.waterInterval;
                 updateWaterIntervalValue(preset.waterInterval);
+                
+                // Fetch Naver encyclopedia in background for presets
+                AppState.currentNaverData = null;
+                fetchNaverEncyclopedia(preset.name).then(naverResult => {
+                    if (naverResult) AppState.currentNaverData = naverResult;
+                });
             } else {
-                document.getElementById('plant-species').value = '';
-                document.getElementById('plant-nickname').value = '';
+                document.getElementById('plant-species').value = 'AI 분석 중...';
+                document.getElementById('plant-nickname').value = 'AI 분석 중...';
                 document.getElementById('water-slider').value = 7;
                 updateWaterIntervalValue(7);
+                
+                // Automatically run Gemini + NAVER AI plant analysis in background
+                analyzePlantWithAI();
             }
             
             goToStep(3);
@@ -491,11 +500,7 @@ function initRegistrationFlow() {
         saveNewPlant();
     });
 
-    // Step 3: AI Analyze Button click
-    const btnAnalyze = document.getElementById('btn-ai-analyze');
-    if (btnAnalyze) {
-        btnAnalyze.addEventListener('click', analyzePlantWithAI);
-    }
+    // (Manual AI analyze button click listener removed as it is now automatic)
 
     // Step 3: Naver Search on species input change
     const speciesInput = document.getElementById('plant-species');
@@ -1407,6 +1412,10 @@ async function analyzePlantWithAI() {
     const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
     if (!apiKey) {
         showAlert("⚠️ Gemini API Key가 등록되지 않았습니다. 설정 화면에서 입력해 주세요.");
+        // Clear placeholders so they don't say "AI 분석 중..." forever
+        document.getElementById('plant-species').value = '';
+        document.getElementById('plant-nickname').value = '';
+        
         closeRegisterModal();
         switchView('settings');
         setTimeout(() => {
@@ -1420,6 +1429,9 @@ async function analyzePlantWithAI() {
     const base64Data = getImageBase64(imgElement);
     if (!base64Data) {
         showAlert("⚠️ 식물 이미지를 변환할 수 없습니다. 이미지를 다시 선택해 주세요.");
+        // Clear placeholders
+        document.getElementById('plant-species').value = '';
+        document.getElementById('plant-nickname').value = '';
         return;
     }
 
@@ -1519,6 +1531,9 @@ async function analyzePlantWithAI() {
     } catch (error) {
         console.error("AI Analysis failed:", error);
         showAlert(`❌ AI 분석 실패: ${error.message}`);
+        // Clear placeholders on error
+        document.getElementById('plant-species').value = '';
+        document.getElementById('plant-nickname').value = '';
     } finally {
         if (btnAnalyze) {
             btnAnalyze.disabled = false;

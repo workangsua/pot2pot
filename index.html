@@ -360,16 +360,12 @@
                                         </div>
                                     </div>
 
-                                    <!-- AI Analysis Container -->
-                                    <div class="ai-analyze-container" style="margin-bottom: 16px;">
-                                        <button type="button" id="btn-ai-analyze" class="btn-ai-analyze" style="width: 100%; background: linear-gradient(135deg, #2a2a27 0%, #1f1f1d 100%); border: 1.5px dashed var(--forest-primary); border-radius: 16px; color: var(--forest-primary); padding: 14px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                            AI로 식물 정보 분석하기 (자동 입력)
-                                        </button>
-                                        <div id="ai-loading-indicator" class="ai-loading-box" style="display: none; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--sand-dark); border-radius: 16px; padding: 14px; align-items: center; justify-content: center; gap: 12px; margin-top: 8px;">
-                                            <div class="ai-spinner" style="width: 20px; height: 20px; border: 3px solid rgba(191, 255, 67, 0.2); border-top: 3px solid var(--forest-primary); border-radius: 50%; animation: ai-spin 0.8s linear infinite;"></div>
-                                            <span class="ai-loading-text" style="font-size: 0.82rem; color: var(--text-dark); font-weight: 600;">Gemini가 식물 사진 분석 중...</span>
-                                        </div>
+                                    <!-- AI Loading Indicator Banner -->
+                                    <div id="ai-loading-indicator" class="ai-loading-box" style="display: none; background: rgba(191, 255, 67, 0.08); border: 1.5px dashed var(--forest-primary); border-radius: 16px; padding: 12px; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; margin-top: 4px;">
+                                        <div class="ai-spinner" style="width: 18px; height: 18px; border: 2.5px solid rgba(191, 255, 67, 0.2); border-top: 2.5px solid var(--forest-primary); border-radius: 50%; animation: ai-spin 0.8s linear infinite;"></div>
+                                        <span class="ai-loading-text" style="font-size: 0.8rem; color: var(--forest-primary); font-weight: 700;">AI가 식물의 정보를 분석 중입니다...</span>
                                     </div>
+
 
                                     <!-- Form Inputs -->
                                     <div class="form-group">
