@@ -1447,11 +1447,15 @@ async function detectPlantBoundingBoxWithAI() {
             });
         } else {
             // Production Vercel Proxy
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (apiKey) {
+                headers['x-gemini-key'] = apiKey;
+            }
             response = await fetch('/api/gemini-analysis', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: headers,
                 body: JSON.stringify({
                     image: base64Data,
                     mode: 'bbox'
@@ -1617,6 +1621,20 @@ async function analyzePlantWithAI() {
     } catch (error) {
         console.error("AI Analysis failed:", error);
         showAlert(`❌ AI 분석 실패: ${error.message}`);
+        
+        // If the error indicates missing API key, prompt to enter it in settings
+        if (error.message.includes("Gemini API Key is missing") || error.message.includes("x-gemini-key") || error.message.includes("401")) {
+            setTimeout(() => {
+                showAlert("⚙️ 설정(Settings) 화면에서 Gemini API Key를 등록하시면 개인 무료 키로 바로 AI 기능을 이용할 수 있습니다.");
+                closeRegisterModal();
+                switchView('settings');
+                setTimeout(() => {
+                    const keyInput = document.getElementById('settings-gemini-key');
+                    if (keyInput) keyInput.focus();
+                }, 400);
+            }, 1500);
+        }
+        
         // Clear placeholders on error
         document.getElementById('plant-species').value = '';
         document.getElementById('plant-nickname').value = '';
