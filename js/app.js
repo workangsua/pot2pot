@@ -1408,7 +1408,7 @@ async function detectPlantBoundingBoxWithAI() {
             const prompt = "Identify the plant and its pot (including the foliage/succulent and the container/pot). Return a JSON object with:\n" +
                            "\"box_2d\": [ymin, xmin, ymax, xmax],\n" +
                            "\"polygon\": [[y1, x1], [y2, x2], ..., [yn, xn]] (a list of 20 to 45 points outlining the boundary of the plant and pot in clockwise order, normalized to 0-1000 where 0 is top/left and 1000 is bottom/right).\n" +
-                           "Be extremely precise to ONLY include the plant and pot, excluding any surrounding background, hands, floor, or phone frames/screens. Do not include any markdown formatting or other text, return ONLY the raw JSON.";
+                           "Make the polygon contour extremely tight, hugging the actual edges of the plant and pot as closely as possible. Be extremely precise to ONLY include the plant and pot, excluding any surrounding background, hands, floor, or phone frames/screens. Do not include any markdown formatting or other text, return ONLY the raw JSON.";
 
             response = await fetch(url, {
                 method: 'POST',

@@ -281,6 +281,9 @@ class PlantSegmenter {
             
             // Apply polygon restriction if provided by Gemini AI (keeps only the plant + pot outline)
             if (polygon && Array.isArray(polygon) && polygon.length >= 3) {
+                // Snap polygon to image edges for pixel-perfect contour alignment
+                const snappedPoints = this.snapPolygonToEdges(polygon, imgData, width, height);
+                
                 const polyCanvas = document.createElement('canvas');
                 polyCanvas.width = width;
                 polyCanvas.height = height;
@@ -289,13 +292,9 @@ class PlantSegmenter {
                 polyCtx.fillRect(0, 0, width, height);
                 polyCtx.fillStyle = '#ffffff';
                 polyCtx.beginPath();
-                polygon.forEach((pt, index) => {
-                    const py = pt[0];
-                    const px = pt[1];
-                    const pxX = (px / 1000) * width;
-                    const pyY = (py / 1000) * height;
-                    if (index === 0) polyCtx.moveTo(pxX, pyY);
-                    else polyCtx.lineTo(pxX, pyY);
+                snappedPoints.forEach((pt, index) => {
+                    if (index === 0) polyCtx.moveTo(pt.x, pt.y);
+                    else polyCtx.lineTo(pt.x, pt.y);
                 });
                 polyCtx.closePath();
                 polyCtx.fill();
@@ -585,6 +584,101 @@ class PlantSegmenter {
 
         // 4. Draw the original plant cutout on top in the center
         this.ctx.drawImage(this.tempCanvas, 0, 0);
+    }
+
+    /**
+     * Snap coarse polygon coordinates to local high-contrast color boundaries (edges)
+     * and smooth the result to prevent jaggy curves.
+     */
+    snapPolygonToEdges(polygon, imgData, width, height) {
+        const points = polygon.map(pt => {
+            const py = pt[0];
+            const px = pt[1];
+            return {
+                x: (px / 1000) * width,
+                y: (py / 1000) * height
+            };
+        });
+
+        const n = points.length;
+        const searchRange = 15; // Search +/-15 pixels along the normal vector
+        const pixels = imgData.data;
+
+        const getColor = (x, y) => {
+            const px = Math.max(0, Math.min(width - 1, Math.round(x)));
+            const py = Math.max(0, Math.min(height - 1, Math.round(y)));
+            const idx = (py * width + px) * 4;
+            return [pixels[idx], pixels[idx + 1], pixels[idx + 2]];
+        };
+
+        const colorDist = (c1, c2) => {
+            return Math.sqrt(
+                Math.pow(c1[0] - c2[0], 2) +
+                Math.pow(c1[1] - c2[1], 2) +
+                Math.pow(c1[2] - c2[2], 2)
+            );
+        };
+
+        const snappedPoints = [];
+
+        for (let i = 0; i < n; i++) {
+            const p = points[i];
+            const prev = points[(i - 1 + n) % n];
+            const next = points[(i + 1) % n];
+
+            // Calculate tangent
+            const tx = next.x - prev.x;
+            const ty = next.y - prev.y;
+            const tLen = Math.sqrt(tx * tx + ty * ty);
+
+            if (tLen === 0) {
+                snappedPoints.push({ x: p.x, y: p.y });
+                continue;
+            }
+
+            // Normal vector (perpendicular to boundary)
+            const nx = -ty / tLen;
+            const ny = tx / tLen;
+
+            let bestT = 0;
+            let maxContrast = -1;
+
+            // Search along the normal line segment
+            for (let t = -searchRange; t <= searchRange; t++) {
+                const cx = p.x + t * nx;
+                const cy = p.y + t * ny;
+
+                // Compute color difference of pixels just inside and outside
+                const sample1 = getColor(cx - 2.5 * nx, cy - 2.5 * ny);
+                const sample2 = getColor(cx + 2.5 * nx, cy + 2.5 * ny);
+                const contrast = colorDist(sample1, sample2);
+
+                if (contrast > maxContrast) {
+                    maxContrast = contrast;
+                    bestT = t;
+                }
+            }
+
+            snappedPoints.push({
+                x: p.x + bestT * nx,
+                y: p.y + bestT * ny
+            });
+        }
+
+        // Apply a weighted 3-point smoothing filter (Gaussian-style) to smooth the contour
+        const smoothedPoints = [];
+        for (let i = 0; i < n; i++) {
+            const p = snappedPoints[i];
+            const prev = snappedPoints[(i - 1 + n) % n];
+            const next = snappedPoints[(i + 1) % n];
+
+            smoothedPoints.push({
+                x: 0.22 * prev.x + 0.56 * p.x + 0.22 * next.x,
+                y: 0.22 * prev.y + 0.56 * p.y + 0.22 * next.y
+            });
+        }
+
+        return smoothedPoints;
     }
 
     /**
