@@ -539,7 +539,8 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    color: var(--text-muted);
+    color: #ffffff;
+    opacity: 0.65;
     text-decoration: none;
     font-size: 0.65rem;
     font-weight: 600;
@@ -549,8 +550,13 @@ body {
     cursor: pointer;
 }
 
+.nav-item:hover {
+    opacity: 1;
+}
+
 .nav-item.active {
     color: var(--forest-primary);
+    opacity: 1;
 }
 
 .nav-icon {
@@ -577,6 +583,7 @@ body {
     color: #000000;
     border: 3px solid var(--sand-primary);
     transition: var(--transition-bounce);
+    opacity: 1;
 }
 
 .nav-item.add-pot:hover {
@@ -1590,6 +1597,7 @@ body {
         display: flex;
         justify-content: center;
         align-items: center;
+        opacity: 1;
     }
 
     .nav-item.add-pot::after {
