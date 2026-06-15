@@ -62,9 +62,10 @@ class PlantSegmenter {
     }
 
     /**
-     * Automatic white background removal (ideal for white-bg presets)
+     * Automatic background removal using border-connected flood-fill
+     * Densely samples border pixels, clusters them, and performs BFS region growing.
      */
-    autoRemoveWhiteBackground(tolerance = 30) {
+    autoRemoveWhiteBackground(tolerance = 35) {
         try {
             // Draw image onto a temp canvas to inspect pixels
             const tempCanvas = document.createElement('canvas');
@@ -78,92 +79,146 @@ class PlantSegmenter {
             
             const pixels = imgData.data;
             const maskPixels = maskData.data;
+            const width = this.width;
+            const height = this.height;
 
-            // Sample 4 corners of the image (with a tiny inset to avoid border shadows or absolute edge artifacts)
-            const insetX = Math.max(2, Math.floor(this.width * 0.01));
-            const insetY = Math.max(2, Math.floor(this.height * 0.01));
+            // Sample border colors (with a tiny inset to avoid absolute edge artifacts)
+            const insetX = Math.max(2, Math.floor(width * 0.015));
+            const insetY = Math.max(2, Math.floor(height * 0.015));
             
-            const getPixel = (imgD, x, y) => {
-                const idx = (y * imgD.width + x) * 4;
-                return {
-                    r: imgD.data[idx],
-                    g: imgD.data[idx + 1],
-                    b: imgD.data[idx + 2]
-                };
+            const borderColors = [];
+            const step = 6; // Densely sample every 6 pixels
+            
+            const addBorderColor = (x, y) => {
+                const idx = (y * width + x) * 4;
+                borderColors.push({
+                    r: pixels[idx],
+                    g: pixels[idx + 1],
+                    b: pixels[idx + 2]
+                });
+            };
+            
+            // Sample all 4 borders
+            for (let x = insetX; x < width - insetX; x += step) {
+                addBorderColor(x, insetY);
+                addBorderColor(x, height - 1 - insetY);
+            }
+            for (let y = insetY; y < height - insetY; y += step) {
+                addBorderColor(insetX, y);
+                addBorderColor(width - 1 - insetX, y);
+            }
+
+            // Cluster colors to find distinct background color profiles
+            const uniqueColors = [];
+            const colorDiff = (c1, c2) => {
+                return Math.sqrt(
+                    Math.pow(c1.r - c2.r, 2) +
+                    Math.pow(c1.g - c2.g, 2) +
+                    Math.pow(c1.b - c2.b, 2)
+                );
             };
 
-            const corners = [
-                getPixel(imgData, insetX, insetY), // Top-left
-                getPixel(imgData, this.width - 1 - insetX, insetY), // Top-right
-                getPixel(imgData, insetX, this.height - 1 - insetY), // Bottom-left
-                getPixel(imgData, this.width - 1 - insetX, this.height - 1 - insetY) // Bottom-right
-            ];
-
-            // Group corner colors to find the most common background color
-            const groups = [];
-            corners.forEach(color => {
+            borderColors.forEach(color => {
                 let found = false;
-                for (let group of groups) {
-                    const diff = Math.sqrt(
-                        Math.pow(color.r - group.color.r, 2) +
-                        Math.pow(color.g - group.color.g, 2) +
-                        Math.pow(color.b - group.color.b, 2)
-                    );
-                    if (diff < 20) {
-                        group.count++;
-                        // Average color slightly
-                        group.color.r = Math.round((group.color.r * (group.count - 1) + color.r) / group.count);
-                        group.color.g = Math.round((group.color.g * (group.count - 1) + color.g) / group.count);
-                        group.color.b = Math.round((group.color.b * (group.count - 1) + color.b) / group.count);
+                for (let uc of uniqueColors) {
+                    if (colorDiff(color, uc) < 18) { // Threshold for clustering
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
-                    groups.push({ color: { ...color }, count: 1 });
+                    uniqueColors.push(color);
                 }
             });
 
-            // Sort by count descending
-            groups.sort((a, b) => b.count - a.count);
+            console.log(`Smart cutout: Sampled ${borderColors.length} border pixels, clustered into ${uniqueColors.length} unique colors.`);
 
-            // Default target color is white
-            let targetR = 255, targetG = 255, targetB = 255;
-            if (groups.length > 0) {
-                targetR = groups[0].color.r;
-                targetG = groups[0].color.g;
-                targetB = groups[0].color.b;
+            // Initialize visited array and BFS queue starting from boundary pixels
+            const visited = new Uint8Array(width * height);
+            const queue = [];
+            
+            const pushToQueue = (x, y) => {
+                const idx = y * width + x;
+                if (!visited[idx]) {
+                    visited[idx] = 1;
+                    queue.push(x, y);
+                }
+            };
+
+            // Push the absolute outer border pixels to seed the flood fill
+            for (let x = 0; x < width; x++) {
+                pushToQueue(x, 0);
+                pushToQueue(x, height - 1);
+            }
+            for (let y = 1; y < height - 1; y++) {
+                pushToQueue(0, y);
+                pushToQueue(width - 1, y);
             }
 
-            console.log(`Auto-detected background color: RGB(${targetR}, ${targetG}, ${targetB})`);
-
-            // Apply keying based on target color
-            for (let i = 0; i < pixels.length; i += 4) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-
-                const diff = Math.sqrt(
-                    Math.pow(r - targetR, 2) + 
-                    Math.pow(g - targetG, 2) + 
-                    Math.pow(b - targetB, 2)
-                );
-
-                if (diff < tolerance) {
-                    maskPixels[i] = 0;     // R
-                    maskPixels[i + 1] = 0; // G
-                    maskPixels[i + 2] = 0; // B
-                    maskPixels[i + 3] = 0; // A
-                } else {
-                    maskPixels[i] = 255;
-                    maskPixels[i + 1] = 255;
-                    maskPixels[i + 2] = 255;
-                    maskPixels[i + 3] = 255;
+            let head = 0;
+            const dx = [1, -1, 0, 0];
+            const dy = [0, 0, 1, -1];
+            
+            // Run BFS flood fill
+            while (head < queue.length) {
+                const cx = queue[head++];
+                const cy = queue[head++];
+                
+                // Mark as background in mask (transparent)
+                const cPixelIdx = (cy * width + cx) * 4;
+                maskPixels[cPixelIdx] = 0;
+                maskPixels[cPixelIdx + 1] = 0;
+                maskPixels[cPixelIdx + 2] = 0;
+                maskPixels[cPixelIdx + 3] = 0;
+                
+                for (let i = 0; i < 4; i++) {
+                    const nx = cx + dx[i];
+                    const ny = cy + dy[i];
+                    
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const nIdx = ny * width + nx;
+                        if (!visited[nIdx]) {
+                            const nPixelIdx = nIdx * 4;
+                            const nColor = {
+                                r: pixels[nPixelIdx],
+                                g: pixels[nPixelIdx + 1],
+                                b: pixels[nPixelIdx + 2]
+                            };
+                            
+                            // Check if neighbor matches any clustered border background color
+                            let matchesBg = false;
+                            for (let uc of uniqueColors) {
+                                if (colorDiff(nColor, uc) < tolerance) {
+                                    matchesBg = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (matchesBg) {
+                                visited[nIdx] = 1;
+                                queue.push(nx, ny);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Mark all unvisited pixels as foreground (white/opaque)
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = y * width + x;
+                    if (!visited[idx]) {
+                        const mIdx = idx * 4;
+                        maskPixels[mIdx] = 255;
+                        maskPixels[mIdx + 1] = 255;
+                        maskPixels[mIdx + 2] = 255;
+                        maskPixels[mIdx + 3] = 255;
+                    }
                 }
             }
 
             this.maskCtx.putImageData(maskData, 0, 0);
-            this.filterMaskNoise(0.02);
+            this.filterMaskNoise(0.01); // Filter noise components smaller than 1% of main component
             this.render();
         } catch (err) {
             console.error("CORS canvas error (file:// protocol):", err);

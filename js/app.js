@@ -455,29 +455,24 @@ function initRegistrationFlow() {
     });
     
     // Step 2 Canvas toolbar bindings
+    const backBtn = document.getElementById('btn-tool-back');
     const eraserBtn = document.getElementById('btn-tool-erase');
-    const restoreBtn = document.getElementById('btn-tool-restore');
     const magicTapBtn = document.getElementById('btn-tool-magic-tap');
     const brushSlider = document.getElementById('brush-size');
     
+    backBtn.addEventListener('click', () => {
+        goToStep(1);
+    });
+    
     eraserBtn.addEventListener('click', () => {
         eraserBtn.classList.add('active');
-        restoreBtn.classList.remove('active');
         magicTapBtn.classList.remove('active');
         if (AppState.segmenter) AppState.segmenter.brushMode = 'erase';
     });
     
-    restoreBtn.addEventListener('click', () => {
-        restoreBtn.classList.add('active');
-        eraserBtn.classList.remove('active');
-        magicTapBtn.classList.remove('active');
-        if (AppState.segmenter) AppState.segmenter.brushMode = 'restore';
-    });
-
     magicTapBtn.addEventListener('click', () => {
         magicTapBtn.classList.add('active');
         eraserBtn.classList.remove('active');
-        restoreBtn.classList.remove('active');
         if (AppState.segmenter) AppState.segmenter.brushMode = 'magic';
     });
     
