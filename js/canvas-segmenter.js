@@ -99,10 +99,14 @@ class PlantSegmenter {
                 });
             };
             
-            // Sample border colors (only top and upper-sides to avoid pot/soil colors at the bottom)
-            // 1. Sample Top border completely
+            // Sample border colors (only top-left, top-right, and upper-sides to avoid pot and tall center plants)
+            // 1. Sample Top border but skip the middle 40% (x from 30% to 70% of width) where the plant is centered
+            const leftLimit = Math.floor(width * 0.30);
+            const rightLimit = Math.floor(width * 0.70);
             for (let x = insetX; x < width - insetX; x += step) {
-                addBorderColor(x, insetY);
+                if (x < leftLimit || x > rightLimit) {
+                    addBorderColor(x, insetY);
+                }
             }
             // 2. Sample Left & Right borders but ONLY up to 60% of the height to avoid the pot
             const maxHeightToSample = Math.floor(height * 0.60);

@@ -683,10 +683,23 @@ function setupCanvasEditor() {
                     bboxPromise,
                     new Promise(resolve => setTimeout(() => resolve(null), 2500))
                 ]);
+                const badge = document.getElementById('ai-status-badge');
                 if (aiResult) {
                     console.log("Gemini AI detected result:", aiResult);
                     AppState.aiBoundingBox = aiResult.box_2d || null;
                     AppState.aiPolygon = aiResult.polygon || null;
+                    if (badge) {
+                        badge.textContent = "✨ AI 누끼 적용됨";
+                        badge.className = "ai-status-badge ai-active";
+                    }
+                } else {
+                    console.warn("Gemini AI detection failed or skipped. Falling back to local segmenter.");
+                    AppState.aiBoundingBox = null;
+                    AppState.aiPolygon = null;
+                    if (badge) {
+                        badge.textContent = "⚠️ 일반 누끼 (AI Key 미등록)";
+                        badge.className = "ai-status-badge ai-inactive";
+                    }
                 }
             } catch (err) {
                 console.error("Error awaiting bounding box/polygon:", err);
