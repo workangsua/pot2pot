@@ -1472,8 +1472,9 @@ async function analyzePlantWithAI() {
         return;
     }
 
-    const imgElement = document.getElementById('preview-cutout-img');
-    const base64Data = getImageBase64(imgElement);
+    // Use the original captured image base64 data for AI species identification rather than the transparent cutout image.
+    // This keeps full visual details and prevents API errors from empty/transparent png inputs.
+    const base64Data = AppState.capturedImageSrc ? AppState.capturedImageSrc.split(',')[1] : null;
     if (!base64Data) {
         showAlert("⚠️ 식물 이미지를 변환할 수 없습니다. 이미지를 다시 선택해 주세요.");
         // Clear placeholders

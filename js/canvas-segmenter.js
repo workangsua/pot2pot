@@ -136,7 +136,7 @@ class PlantSegmenter {
 
             console.log(`Smart cutout: Sampled ${borderColors.length} border pixels, clustered into ${uniqueColors.length} unique colors.`);
 
-            // Initialize visited array and BFS queue starting from boundary pixels
+            // Initialize visited array and BFS queue
             const visited = new Uint8Array(width * height);
             const queue = [];
             
@@ -148,14 +148,52 @@ class PlantSegmenter {
                 }
             };
 
-            // Push the absolute outer border pixels to seed the flood fill
-            for (let x = 0; x < width; x++) {
-                pushToQueue(x, 0);
-                pushToQueue(x, height - 1);
-            }
-            for (let y = 1; y < height - 1; y++) {
-                pushToQueue(0, y);
-                pushToQueue(width - 1, y);
+            // Calculate bounding box pixel boundaries if provided by Gemini AI
+            let pxYmin = 0, pxXmin = 0, pxYmax = height - 1, pxXmax = width - 1;
+            const hasBox = boundingBox && Array.isArray(boundingBox) && boundingBox.length === 4;
+            
+            if (hasBox) {
+                const [ymin, xmin, ymax, xmax] = boundingBox;
+                pxYmin = Math.max(0, Math.floor(ymin / 1000 * height));
+                pxXmin = Math.max(0, Math.floor(xmin / 1000 * width));
+                pxYmax = Math.min(height - 1, Math.floor(ymax / 1000 * height));
+                pxXmax = Math.min(width - 1, Math.floor(xmax / 1000 * width));
+
+                // 1. Mark everything OUTSIDE the bounding box as visited and transparent background in the mask
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
+                            const idx = y * width + x;
+                            visited[idx] = 1; // Mark as visited so BFS doesn't process it
+                            
+                            const pixelIdx = idx * 4;
+                            maskPixels[pixelIdx] = 0;
+                            maskPixels[pixelIdx + 1] = 0;
+                            maskPixels[pixelIdx + 2] = 0;
+                            maskPixels[pixelIdx + 3] = 0;
+                        }
+                    }
+                }
+
+                // 2. Seed BFS from the perimeter of the bounding box
+                for (let x = pxXmin; x <= pxXmax; x++) {
+                    pushToQueue(x, pxYmin);
+                    pushToQueue(x, pxYmax);
+                }
+                for (let y = pxYmin; y <= pxYmax; y++) {
+                    pushToQueue(pxXmin, y);
+                    pushToQueue(pxXmax, y);
+                }
+            } else {
+                // No bounding box: seed from the absolute outer borders of the canvas
+                for (let x = 0; x < width; x++) {
+                    pushToQueue(x, 0);
+                    pushToQueue(x, height - 1);
+                }
+                for (let y = 1; y < height - 1; y++) {
+                    pushToQueue(0, y);
+                    pushToQueue(width - 1, y);
+                }
             }
 
             let head = 0;

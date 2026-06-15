@@ -1070,10 +1070,10 @@ body {
     position: relative;
     width: 100%;
     aspect-ratio: 1.1;
-    background: white;
+    background: #1e1e1e;
     border-radius: 28px;
     overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
     box-shadow: var(--shadow-sm);
     display: flex;
     align-items: center;
@@ -1285,12 +1285,12 @@ body {
 .form-plant-preview-img-wrapper {
     width: 68px;
     height: 68px;
-    background: white;
+    background: #1e1e1e;
     border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(0,0,0,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 .form-plant-preview-img-wrapper img {
