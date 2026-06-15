@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initDetailModalFlow();
     renderArchive();
     renderBadges();
-    renderCommunityFeed();
     updateUserBadgeUI();
     
     // Set default date for date picker to today
@@ -283,6 +282,11 @@ function switchView(viewName) {
     const activeNavItem = document.querySelector(`.nav-item[data-view="${viewName}"]`);
     if (activeNavItem) {
         activeNavItem.classList.add('active');
+    }
+    
+    // Render badges dynamically if settings is visited
+    if (viewName === 'settings') {
+        renderBadges();
     }
 }
 
@@ -854,40 +858,10 @@ window.waterPlant = function(plantId) {
     }
 };
 
-// Prompt sharing to feed
-function promptShareToCommunity(plant) {
-    const share = confirm(`[${plant.nickname}]의 이쁜 누끼 사진을 식집사 전체 커뮤니티 팟로그에 자랑하시겠습니까?`);
-    if (share) {
-        shareToFeed(plant);
-    }
-}
-
-function shareToFeed(plant) {
-    // Save post locally
-    const posts = JSON.parse(localStorage.getItem('pot2pot_feed') || '[]');
-    const newPost = {
-        id: 'post_' + Date.now(),
-        user: AppState.user.title,
-        avatar: '🌱',
-        image: plant.image,
-        nickname: plant.nickname,
-        species: plant.species,
-        timestamp: '방금 전',
-        likes: 0
-    };
-    
-    posts.unshift(newPost);
-    localStorage.setItem('pot2pot_feed', JSON.stringify(posts));
-    
-    showAlert("💌 커뮤니티 팟로그에 식물 자랑글을 게시했습니다!");
-    addXP(15);
-    renderCommunityFeed();
-    switchView('community');
-}
-
 // Render Badges View
 function renderBadges() {
     const container = document.getElementById('badges-container');
+    if (!container) return;
     container.innerHTML = '';
     
     BADGES.forEach(badge => {
@@ -905,79 +879,6 @@ function renderBadges() {
         container.appendChild(card);
     });
 }
-
-// Render Community Feed
-function renderCommunityFeed() {
-    const container = document.getElementById('feed-container');
-    container.innerHTML = '';
-    
-    const defaultPosts = [
-        {
-            id: 'mock_1',
-            user: '초록손 마스터 👑',
-            avatar: '🍀',
-            image: 'assets/monstera.png',
-            nickname: '몬몬이',
-            species: '몬스테라 델리시오사',
-            timestamp: '2시간 전',
-            likes: 14
-        },
-        {
-            id: 'mock_2',
-            user: '선인장러버 🌵',
-            avatar: '🌸',
-            image: 'assets/cactus.png',
-            nickname: '가시포포',
-            species: '꽃선인장',
-            timestamp: '5시간 전',
-            likes: 8
-        }
-    ];
-    
-    const userPosts = JSON.parse(localStorage.getItem('pot2pot_feed') || '[]');
-    const allPosts = [...userPosts, ...defaultPosts];
-    
-    allPosts.forEach(post => {
-        const postCard = document.createElement('div');
-        postCard.className = 'community-post';
-        postCard.innerHTML = `
-            <div class="post-header">
-                <div class="post-avatar">${post.avatar}</div>
-                <div class="post-user-info">
-                    <h4>${post.user}</h4>
-                    <span>${post.timestamp}</span>
-                </div>
-            </div>
-            <div class="post-img checkerboard-bg">
-                <img src="${post.image}" alt="${post.nickname}">
-            </div>
-            <div style="font-size:0.85rem; font-weight:700; margin-bottom: 6px;">
-                ${post.nickname} (${post.species}) 자랑하기
-            </div>
-            <div class="post-actions">
-                <button style="background:none; border:none; cursor:pointer; color:inherit; font-weight:inherit;" onclick="likePost('${post.id}')">
-                    ❤️ <span>${post.likes}</span> 좋아요
-                </button>
-                <span>💬 댓글 달기</span>
-            </div>
-        `;
-        container.appendChild(postCard);
-    });
-}
-
-window.likePost = function(postId) {
-    // Handle mock post liking
-    const userPosts = JSON.parse(localStorage.getItem('pot2pot_feed') || '[]');
-    const post = userPosts.find(p => p.id === postId);
-    
-    if (post) {
-        post.likes += 1;
-        localStorage.setItem('pot2pot_feed', JSON.stringify(userPosts));
-    }
-    
-    showAlert("❤️ 게시글을 좋아합니다!");
-    renderCommunityFeed();
-};
 
 // --- Plant Detail View & Event Listeners ---
 let currentDetailPlantId = null;
@@ -1058,15 +959,6 @@ function initDetailModalFlow() {
     document.getElementById('btn-cal-prev').addEventListener('click', () => navigateCalendar(-1));
     document.getElementById('btn-cal-next').addEventListener('click', () => navigateCalendar(1));
     
-    // Share post
-    document.getElementById('btn-share-post').addEventListener('click', () => {
-        if (!currentDetailPlantId) return;
-        const plant = AppState.plants.find(p => p.id === currentDetailPlantId);
-        if (plant) {
-            shareToFeed(plant);
-            closeDetailModal();
-        }
-    });
 }
 
 function openDetailModal(plantId) {

@@ -95,49 +95,26 @@
                     </div>
 
                     <!-- ==========================================
-                         VIEW 2: Community Feed
-                         ========================================== -->
-                    <div id="screen-community" class="screen-view">
-                        <header class="app-header">
-                            <h2 class="dummy-screen-title">식집사 팟로그 💬</h2>
-                        </header>
-                        <div class="scrollable-content">
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; padding-left: 2px;">
-                                다른 식집사님들의 소중한 식물 자랑과 관리 팁을 확인해 보세요.
-                            </p>
-                            <div id="feed-container">
-                                <!-- Generated Dynamically -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ==========================================
-                         VIEW 3: Badges Center
-                         ========================================== -->
-                    <div id="screen-badges" class="screen-view">
-                        <header class="app-header">
-                            <h2 class="dummy-screen-title">그린레벨 센터 🏆</h2>
-                        </header>
-                        <div class="scrollable-content">
-                            <div class="dashboard-hero" style="background: linear-gradient(135deg, var(--gold-pastel) 0%, rgba(253,246,231,0.5) 100%); border-color: rgba(223, 177, 91, 0.15); margin-bottom: 20px;">
-                                <h3 style="font-size: 1.05rem; font-weight: 700; color: #92400e; margin-bottom: 4px;">활동 마일스톤</h3>
-                                <p style="font-size: 0.8rem; color: #b45309;">식물을 스캔하고, 물을 주고, 기록을 남겨 등급을 올리세요!</p>
-                            </div>
-                            
-                            <div id="badges-container">
-                                <!-- Generated Dynamically -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ==========================================
-                         VIEW 4: Settings
+                         VIEW 3: Settings & Achievements (그린레벨 통합)
                          ========================================== -->
                     <div id="screen-settings" class="screen-view">
                         <header class="app-header">
                             <h2 class="dummy-screen-title">설정 ⚙️</h2>
                         </header>
                         <div class="scrollable-content" style="padding-top: 10px;">
+                            
+                            <!-- Achievements & Badges integrated in Settings -->
+                            <div class="settings-badges-section" style="margin-bottom: 25px;">
+                                <div class="dashboard-hero" style="background: linear-gradient(135deg, var(--gold-pastel) 0%, rgba(253,246,231,0.5) 100%); border-color: rgba(223, 177, 91, 0.15); margin-bottom: 16px; border-radius: 20px; padding: 14px 16px; border: 1px solid rgba(223, 177, 91, 0.15);">
+                                    <h3 style="font-size: 1.02rem; font-weight: 700; color: #92400e; margin-bottom: 4px;">활동 마일스톤</h3>
+                                    <p style="font-size: 0.78rem; color: #b45309; margin: 0; line-height: 1.3;">식물을 스캔하고, 물을 주고, 기록을 남겨 등급을 올리세요!</p>
+                                </div>
+                                <div id="badges-container" style="margin-bottom: 20px;">
+                                    <!-- Generated Dynamically -->
+                                </div>
+                            </div>
+
+                            <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; padding-left: 2px;">앱 설정</h3>
                             <div style="background: var(--sand-light); border-radius: 20px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 14px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px;">
                                     <span style="font-size: 0.85rem; font-weight: 600;">알림 푸시 서비스 활성화</span>
@@ -179,31 +156,49 @@
                     </div>
 
                     <!-- ==========================================
-                         Floating Bottom Navigation
+                         Floating Bottom Navigation (3-Tab Redesigned Cutout)
                          ========================================== -->
-                    <nav id="bottom-nav" class="bottom-nav">
-                        <button class="nav-item active" data-view="archive">
-                            <span class="nav-icon">🪴</span>
-                            <span>마이팟</span>
-                        </button>
-                        <button class="nav-item" data-view="community">
-                            <span class="nav-icon">💬</span>
-                            <span>팟로그</span>
-                        </button>
+                    <nav id="bottom-nav" class="bottom-nav-container">
+                        <!-- Curved background structure -->
+                        <div class="bottom-nav-bg-wrapper">
+                            <div class="bottom-nav-bg-side left"></div>
+                            <div class="bottom-nav-bg-center">
+                                <!-- Center SVG Dip Cutout -->
+                                <svg viewBox="0 0 100 64" preserveAspectRatio="none">
+                                    <path d="M 0 0 C 15 0, 20 32, 50 32 C 80 32, 85 0, 100 0 L 100 64 L 0 64 Z" fill="rgba(26, 26, 26, 0.92)"></path>
+                                    <!-- Top border curve -->
+                                    <path d="M 0 0 C 15 0, 20 32, 50 32 C 80 32, 85 0, 100 0" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"></path>
+                                </svg>
+                            </div>
+                            <div class="bottom-nav-bg-side right"></div>
+                        </div>
                         
-                        <!-- Floating FAB to open registration flow -->
-                        <button class="nav-item add-pot" aria-label="마이팟 등록">
-                            <span class="nav-icon">+</span>
-                        </button>
-                        
-                        <button class="nav-item" data-view="badges">
-                            <span class="nav-icon">🏆</span>
-                            <span>그린레벨</span>
-                        </button>
-                        <button class="nav-item" data-view="settings">
-                            <span class="nav-icon">⚙️</span>
-                            <span>설정</span>
-                        </button>
+                        <!-- Navigation Buttons -->
+                        <div class="bottom-nav-items">
+                            <button class="nav-item active" data-view="archive" aria-label="마이팟">
+                                <span class="nav-icon">
+                                    <!-- Smiley SVG -->
+                                    <svg viewBox="0 0 148 148" width="22" height="22"><path d="M74 0C114.869 0 148 33.1309 148 74C148 114.869 114.869 148 74 148C33.1309 148 0 114.869 0 74C0 33.1309 33.1309 0 74 0ZM38.8164 81C36.6076 81.0002 34.7953 82.7957 35.0186 84.9932C37.0186 104.656 53.6257 120 73.8164 120C94.0072 120 110.614 104.656 112.614 84.9932C112.838 82.7956 111.025 81 108.816 81H38.8164ZM49 39C41.8203 39 36 44.8203 36 52C36 59.1797 41.8203 65 49 65C56.1797 65 62 59.1797 62 52C62 44.8203 56.1797 39 49 39ZM100 39C92.8203 39 87 44.8203 87 52C87 59.1797 92.8203 65 100 65C107.18 65 113 59.1797 113 52C113 44.8203 107.18 39 100 39Z" fill="currentColor"/></svg>
+                                </span>
+                                <span class="nav-label">마이팟</span>
+                            </button>
+
+                            <!-- Center Add Pot button -->
+                            <button class="nav-item add-pot" aria-label="마이팟 등록">
+                                <span class="nav-icon">
+                                    <!-- Tulip SVG -->
+                                    <svg viewBox="0 0 123 142" width="22" height="25" style="transform: translateY(1.5px);"><path d="M105.188 4.01262C105.194 1.12559 102.233 -0.816713 99.5875 0.338793L63.5397 14.0871C63.3647 14.1635 63.1989 14.2498 63.0426 14.3449H60.4215C60.2652 14.2498 60.0995 14.1635 59.9244 14.0871L23.8766 0.339015C21.2308 -0.816806 18.2691 1.12569 18.275 4.01284L18.524 37.4972C19.6907 56.896 33.5682 72.864 51.9401 77.1867V107.409C49.6313 104.445 46.7344 101.685 43.317 99.3263C29.9082 90.0723 8.89817 87.268 2.15295 97.0402C-4.5919 106.813 5.48315 125.463 18.8922 134.717C25.8943 139.549 33.695 141.743 40.5113 141.345H82.3688C89.1852 141.743 96.9858 139.55 103.988 134.717C117.397 125.463 127.473 106.813 120.728 97.0402C113.983 87.2675 92.9721 90.0721 79.5631 99.3263C76.1457 101.685 73.2488 104.445 70.9401 107.409V77.4093C90.4876 73.2965 105.2 56.0612 105.433 35.3449L105.188 4.01262Z" fill="currentColor"/></svg>
+                                </span>
+                            </button>
+
+                            <button class="nav-item" data-view="settings" aria-label="설정">
+                                <span class="nav-icon">
+                                    <!-- Toggle Switch SVG -->
+                                    <svg viewBox="0 0 148 147" width="22" height="22"><path d="M115 0C133.225 1.28852e-06 148 14.7746 148 33C148 51.2254 133.225 66 115 66H33C14.7746 66 0 51.2254 0 33C0 14.7746 14.7746 9.66391e-08 33 0H115ZM112 15C102.059 15 94 23.0589 94 33C94 42.9411 102.059 51 112 51C121.941 51 130 42.9411 130 33C130 23.0589 121.941 15 112 15Z" fill="currentColor"/><path d="M33 147C14.7746 147 1.29164e-06 132.225 2.88495e-06 114C4.47827e-06 95.7746 14.7746 81 33 81L115 81C133.225 81 148 95.7746 148 114C148 132.225 133.225 147 115 147L33 147ZM36 132C45.9411 132 54 123.941 54 114C54 104.059 45.9411 96 36 96C26.0589 96 18 104.059 18 114C18 123.941 26.0589 132 36 132Z" fill="currentColor"/></svg>
+                                </span>
+                                <span class="nav-label">설정</span>
+                            </button>
+                        </div>
                     </nav>
 
                 </div><!-- app-viewport -->
@@ -413,7 +408,6 @@
                                 <span id="detail-species" class="detail-subtitle">몬스테라</span>
                             </div>
                             <div class="detail-header-actions">
-                                <button id="btn-share-post" class="btn-share-icon" title="커뮤니티에 자랑하기">📢</button>
                                 <button id="detail-modal-close" class="modal-close-btn">&times;</button>
                             </div>
                         </header>
