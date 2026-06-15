@@ -11,9 +11,9 @@
     --forest-light: #a4db37;
     --forest-pastel: rgba(205, 255, 98, 0.12); /* Soft neon glow bg */
     
-    --sand-primary: #222222; /* Device viewport background */
-    --sand-dark: #3a3a3a; /* Borders and dividers */
-    --sand-light: #3a3a3a; /* Cards and sheets background */
+    --sand-primary: #3a3a3a; /* Device viewport background */
+    --sand-dark: #2a2a2a; /* Borders and dividers */
+    --sand-light: #222222; /* Cards and sheets background */
     
     --terracotta: #cc7052;
     --terracotta-light: #e6967e;
@@ -523,7 +523,7 @@ body {
     left: 16px;
     right: 16px;
     width: calc(100% - 32px);
-    height: 72px; /* Taller to support text label under icon */
+    height: 92px; /* Increased from 72px for more vertical presence */
     z-index: 100;
 }
 
@@ -532,14 +532,14 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 64px; /* Background height matches the sides */
+    height: 80px; /* Increased from 64px (Background height of side panels) */
     display: flex;
     filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.45));
     pointer-events: none;
 }
 
 .bottom-nav-bg-side {
-    height: 64px;
+    height: 80px; /* Increased from 64px */
     background: rgba(26, 26, 26, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -549,21 +549,21 @@ body {
 
 .bottom-nav-bg-side.left {
     flex: 1;
-    border-radius: 32px 0 0 32px;
+    border-radius: 40px 0 0 40px; /* Increased from 32px to match 80px height (pill shape) */
     border-left: 1px solid rgba(255, 255, 255, 0.08);
     margin-right: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-side.right {
     flex: 1;
-    border-radius: 0 32px 32px 0;
+    border-radius: 0 40px 40px 0; /* Increased from 32px to match 80px height (pill shape) */
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     margin-left: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-center {
-    width: 100px;
-    height: 64px;
+    width: 110px; /* Increased from 100px for larger circular button */
+    height: 80px; /* Increased from 64px */
     position: relative;
 }
 
@@ -580,11 +580,11 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 64px;
+    height: 80px; /* Increased from 64px */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 32px;
+    padding: 0 36px; /* Slightly wider padding for more breathing room */
     box-sizing: border-box;
 }
 
@@ -600,8 +600,8 @@ body {
     opacity: 0.7;
     transition: var(--transition-smooth);
     text-decoration: none;
-    width: 60px;
-    height: 52px;
+    width: 68px; /* Increased from 60px */
+    height: 64px; /* Increased from 52px */
     padding: 0;
 }
 
@@ -618,43 +618,50 @@ body {
 }
 
 .nav-icon {
-    font-size: 1.35rem;
+    font-size: 1.5rem; /* Increased from 1.35rem */
     transition: var(--transition-smooth);
     display: flex;
     align-items: center;
     justify-content: center;
     color: inherit;
-    margin-bottom: 2px;
+    margin-bottom: 6px; /* Increased from 2px for a larger, cleaner gap */
+}
+
+.nav-icon svg {
+    width: 25px; /* Increased from 22px */
+    height: 25px; /* Increased from 22px */
 }
 
 .nav-item.active .nav-icon {
-    transform: scale(1.05);
+    transform: scale(1.08); /* Slightly more prominent scaling on active */
 }
 
 .nav-label {
-    font-size: 0.65rem;
+    font-size: 0.7rem; /* Increased from 0.65rem */
     font-weight: 700;
     color: inherit;
+    letter-spacing: -0.2px;
 }
 
 /* Center Add Pot Button */
 .nav-item.add-pot {
     position: absolute;
     left: 50%;
-    top: -14px; /* Floats up into the U cutout */
+    top: -20px; /* Floats up into the larger cutout */
     transform: translateX(-50%);
     background: var(--forest-primary);
-    width: 54px;
-    height: 54px;
+    width: 66px; /* Increased from 54px for a more satisfying and proud size */
+    height: 66px; /* Increased from 54px */
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 20px rgba(205, 255, 98, 0.35);
+    box-shadow: 0 10px 24px rgba(205, 255, 98, 0.4); /* Enhanced shadow */
     color: #222222 !important; /* Black icon inside */
     border: none;
     transition: var(--transition-bounce);
     opacity: 1;
+    z-index: 10;
 }
 
 .nav-item.add-pot:hover {
@@ -672,9 +679,14 @@ body {
 }
 
 .nav-item.add-pot .nav-icon {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     color: #222222;
     margin: 0;
+}
+
+.nav-item.add-pot .nav-icon svg {
+    width: 26px; /* Larger tulip icon */
+    height: 30px;
 }
 
 /* ==========================================
