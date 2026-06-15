@@ -539,8 +539,7 @@ body {
 }
 
 .bottom-nav-bg-side {
-    height: 68px; /* Pushed down to start at y = 12px for seamless wave-shoulder integration */
-    margin-top: 12px;
+    height: 80px;
     background: rgba(42, 42, 42, 0.92); /* Elevated dark gray for strong contrast against #222222 */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -550,20 +549,20 @@ body {
 
 .bottom-nav-bg-side.left {
     flex: 1;
-    border-radius: 34px 0 0 34px; /* Pill shape scaled down to 68px height */
+    border-radius: 40px 0 0 40px; /* Pill shape */
     border-left: 1.5px solid rgba(255, 255, 255, 0.16);
     margin-right: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-side.right {
     flex: 1;
-    border-radius: 0 34px 34px 0; /* Pill shape scaled down to 68px height */
+    border-radius: 0 40px 40px 0; /* Pill shape */
     border-right: 1.5px solid rgba(255, 255, 255, 0.16);
     margin-left: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-center {
-    width: 160px; /* Widen to 160px to support organic S-curve shoulder waves with more R-value */
+    width: 160px; /* Widen to 160px to support smooth, rounded U-shape cutout */
     height: 80px;
     position: relative;
 }
@@ -578,10 +577,10 @@ body {
 
 .bottom-nav-items {
     position: absolute;
-    top: 12px; /* Pushed down by 12px to align buttons perfectly with the side panels */
+    top: 0;
     left: 0;
     width: 100%;
-    height: 68px; /* Matching the height of the side panels */
+    height: 80px; /* Matching the height of the side panels */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -648,7 +647,7 @@ body {
 .nav-item.add-pot {
     position: absolute;
     left: 50%;
-    top: -50px; /* Adjusted to maintain the same vertical position relative to the 12px wrapper offset */
+    top: -38px; /* Balanced floating height to coordinate with the smooth U-cutout */
     transform: translateX(-50%);
     background: var(--forest-primary);
     width: 66px; /* Increased from 54px for a more satisfying and proud size */
