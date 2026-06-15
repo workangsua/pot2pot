@@ -539,7 +539,8 @@ body {
 }
 
 .bottom-nav-bg-side {
-    height: 80px;
+    height: 68px; /* Pushed down to start at y = 12px for seamless wave-shoulder integration */
+    margin-top: 12px;
     background: rgba(42, 42, 42, 0.92); /* Elevated dark gray for strong contrast against #222222 */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -549,20 +550,20 @@ body {
 
 .bottom-nav-bg-side.left {
     flex: 1;
-    border-radius: 40px 0 0 40px; /* Pill shape */
+    border-radius: 34px 0 0 34px; /* Pill shape scaled down to 68px height */
     border-left: 1.5px solid rgba(255, 255, 255, 0.16);
     margin-right: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-side.right {
     flex: 1;
-    border-radius: 0 40px 40px 0; /* Pill shape */
+    border-radius: 0 34px 34px 0; /* Pill shape scaled down to 68px height */
     border-right: 1.5px solid rgba(255, 255, 255, 0.16);
     margin-left: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-center {
-    width: 140px; /* Increased to 140px to widen the U-cutout sides and resolve tight lateral gaps */
+    width: 156px; /* Widen to 156px to support organic S-curve shoulder waves */
     height: 80px;
     position: relative;
 }
@@ -577,14 +578,14 @@ body {
 
 .bottom-nav-items {
     position: absolute;
-    top: 0;
+    top: 12px; /* Pushed down by 12px to align buttons perfectly with the side panels */
     left: 0;
     width: 100%;
-    height: 80px; /* Increased from 64px */
+    height: 68px; /* Matching the height of the side panels */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 28px; /* Slightly reduced padding to accommodate the wider cutout and prevent overlap */
+    padding: 0 24px; /* Adjusted to accommodate the wider 156px cutout */
     box-sizing: border-box;
 }
 
@@ -647,7 +648,7 @@ body {
 .nav-item.add-pot {
     position: absolute;
     left: 50%;
-    top: -38px; /* Adjusted to balance the gap symmetrically along the cutout curve */
+    top: -50px; /* Adjusted to maintain the same vertical position relative to the 12px wrapper offset */
     transform: translateX(-50%);
     background: var(--forest-primary);
     width: 66px; /* Increased from 54px for a more satisfying and proud size */
