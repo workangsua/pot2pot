@@ -70,12 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load and bind Gemini Key
     const keyInput = document.getElementById('settings-gemini-key');
     if (keyInput) {
-        keyInput.value = localStorage.getItem('pot2pot_gemini_key') || '';
+        const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key') || '';
+        if (savedGeminiKey) {
+            keyInput.placeholder = "개별 키가 저장되어 있습니다 (••••••••)";
+        }
+        keyInput.value = '';
+        
         keyInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
-            localStorage.setItem('pot2pot_gemini_key', val);
-            AppState.geminiKey = val;
-            showAlert("⚙️ Gemini API Key가 저장되었습니다.");
+            if (val) {
+                localStorage.setItem('pot2pot_gemini_key', val);
+                AppState.geminiKey = val;
+                keyInput.placeholder = "개별 키가 저장되어 있습니다 (••••••••)";
+                keyInput.value = '';
+                showAlert("⚙️ Gemini API Key가 개별 저장되었습니다.");
+            } else {
+                localStorage.removeItem('pot2pot_gemini_key');
+                AppState.geminiKey = '';
+                keyInput.placeholder = "기본 AI 키 사용 중 (개별 키 사용 시 입력)";
+                showAlert("⚙️ 개별 Gemini API Key가 삭제되었습니다. 기본 키를 사용합니다.");
+            }
         });
     }
 
@@ -84,22 +98,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const naverSecretInput = document.getElementById('settings-naver-secret');
     
     if (naverIdInput) {
-        naverIdInput.value = localStorage.getItem('pot2pot_naver_client_id') || '';
+        const savedNaverId = localStorage.getItem('pot2pot_naver_client_id') || '';
+        if (savedNaverId) {
+            naverIdInput.placeholder = "개별 Client ID가 저장되어 있습니다 (••••••••)";
+        }
+        naverIdInput.value = '';
+        
         naverIdInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
-            localStorage.setItem('pot2pot_naver_client_id', val);
-            AppState.naverId = val;
-            showAlert("⚙️ 네이버 Client ID가 저장되었습니다.");
+            if (val) {
+                localStorage.setItem('pot2pot_naver_client_id', val);
+                AppState.naverId = val;
+                naverIdInput.placeholder = "개별 Client ID가 저장되어 있습니다 (••••••••)";
+                naverIdInput.value = '';
+                showAlert("⚙️ 네이버 Client ID가 개별 저장되었습니다.");
+            } else {
+                localStorage.removeItem('pot2pot_naver_client_id');
+                AppState.naverId = '';
+                naverIdInput.placeholder = "기본 Client ID 사용 중 (개별 ID 사용 시 입력)";
+                showAlert("⚙️ 개별 네이버 Client ID가 삭제되었습니다. 기본 설정을 사용합니다.");
+            }
         });
     }
     
     if (naverSecretInput) {
-        naverSecretInput.value = localStorage.getItem('pot2pot_naver_client_secret') || '';
+        const savedNaverSecret = localStorage.getItem('pot2pot_naver_client_secret') || '';
+        if (savedNaverSecret) {
+            naverSecretInput.placeholder = "개별 Client Secret가 저장되어 있습니다 (••••••••)";
+        }
+        naverSecretInput.value = '';
+        
         naverSecretInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
-            localStorage.setItem('pot2pot_naver_client_secret', val);
-            AppState.naverSecret = val;
-            showAlert("⚙️ 네이버 Client Secret이 저장되었습니다.");
+            if (val) {
+                localStorage.setItem('pot2pot_naver_client_secret', val);
+                AppState.naverSecret = val;
+                naverSecretInput.placeholder = "개별 Client Secret가 저장되어 있습니다 (••••••••)";
+                naverSecretInput.value = '';
+                showAlert("⚙️ 네이버 Client Secret이 개별 저장되었습니다.");
+            } else {
+                localStorage.removeItem('pot2pot_naver_client_secret');
+                AppState.naverSecret = '';
+                naverSecretInput.placeholder = "기본 Client Secret 사용 중 (개별 Secret 사용 시 입력)";
+                showAlert("⚙️ 개별 네이버 Client Secret이 삭제되었습니다. 기본 설정을 사용합니다.");
+            }
         });
     }
     
@@ -1409,9 +1451,11 @@ function getImageBase64(imgElement) {
 }
 
 async function analyzePlantWithAI() {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
-    if (!apiKey) {
-        showAlert("⚠️ Gemini API Key가 등록되지 않았습니다. 설정 화면에서 입력해 주세요.");
+    
+    if (isLocal && !apiKey) {
+        showAlert("⚠️ Local 환경에서는 Gemini API Key가 등록되어야 합니다. 설정 화면에서 입력해 주세요.");
         // Clear placeholders so they don't say "AI 분석 중..." forever
         document.getElementById('plant-species').value = '';
         document.getElementById('plant-nickname').value = '';
@@ -1447,40 +1491,58 @@ async function analyzePlantWithAI() {
     }
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        const prompt = "이 식물 사진을 분석하여 다음 JSON 구조로만 정확하게 응답해주세요. 다른 부연 설명이나 마크다운 백틱(```json)을 절대 포함하지 마십시오.\n" +
-                       "{\n" +
-                       "  \"species\": \"식물의 정확한 종류/품종 국문명 (예: 몬스테라 델리시오사, 아레카야자 등)\",\n" +
-                       "  \"nickname\": \"식물의 생김새나 특징에 어울리는 귀여운 4글자 이내의 한글 별명 추천 (예: 초록이, 선선이, 몬몬이 등)\",\n" +
-                       "  \"waterInterval\": 식물의 품종별 권장 물주기 주기 (1에서 30 사이의 정수 일수)\n" +
-                       "}";
+        let response;
+        if (isLocal) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const prompt = "이 식물 사진을 분석하여 다음 JSON 구조로만 정확하게 응답해주세요. 다른 부연 설명이나 마크다운 백틱(```json)을 절대 포함하지 마십시오.\n" +
+                           "{\n" +
+                           "  \"species\": \"식물의 정확한 종류/품종 국문명 (예: 몬스테라 델리시오사, 아레카야자 등)\",\n" +
+                           "  \"nickname\": \"식물의 생김새나 특징에 어울리는 귀여운 4글자 이내의 한글 별명 추천 (예: 초록이, 선선이, 몬몬이 등)\",\n" +
+                           "  \"waterInterval\": 식물의 품종별 권장 물주기 주기 (1에서 30 사이의 정수 일수)\n" +
+                           "}";
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        {
-                            inlineData: {
-                                mimeType: "image/png",
-                                data: base64Data
+            response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            {
+                                inlineData: {
+                                    mimeType: "image/png",
+                                    data: base64Data
+                                }
                             }
-                        }
-                    ]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
-            })
-        });
+                        ]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    }
+                })
+            });
+        } else {
+            // Production Vercel Proxy
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (apiKey) {
+                headers['x-gemini-key'] = apiKey;
+            }
+            response = await fetch('/api/gemini-analysis', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    image: base64Data
+                })
+            });
+        }
 
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
-            const errMsg = errData.error?.message || `HTTP 에러 ${response.status}`;
+            const errMsg = errData.error?.message || errData.error || `HTTP 에러 ${response.status}`;
             throw new Error(errMsg);
         }
 
@@ -1546,57 +1608,52 @@ async function analyzePlantWithAI() {
 }
 
 async function fetchNaverEncyclopedia(species) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const naverId = localStorage.getItem('pot2pot_naver_client_id') || AppState.naverId;
     const naverSecret = localStorage.getItem('pot2pot_naver_client_secret') || AppState.naverSecret;
     
-    if (!naverId || !naverSecret) {
-        console.warn("NAVER Client ID or Secret is missing. Skipping Encyclopedia search.");
-        return null;
+    // In local development, we skip calling NAVER API since Vercel Serverless proxy isn't available, and immediately return Mock DB data.
+    if (isLocal) {
+        console.log("Local development environment. Using mock encyclopedia data.");
+        const cleanSpecies = species.replace(/[^가-힣a-zA-Z]/g, ''); // Clean special chars
+        
+        const mockDb = {
+            '몬스테라': {
+                description: "몬스테라(Monstera)는 천남성과의 한 속이다. 잎에 구멍이 뚫려 있거나 갈라져 있는 독특한 잎 모양을 가진 상록 덩굴성 관엽식물이다. 멕시코와 중앙아메리카가 원산지이며, 실내 환경에 적응을 잘하고 이국적인 분위기를 주어 반려식물 및 인테리어 식물로 인기가 높다.",
+                link: "https://terms.naver.com/entry.naver?docId=1095039&cid=40942&categoryId=32696"
+            },
+            '선인장': {
+                description: "선인장(Cactus)은 선인장과에 속하는 식물의 총칭이다. 건조한 사막과 고산지대 등 척박한 환경에 적응하기 위해 잎이 가시로 퇴화하고 줄기가 다육화되어 수분을 저장한다. 꽃이 아름답고 키우기 쉬워 반려식물로 많은 사랑을 받는다.",
+                link: "https://terms.naver.com/entry.naver?docId=1112023&cid=40942&categoryId=32697"
+            },
+            '산세베리아': {
+                description: "산세베리아(Sansevieria)는 아스파라거스과의 한 속이다. 건조에 극도로 강하여 몇 달 동안 물을 주지 않아도 죽지 않는 생명력을 자랑한다. 공기 정화 능력이 탁월하고 밤에 산소를 배출하는 특성이 있어 침실용 식물로 추천된다.",
+                link: "https://terms.naver.com/entry.naver?docId=1108643&cid=40942&categoryId=32696"
+            }
+        };
+        
+        // Try to match key
+        for (let key in mockDb) {
+            if (cleanSpecies.includes(key) || key.includes(cleanSpecies)) {
+                return mockDb[key];
+            }
+        }
+        // Fallback mock description for other plants
+        return {
+            description: `네이버 백과사전에서 검색된 '${species}' 정보입니다. 이 식물은 쾌적한 실내 온도와 적절한 통풍이 유지되는 곳에서 가장 잘 자라며, 과습에 주의해야 하는 아름다운 반려식물입니다.`,
+            link: "https://terms.naver.com/search.naver?query=" + encodeURIComponent(species)
+        };
     }
     
+    // In Production: Call Vercel Serverless Function Proxy
     try {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const headers = {};
+        if (naverId) headers['x-naver-client-id'] = naverId;
+        if (naverSecret) headers['x-naver-client-secret'] = naverSecret;
         
-        // In local development (static server), Vercel serverless /api/ is not available, so we provide mock fallback data for popular plants
-        if (isLocal) {
-            console.log("Local development environment. Attempting mock encyclopedia data first.");
-            const cleanSpecies = species.replace(/[^가-힣a-zA-Z]/g, ''); // Clean special chars
-            
-            const mockDb = {
-                '몬스테라': {
-                    description: "몬스테라(Monstera)는 천남성과의 한 속이다. 잎에 구멍이 뚫려 있거나 갈라져 있는 독특한 잎 모양을 가진 상록 덩굴성 관엽식물이다. 멕시코와 중앙아메리카가 원산지이며, 실내 환경에 적응을 잘하고 이국적인 분위기를 주어 반려식물 및 인테리어 식물로 인기가 높다.",
-                    link: "https://terms.naver.com/entry.naver?docId=1095039&cid=40942&categoryId=32696"
-                },
-                '선인장': {
-                    description: "선인장(Cactus)은 선인장과에 속하는 식물의 총칭이다. 건조한 사막과 고산지대 등 척박한 환경에 적응하기 위해 잎이 가시로 퇴화하고 줄기가 다육화되어 수분을 저장한다. 꽃이 아름답고 키우기 쉬워 반려식물로 많은 사랑을 받는다.",
-                    link: "https://terms.naver.com/entry.naver?docId=1112023&cid=40942&categoryId=32697"
-                },
-                '산세베리아': {
-                    description: "산세베리아(Sansevieria)는 아스파라거스과의 한 속이다. 건조에 극도로 강하여 몇 달 동안 물을 주지 않아도 죽지 않는 생명력을 자랑한다. 공기 정화 능력이 탁월하고 밤에 산소를 배출하는 특성이 있어 침실용 식물로 추천된다.",
-                    link: "https://terms.naver.com/entry.naver?docId=1108643&cid=40942&categoryId=32696"
-                }
-            };
-            
-            // Try to match key
-            for (let key in mockDb) {
-                if (cleanSpecies.includes(key) || key.includes(cleanSpecies)) {
-                    return mockDb[key];
-                }
-            }
-            // Fallback mock description for other plants
-            return {
-                description: `네이버 백과사전에서 검색된 '${species}' 정보입니다. 이 식물은 쾌적한 실내 온도와 적절한 통풍이 유지되는 곳에서 가장 잘 자라며, 과습에 주의해야 하는 아름다운 반려식물입니다.`,
-                link: "https://terms.naver.com/search.naver?query=" + encodeURIComponent(species)
-            };
-        }
-        
-        // Production (Vercel serverless function proxy)
         const response = await fetch(`/api/naver-search?query=${encodeURIComponent(species)}`, {
             method: 'GET',
-            headers: {
-                'x-naver-client-id': naverId,
-                'x-naver-client-secret': naverSecret
-            }
+            headers: headers
         });
         
         if (!response.ok) {
