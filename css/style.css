@@ -562,7 +562,7 @@ body {
 }
 
 .bottom-nav-bg-center {
-    width: 124px; /* Increased from 110px to widen U cutout sides and create spacious lateral gaps */
+    width: 140px; /* Increased to 140px to widen the U-cutout sides and resolve tight lateral gaps */
     height: 80px;
     position: relative;
 }
@@ -584,7 +584,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 36px; /* Slightly wider padding for more breathing room */
+    padding: 0 28px; /* Slightly reduced padding to accommodate the wider cutout and prevent overlap */
     box-sizing: border-box;
 }
 
@@ -600,7 +600,7 @@ body {
     opacity: 0.7;
     transition: var(--transition-smooth);
     text-decoration: none;
-    width: 68px; /* Increased from 60px */
+    width: 60px; /* Adjusted to 60px to give more breathing room on both sides of the cutout */
     height: 64px; /* Increased from 52px */
     padding: 0;
 }
