@@ -409,14 +409,18 @@ class PlantSegmenter {
         this.silCtx.globalCompositeOperation = 'source-over';
 
         // 3. Draw the thick white outline on the display canvas by offsetting the silhouette
-        const outlineRadius = 8; // Bold white sticker border
-        const steps = 16;
+        // Calculate proportional outline thickness and shadow blur based on canvas width
+        const outlineRadius = Math.max(6, Math.round(this.width * 0.022)); // Proportional to canvas width (~2.2%)
+        const steps = Math.max(16, Math.min(32, Math.round(outlineRadius * 1.5))); // Smooth out circle offsets
+        
+        const shadowBlur = Math.max(4, Math.round(this.width * 0.012));
+        const shadowOffsetY = Math.max(2, Math.round(this.width * 0.008));
         
         // Setup drop shadow on the display canvas to make the sticker pop!
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-        this.ctx.shadowBlur = 5;
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+        this.ctx.shadowBlur = shadowBlur;
         this.ctx.shadowOffsetX = 0;
-        this.ctx.shadowOffsetY = 3;
+        this.ctx.shadowOffsetY = shadowOffsetY;
 
         for (let i = 0; i < steps; i++) {
             const angle = (i / steps) * Math.PI * 2;
