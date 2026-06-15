@@ -562,7 +562,7 @@ body {
 }
 
 .bottom-nav-bg-center {
-    width: 180px; /* Widen to 180px to support a sweeping, gentler U-shape cutout matching the user's guide */
+    width: 128px; /* Restored to 128px to bring categories back to their original comfortable spacing */
     height: 80px;
     position: relative;
 }
@@ -584,7 +584,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px; /* Slightly reduced padding to accommodate the wider 180px cutout */
+    padding: 0 36px; /* Restored original padding for tight, beautiful category spacing */
     box-sizing: border-box;
 }
 
@@ -600,7 +600,7 @@ body {
     opacity: 0.7;
     transition: var(--transition-smooth);
     text-decoration: none;
-    width: 60px; /* Adjusted to 60px to give more breathing room on both sides of the cutout */
+    width: 68px; /* Restored to original width for comfortable touch area */
     height: 64px; /* Increased from 52px */
     padding: 0;
 }
