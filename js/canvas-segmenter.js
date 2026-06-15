@@ -280,7 +280,7 @@ class PlantSegmenter {
             }
 
             this.maskCtx.putImageData(maskData, 0, 0);
-            this.filterMaskNoise(0.01); // Filter noise components smaller than 1% of main component
+            this.filterMaskNoise();
             this.render();
         } catch (err) {
             console.error("CORS canvas error (file:// protocol):", err);
@@ -400,10 +400,10 @@ class PlantSegmenter {
     }
 
     /**
-     * Filter out small isolated islands/noise (e.g. status bar text, battery icon, small specks)
-     * keeps only the large plant component.
+     * Filter out all components except the single largest connected component (plant + pot).
+     * This enforces a unified "한 덩어리" sticker and removes any disjointed background clutter.
      */
-    filterMaskNoise(minSizePercent = 0.02) {
+    filterMaskNoise() {
         try {
             const maskData = this.maskCtx.getImageData(0, 0, this.width, this.height);
             const data = maskData.data;
@@ -461,31 +461,24 @@ class PlantSegmenter {
 
             // Sort by component size descending
             components.sort((a, b) => b.length - a.length);
-            const largestSize = components[0].length;
-            const threshold = largestSize * minSizePercent; // Component must be at least 2% of the main component size
-
+            
+            // Keep ONLY the single largest component (the main plant + pot)
+            const mainComponent = components[0];
             const keepMap = new Uint8Array(width * height);
-            components.forEach(comp => {
-                // If it is smaller than threshold and not exceptionally large, discard it
-                if (comp.length < threshold && comp.length < 800) {
-                    return; 
-                }
-                
-                // Keep these pixels
-                comp.forEach(([cx, cy]) => {
-                    for (let dy = -Math.floor(step/2); dy <= Math.floor(step/2); dy++) {
-                        for (let dx = -Math.floor(step/2); dx <= Math.floor(step/2); dx++) {
-                            const px = cx + dx;
-                            const py = cy + dy;
-                            if (px >= 0 && px < width && py >= 0 && py < height) {
-                                keepMap[py * width + px] = 1;
-                            }
+            
+            mainComponent.forEach(([cx, cy]) => {
+                for (let dy = -Math.floor(step/2); dy <= Math.floor(step/2); dy++) {
+                    for (let dx = -Math.floor(step/2); dx <= Math.floor(step/2); dx++) {
+                        const px = cx + dx;
+                        const py = cy + dy;
+                        if (px >= 0 && px < width && py >= 0 && py < height) {
+                            keepMap[py * width + px] = 1;
                         }
                     }
-                });
+                }
             });
 
-            // Apply filter to mask canvas
+            // Apply filter to mask canvas (everything else becomes 100% transparent)
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     const idx = (y * width + x) * 4;
