@@ -72,23 +72,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const keyInput = document.getElementById('settings-gemini-key');
     if (keyInput) {
         const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key') || '';
-        if (savedGeminiKey) {
-            keyInput.placeholder = "개별 키가 저장되어 있습니다 (••••••••)";
-        }
-        keyInput.value = '';
+        keyInput.value = savedGeminiKey;
         
         keyInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
             if (val) {
                 localStorage.setItem('pot2pot_gemini_key', val);
                 AppState.geminiKey = val;
-                keyInput.placeholder = "개별 키가 저장되어 있습니다 (••••••••)";
-                keyInput.value = '';
                 showAlert("⚙️ Gemini API Key가 개별 저장되었습니다.");
             } else {
                 localStorage.removeItem('pot2pot_gemini_key');
                 AppState.geminiKey = '';
-                keyInput.placeholder = "기본 AI 키 사용 중 (개별 키 사용 시 입력)";
                 showAlert("⚙️ 개별 Gemini API Key가 삭제되었습니다. 기본 키를 사용합니다.");
             }
         });
@@ -100,23 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (naverIdInput) {
         const savedNaverId = localStorage.getItem('pot2pot_naver_client_id') || '';
-        if (savedNaverId) {
-            naverIdInput.placeholder = "개별 Client ID가 저장되어 있습니다 (••••••••)";
-        }
-        naverIdInput.value = '';
+        naverIdInput.value = savedNaverId;
         
         naverIdInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
             if (val) {
                 localStorage.setItem('pot2pot_naver_client_id', val);
                 AppState.naverId = val;
-                naverIdInput.placeholder = "개별 Client ID가 저장되어 있습니다 (••••••••)";
-                naverIdInput.value = '';
                 showAlert("⚙️ 네이버 Client ID가 개별 저장되었습니다.");
             } else {
                 localStorage.removeItem('pot2pot_naver_client_id');
                 AppState.naverId = '';
-                naverIdInput.placeholder = "기본 Client ID 사용 중 (개별 ID 사용 시 입력)";
                 showAlert("⚙️ 개별 네이버 Client ID가 삭제되었습니다. 기본 설정을 사용합니다.");
             }
         });
@@ -124,23 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (naverSecretInput) {
         const savedNaverSecret = localStorage.getItem('pot2pot_naver_client_secret') || '';
-        if (savedNaverSecret) {
-            naverSecretInput.placeholder = "개별 Client Secret가 저장되어 있습니다 (••••••••)";
-        }
-        naverSecretInput.value = '';
+        naverSecretInput.value = savedNaverSecret;
         
         naverSecretInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
             if (val) {
                 localStorage.setItem('pot2pot_naver_client_secret', val);
                 AppState.naverSecret = val;
-                naverSecretInput.placeholder = "개별 Client Secret가 저장되어 있습니다 (••••••••)";
-                naverSecretInput.value = '';
                 showAlert("⚙️ 네이버 Client Secret이 개별 저장되었습니다.");
             } else {
                 localStorage.removeItem('pot2pot_naver_client_secret');
                 AppState.naverSecret = '';
-                naverSecretInput.placeholder = "기본 Client Secret 사용 중 (개별 Secret 사용 시 입력)";
                 showAlert("⚙️ 개별 네이버 Client Secret이 삭제되었습니다. 기본 설정을 사용합니다.");
             }
         });
