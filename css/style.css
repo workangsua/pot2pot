@@ -11,9 +11,9 @@
     --forest-light: #a4db37;
     --forest-pastel: rgba(205, 255, 98, 0.12); /* Soft neon glow bg */
     
-    --sand-primary: #3a3a3a; /* Device viewport background */
-    --sand-dark: #2a2a2a; /* Borders and dividers */
-    --sand-light: #222222; /* Cards and sheets background */
+    --sand-primary: #222222; /* Device viewport background */
+    --sand-dark: #3a3a3a; /* Borders and dividers */
+    --sand-light: #3a3a3a; /* Cards and sheets background */
     
     --terracotta: #cc7052;
     --terracotta-light: #e6967e;
@@ -532,32 +532,32 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 80px; /* Increased from 64px (Background height of side panels) */
+    height: 80px; /* Background height of side panels */
     display: flex;
-    filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.45));
+    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.7)); /* Darker, more pronounced shadow */
     pointer-events: none;
 }
 
 .bottom-nav-bg-side {
-    height: 80px; /* Increased from 64px */
-    background: rgba(26, 26, 26, 0.92);
+    height: 80px;
+    background: rgba(42, 42, 42, 0.92); /* Elevated dark gray for strong contrast against #222222 */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1.5px solid rgba(255, 255, 255, 0.16); /* Thicker and brighter border outline */
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.16);
 }
 
 .bottom-nav-bg-side.left {
     flex: 1;
-    border-radius: 40px 0 0 40px; /* Increased from 32px to match 80px height (pill shape) */
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 40px 0 0 40px; /* Pill shape */
+    border-left: 1.5px solid rgba(255, 255, 255, 0.16);
     margin-right: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
 .bottom-nav-bg-side.right {
     flex: 1;
-    border-radius: 0 40px 40px 0; /* Increased from 32px to match 80px height (pill shape) */
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0 40px 40px 0; /* Pill shape */
+    border-right: 1.5px solid rgba(255, 255, 255, 0.16);
     margin-left: -1px; /* Overlap 1px to hide seamless subpixel line */
 }
 
@@ -647,7 +647,7 @@ body {
 .nav-item.add-pot {
     position: absolute;
     left: 50%;
-    top: -20px; /* Floats up into the larger cutout */
+    top: -34px; /* Floated higher to create a distinct, clean gap between circle and cutout bottom */
     transform: translateX(-50%);
     background: var(--forest-primary);
     width: 66px; /* Increased from 54px for a more satisfying and proud size */
@@ -656,7 +656,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 24px rgba(205, 255, 98, 0.4); /* Enhanced shadow */
+    box-shadow: 0 12px 28px rgba(205, 255, 98, 0.45); /* Enhanced neon shadow */
     color: #222222 !important; /* Black icon inside */
     border: none;
     transition: var(--transition-bounce);
