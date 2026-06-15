@@ -4,12 +4,12 @@
    Design System Variables & Base Settings
    ========================================== */
 :root {
-    /* Sleek, glowing Dark Mode matching #222222 (bg) and #Bfff43 (neon highlight) */
+    /* Sleek, glowing Dark Mode matching #222222 (bg) and #CDFF62 (neon highlight) */
     --forest-deep: #ffffff; /* White text for titles in dark mode */
-    --forest-primary: #Bfff43; /* Neon brand accent */
+    --forest-primary: #CDFF62; /* Neon brand accent */
     --forest-medium: #8ec426;
     --forest-light: #a4db37;
-    --forest-pastel: rgba(191, 255, 67, 0.12); /* Soft neon glow bg */
+    --forest-pastel: rgba(205, 255, 98, 0.12); /* Soft neon glow bg */
     
     --sand-primary: #222222; /* Device viewport background */
     --sand-dark: #3a3a3a; /* Borders and dividers */
@@ -573,7 +573,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 20px rgba(191, 255, 67, 0.35);
+    box-shadow: 0 8px 20px rgba(205, 255, 98, 0.35);
     color: #000000;
     border: 3px solid var(--sand-primary);
     transition: var(--transition-bounce);
@@ -1133,7 +1133,7 @@ body {
     justify-content: center;
     gap: 6px;
     transition: var(--transition-bounce);
-    box-shadow: 0 4px 12px rgba(191, 255, 67, 0.2);
+    box-shadow: 0 4px 12px rgba(205, 255, 98, 0.2);
 }
 
 .btn-editor-next:hover {
@@ -1230,7 +1230,7 @@ body {
 .form-input-text:focus {
     outline: none;
     border-color: var(--forest-primary);
-    box-shadow: 0 0 0 3px rgba(191, 255, 67, 0.15);
+    box-shadow: 0 0 0 3px rgba(205, 255, 98, 0.15);
 }
 
 /* Water Period Dial/Slider Container */
@@ -1287,7 +1287,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 8px 20px rgba(191, 255, 67, 0.2);
+    box-shadow: 0 8px 20px rgba(205, 255, 98, 0.2);
 }
 
 .btn-submit-plant:hover {
@@ -1567,7 +1567,7 @@ body {
     }
 
     .nav-item.active {
-        background: rgba(191, 255, 67, 0.08);
+        background: rgba(205, 255, 98, 0.08);
         color: var(--forest-primary);
     }
 
@@ -1585,7 +1585,7 @@ body {
         border-radius: 14px;
         padding: 16px;
         margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(191, 255, 67, 0.2);
+        box-shadow: 0 4px 15px rgba(205, 255, 98, 0.2);
         border: none;
         display: flex;
         justify-content: center;
@@ -2355,7 +2355,7 @@ body {
    ========================================== */
 #settings-gemini-key:focus {
     border-color: var(--forest-primary) !important;
-    box-shadow: 0 0 8px rgba(191, 255, 67, 0.2);
+    box-shadow: 0 0 8px rgba(205, 255, 98, 0.2);
 }
 
 .btn-ai-analyze:hover {
@@ -2386,7 +2386,7 @@ body {
    ========================================== */
 #settings-naver-id:focus, #settings-naver-secret:focus {
     border-color: var(--forest-primary) !important;
-    box-shadow: 0 0 8px rgba(191, 255, 67, 0.2);
+    box-shadow: 0 0 8px rgba(205, 255, 98, 0.2);
 }
 
 .detail-naver-card {
