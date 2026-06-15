@@ -562,7 +562,7 @@ body {
 }
 
 .bottom-nav-bg-center {
-    width: 160px; /* Widen to 160px to support smooth, rounded U-shape cutout */
+    width: 180px; /* Widen to 180px to support a sweeping, gentler U-shape cutout matching the user's guide */
     height: 80px;
     position: relative;
 }
@@ -584,7 +584,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 24px; /* Adjusted to accommodate the wider 160px cutout */
+    padding: 0 20px; /* Slightly reduced padding to accommodate the wider 180px cutout */
     box-sizing: border-box;
 }
 
