@@ -18,7 +18,10 @@ const AppState = {
     selectedPreset: null,
     segmenter: null,
     stream: null,
-    geminiKey: null
+    geminiKey: null,
+    naverId: null,
+    naverSecret: null,
+    currentNaverData: null
 };
 
 // Preset Plant Definitions
@@ -73,6 +76,30 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('pot2pot_gemini_key', val);
             AppState.geminiKey = val;
             showAlert("⚙️ Gemini API Key가 저장되었습니다.");
+        });
+    }
+
+    // Load and bind Naver Credentials
+    const naverIdInput = document.getElementById('settings-naver-id');
+    const naverSecretInput = document.getElementById('settings-naver-secret');
+    
+    if (naverIdInput) {
+        naverIdInput.value = localStorage.getItem('pot2pot_naver_client_id') || '';
+        naverIdInput.addEventListener('change', (e) => {
+            const val = e.target.value.trim();
+            localStorage.setItem('pot2pot_naver_client_id', val);
+            AppState.naverId = val;
+            showAlert("⚙️ 네이버 Client ID가 저장되었습니다.");
+        });
+    }
+    
+    if (naverSecretInput) {
+        naverSecretInput.value = localStorage.getItem('pot2pot_naver_client_secret') || '';
+        naverSecretInput.addEventListener('change', (e) => {
+            const val = e.target.value.trim();
+            localStorage.setItem('pot2pot_naver_client_secret', val);
+            AppState.naverSecret = val;
+            showAlert("⚙️ 네이버 Client Secret이 저장되었습니다.");
         });
     }
     
@@ -163,6 +190,11 @@ function loadDataFromStorage() {
     if (savedGeminiKey) {
         AppState.geminiKey = savedGeminiKey;
     }
+
+    const savedNaverId = localStorage.getItem('pot2pot_naver_client_id');
+    const savedNaverSecret = localStorage.getItem('pot2pot_naver_client_secret');
+    if (savedNaverId) AppState.naverId = savedNaverId;
+    if (savedNaverSecret) AppState.naverSecret = savedNaverSecret;
 }
 
 function savePlantsToStorage() {
@@ -464,6 +496,20 @@ function initRegistrationFlow() {
     if (btnAnalyze) {
         btnAnalyze.addEventListener('click', analyzePlantWithAI);
     }
+
+    // Step 3: Naver Search on species input change
+    const speciesInput = document.getElementById('plant-species');
+    if (speciesInput) {
+        speciesInput.addEventListener('change', async (e) => {
+            const val = e.target.value.trim();
+            if (val) {
+                const naverResult = await fetchNaverEncyclopedia(val);
+                if (naverResult) {
+                    AppState.currentNaverData = naverResult;
+                }
+            }
+        });
+    }
 }
 
 function updateWaterIntervalValue(val) {
@@ -636,6 +682,8 @@ function saveNewPlant() {
         waterInterval: interval,
         lastWatered: new Date().toISOString(), // set last watered to today
         adoptionDate: new Date(adoptionDate).toISOString(),
+        naverDesc: AppState.currentNaverData?.description || null,
+        naverLink: AppState.currentNaverData?.link || null,
         records: [
             {
                 id: 'rec_' + Date.now() + '_adopt',
@@ -1026,6 +1074,21 @@ function openDetailModal(plantId) {
     document.getElementById('water-progress-percent').textContent = `${progressPercent}%`;
     document.getElementById('water-progress-fill').style.width = `${progressPercent}%`;
     
+    // Render Naver Encyclopedia details
+    const naverCard = document.getElementById('detail-naver-card');
+    const naverDesc = document.getElementById('detail-naver-desc');
+    const naverLink = document.getElementById('detail-naver-link');
+    
+    if (naverCard && naverDesc && naverLink) {
+        if (plant.naverDesc) {
+            naverCard.style.display = 'flex';
+            naverDesc.textContent = plant.naverDesc;
+            naverLink.href = plant.naverLink || '#';
+        } else {
+            naverCard.style.display = 'none';
+        }
+    }
+
     switchDetailTab('timeline');
     renderTimeline(plant);
     renderCalendar(plant);
@@ -1433,6 +1496,15 @@ async function analyzePlantWithAI() {
 
         if (result.species) {
             document.getElementById('plant-species').value = result.species;
+            
+            // Search NAVER Encyclopedia in background
+            AppState.currentNaverData = null;
+            fetchNaverEncyclopedia(result.species).then(naverResult => {
+                if (naverResult) {
+                    AppState.currentNaverData = naverResult;
+                    console.log("NAVER Encyclopedia data fetched in background:", naverResult);
+                }
+            });
         }
         if (result.nickname) {
             document.getElementById('plant-nickname').value = result.nickname;
@@ -1457,5 +1529,81 @@ async function analyzePlantWithAI() {
         }
     }
 }
+
+async function fetchNaverEncyclopedia(species) {
+    const naverId = localStorage.getItem('pot2pot_naver_client_id') || AppState.naverId;
+    const naverSecret = localStorage.getItem('pot2pot_naver_client_secret') || AppState.naverSecret;
+    
+    if (!naverId || !naverSecret) {
+        console.warn("NAVER Client ID or Secret is missing. Skipping Encyclopedia search.");
+        return null;
+    }
+    
+    try {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        
+        // In local development (static server), Vercel serverless /api/ is not available, so we provide mock fallback data for popular plants
+        if (isLocal) {
+            console.log("Local development environment. Attempting mock encyclopedia data first.");
+            const cleanSpecies = species.replace(/[^가-힣a-zA-Z]/g, ''); // Clean special chars
+            
+            const mockDb = {
+                '몬스테라': {
+                    description: "몬스테라(Monstera)는 천남성과의 한 속이다. 잎에 구멍이 뚫려 있거나 갈라져 있는 독특한 잎 모양을 가진 상록 덩굴성 관엽식물이다. 멕시코와 중앙아메리카가 원산지이며, 실내 환경에 적응을 잘하고 이국적인 분위기를 주어 반려식물 및 인테리어 식물로 인기가 높다.",
+                    link: "https://terms.naver.com/entry.naver?docId=1095039&cid=40942&categoryId=32696"
+                },
+                '선인장': {
+                    description: "선인장(Cactus)은 선인장과에 속하는 식물의 총칭이다. 건조한 사막과 고산지대 등 척박한 환경에 적응하기 위해 잎이 가시로 퇴화하고 줄기가 다육화되어 수분을 저장한다. 꽃이 아름답고 키우기 쉬워 반려식물로 많은 사랑을 받는다.",
+                    link: "https://terms.naver.com/entry.naver?docId=1112023&cid=40942&categoryId=32697"
+                },
+                '산세베리아': {
+                    description: "산세베리아(Sansevieria)는 아스파라거스과의 한 속이다. 건조에 극도로 강하여 몇 달 동안 물을 주지 않아도 죽지 않는 생명력을 자랑한다. 공기 정화 능력이 탁월하고 밤에 산소를 배출하는 특성이 있어 침실용 식물로 추천된다.",
+                    link: "https://terms.naver.com/entry.naver?docId=1108643&cid=40942&categoryId=32696"
+                }
+            };
+            
+            // Try to match key
+            for (let key in mockDb) {
+                if (cleanSpecies.includes(key) || key.includes(cleanSpecies)) {
+                    return mockDb[key];
+                }
+            }
+            // Fallback mock description for other plants
+            return {
+                description: `네이버 백과사전에서 검색된 '${species}' 정보입니다. 이 식물은 쾌적한 실내 온도와 적절한 통풍이 유지되는 곳에서 가장 잘 자라며, 과습에 주의해야 하는 아름다운 반려식물입니다.`,
+                link: "https://terms.naver.com/search.naver?query=" + encodeURIComponent(species)
+            };
+        }
+        
+        // Production (Vercel serverless function proxy)
+        const response = await fetch(`/api/naver-search?query=${encodeURIComponent(species)}`, {
+            method: 'GET',
+            headers: {
+                'x-naver-client-id': naverId,
+                'x-naver-client-secret': naverSecret
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Naver search failed with status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.items && data.items.length > 0) {
+            const item = data.items[0];
+            // Remove HTML bold tags from title/description
+            const cleanDescription = item.description.replace(/<[^>]*>/g, '');
+            return {
+                description: cleanDescription,
+                link: item.link
+            };
+        }
+        return null;
+    } catch (err) {
+        console.error("NAVER API call failed:", err);
+        return null;
+    }
+}
+
 
 

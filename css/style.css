@@ -2163,4 +2163,22 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+/* ==========================================
+   Naver API & Encyclopedia UI
+   ========================================== */
+#settings-naver-id:focus, #settings-naver-secret:focus {
+    border-color: var(--forest-primary) !important;
+    box-shadow: 0 0 8px rgba(191, 255, 67, 0.2);
+}
+
+.detail-naver-card {
+    transition: var(--transition-smooth);
+}
+
+.detail-naver-card:hover {
+    border-color: var(--forest-light) !important;
+    background: rgba(0, 0, 0, 0.25) !important;
+}
+
+
 
