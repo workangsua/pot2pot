@@ -562,8 +562,8 @@ body {
 }
 
 .bottom-nav-bg-center {
-    width: 110px; /* Increased from 100px for larger circular button */
-    height: 80px; /* Increased from 64px */
+    width: 124px; /* Increased from 110px to widen U cutout sides and create spacious lateral gaps */
+    height: 80px;
     position: relative;
 }
 
