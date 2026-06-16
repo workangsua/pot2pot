@@ -70,6 +70,18 @@
                          VIEW 1: Archive (Dashboard)
                          ========================================== -->
                     <div id="screen-archive" class="screen-view active">
+                        <!-- Shared Garden View Banner -->
+                        <div id="shared-garden-banner" class="shared-garden-banner" style="display: none;">
+                            <div class="banner-content">
+                                <span class="banner-icon">📢</span>
+                                <span class="banner-text">공유받은 마이팟을 둘러보는 중입니다.</span>
+                            </div>
+                            <div class="banner-actions">
+                                <button id="btn-banner-import" class="banner-btn btn-import">가져오기</button>
+                                <button id="btn-banner-exit" class="banner-btn btn-exit">내 마이팟 가기</button>
+                            </div>
+                        </div>
+
                         <header class="app-header">
                             <div class="app-logo">
                                 <span style="font-size: 1.35rem;">🌱</span>
@@ -92,6 +104,13 @@
                                         <h2>수아님의 마이팟</h2>
                                         <p>HOW TO LUV MA PLANTS &lt;3</p>
                                     </div>
+                                    <button class="hero-share-btn" id="btn-hero-share" title="마이팟 공유하기">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #ffffff;">
+                                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                            <polyline points="16 6 12 2 8 6"></polyline>
+                                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                                        </svg>
+                                    </button>
                                     <button class="hero-trophy-btn" id="btn-hero-trophy" title="업적 보기">
                                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color: #ffffff;">
                                             <path d="M12 2a1.5 1.5 0 0 1 1.37 1.04l2.24 5.1 5.37.45a1.5 1.5 0 0 1 .85 2.64l-4.06 3.55 1.25 5.25a1.5 1.5 0 0 1-2.25 1.63L12 18.96l-4.77 2.91a1.5 1.5 0 0 1-2.25-1.63l1.25-5.25-4.06-3.55a1.5 1.5 0 0 1 .85-2.64l5.37-.45 2.24-5.1A1.5 1.5 0 0 1 12 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
