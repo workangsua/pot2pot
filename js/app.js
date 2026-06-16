@@ -126,57 +126,7 @@ function loadDataFromStorage() {
 }
 
 function initializeDefaultPlants() {
-    AppState.plants = [
-        {
-            id: 'default_1',
-            nickname: '몬이',
-            species: '몬스테라 델리시오사',
-            theme: 'monstera',
-            image: 'assets/monstera.png',
-            waterInterval: 7,
-            lastWatered: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-            adoptionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-            records: [
-                {
-                    id: 'rec_init_1',
-                    date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                    type: 'adopt',
-                    memo: '🌱 몬이가 우리 집에 온 날! 앞으로 정성을 다해 키워봐야지.'
-                },
-                {
-                    id: 'rec_init_2',
-                    date: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(),
-                    type: 'water',
-                    memo: '💧 첫 번째 물주기 완료. 배수가 아주 시원하게 잘 된다!'
-                },
-                {
-                    id: 'rec_init_3',
-                    date: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(),
-                    type: 'water',
-                    memo: '💧 겉흙이 보슬보슬 말라서 두 번째 물주기 완료.'
-                },
-                {
-                    id: 'rec_init_4',
-                    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                    type: 'repot',
-                    memo: '🪴 뿌리가 삐져나오려 해서 한 단계 더 넓고 쾌적한 화분으로 영양 흙 채워 분갈이를 해줬다!'
-                },
-                {
-                    id: 'rec_init_5',
-                    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                    type: 'diary',
-                    memo: '📝 분갈이하고 났더니 돌돌 말린 귀여운 새 잎이 새로 돋아나고 있다! 대견해라 💚',
-                    image: 'assets/monstera.png'
-                },
-                {
-                    id: 'rec_init_6',
-                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                    type: 'water',
-                    memo: '💧 물 듬뿍 주고 분무도 완료! 이파리 먼지도 살짝 닦아줬다.'
-                }
-            ]
-        }
-    ];
+    AppState.plants = [];
     savePlantsToStorage();
 }
 
@@ -866,9 +816,8 @@ function renderArchive() {
     if (AppState.plants.length === 0) {
         grid.innerHTML = `
             <div class="empty-state">
-                <div class="empty-state-icon">🌵</div>
-                <h3>등록된 식물이 없습니다</h3>
-                <p>아래 '+' 버튼을 눌러 첫 반려식물을 <br>누끼 따서 아카이빙해 보세요!</p>
+                <div class="empty-state-icon">🪴</div>
+                <h3>마이팟을 등록해보세요!</h3>
             </div>
         `;
         return;
