@@ -689,6 +689,26 @@ class PlantSegmenter {
      * Export the final background-removed image as PNG base64
      */
     getMaskedBase64() {
+        // Downscale to max dimension of 400px to prevent localStorage QuotaExceededError
+        const maxExportDim = 400;
+        const width = this.displayCanvas.width;
+        const height = this.displayCanvas.height;
+        
+        if (width > maxExportDim || height > maxExportDim) {
+            const scale = maxExportDim / Math.max(width, height);
+            const exportWidth = Math.round(width * scale);
+            const exportHeight = Math.round(height * scale);
+            
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = exportWidth;
+            exportCanvas.height = exportHeight;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            // Draw displayCanvas downscaled
+            exportCtx.drawImage(this.displayCanvas, 0, 0, exportWidth, exportHeight);
+            return exportCanvas.toDataURL('image/png');
+        }
+        
         return this.displayCanvas.toDataURL('image/png');
     }
 }

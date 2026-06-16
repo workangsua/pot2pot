@@ -78,96 +78,171 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Local Storage Handlers ---
 function loadDataFromStorage() {
-    const savedPlants = localStorage.getItem('pot2pot_plants');
-    const savedUser = localStorage.getItem('pot2pot_user');
+    let savedPlants = null;
+    let savedUser = null;
+    
+    try {
+        savedPlants = localStorage.getItem('pot2pot_plants');
+        savedUser = localStorage.getItem('pot2pot_user');
+    } catch (err) {
+        console.error("Failed to read from localStorage:", err);
+    }
     
     if (savedPlants) {
-        AppState.plants = JSON.parse(savedPlants);
+        try {
+            AppState.plants = JSON.parse(savedPlants);
+        } catch (e) {
+            console.error("Failed to parse saved plants:", e);
+            initializeDefaultPlants();
+        }
     } else {
-        // Add one default plant to look nice at first load
-        AppState.plants = [
-            {
-                id: 'default_1',
-                nickname: '몬이',
-                species: '몬스테라 델리시오사',
-                theme: 'monstera',
-                image: 'assets/monstera.png',
-                waterInterval: 7,
-                lastWatered: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-                adoptionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                records: [
-                    {
-                        id: 'rec_init_1',
-                        date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-                        type: 'adopt',
-                        memo: '🌱 몬이가 우리 집에 온 날! 앞으로 정성을 다해 키워봐야지.'
-                    },
-                    {
-                        id: 'rec_init_2',
-                        date: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(),
-                        type: 'water',
-                        memo: '💧 첫 번째 물주기 완료. 배수가 아주 시원하게 잘 된다!'
-                    },
-                    {
-                        id: 'rec_init_3',
-                        date: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(),
-                        type: 'water',
-                        memo: '💧 겉흙이 보슬보슬 말라서 두 번째 물주기 완료.'
-                    },
-                    {
-                        id: 'rec_init_4',
-                        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                        type: 'repot',
-                        memo: '🪴 뿌리가 삐져나오려 해서 한 단계 더 넓고 쾌적한 화분으로 영양 흙 채워 분갈이를 해줬다!'
-                    },
-                    {
-                        id: 'rec_init_5',
-                        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-                        type: 'diary',
-                        memo: '📝 분갈이하고 났더니 돌돌 말린 귀여운 새 잎이 새로 돋아나고 있다! 대견해라 💚',
-                        image: 'assets/monstera.png'
-                    },
-                    {
-                        id: 'rec_init_6',
-                        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                        type: 'water',
-                        memo: '💧 물 듬뿍 주고 분무도 완료! 이파리 먼지도 살짝 닦아줬다.'
-                    }
-                ]
-            }
-        ];
-        savePlantsToStorage();
+        initializeDefaultPlants();
     }
     
     if (savedUser) {
-        AppState.user = JSON.parse(savedUser);
+        try {
+            AppState.user = JSON.parse(savedUser);
+        } catch (e) {
+            console.error("Failed to parse saved user:", e);
+            initializeDefaultUser();
+        }
     } else {
-        AppState.user = {
-            level: 1,
-            xp: 0,
-            title: "초보 식집사",
-            unlockedBadges: []
-        };
-        saveUserToStorage();
+        initializeDefaultUser();
     }
     
-    const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key');
-    if (savedGeminiKey) {
-        AppState.geminiKey = savedGeminiKey;
-    }
+    try {
+        const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key');
+        if (savedGeminiKey) {
+            AppState.geminiKey = savedGeminiKey;
+        }
 
-    const savedNaverId = localStorage.getItem('pot2pot_naver_client_id');
-    const savedNaverSecret = localStorage.getItem('pot2pot_naver_client_secret');
-    if (savedNaverId) AppState.naverId = savedNaverId;
-    if (savedNaverSecret) AppState.naverSecret = savedNaverSecret;
+        const savedNaverId = localStorage.getItem('pot2pot_naver_client_id');
+        const savedNaverSecret = localStorage.getItem('pot2pot_naver_client_secret');
+        if (savedNaverId) AppState.naverId = savedNaverId;
+        if (savedNaverSecret) AppState.naverSecret = savedNaverSecret;
+    } catch (err) {
+        console.error("Failed to load settings keys from localStorage:", err);
+    }
+}
+
+function initializeDefaultPlants() {
+    AppState.plants = [
+        {
+            id: 'default_1',
+            nickname: '몬이',
+            species: '몬스테라 델리시오사',
+            theme: 'monstera',
+            image: 'assets/monstera.png',
+            waterInterval: 7,
+            lastWatered: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+            adoptionDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            records: [
+                {
+                    id: 'rec_init_1',
+                    date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    type: 'adopt',
+                    memo: '🌱 몬이가 우리 집에 온 날! 앞으로 정성을 다해 키워봐야지.'
+                },
+                {
+                    id: 'rec_init_2',
+                    date: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(),
+                    type: 'water',
+                    memo: '💧 첫 번째 물주기 완료. 배수가 아주 시원하게 잘 된다!'
+                },
+                {
+                    id: 'rec_init_3',
+                    date: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(),
+                    type: 'water',
+                    memo: '💧 겉흙이 보슬보슬 말라서 두 번째 물주기 완료.'
+                },
+                {
+                    id: 'rec_init_4',
+                    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    type: 'repot',
+                    memo: '🪴 뿌리가 삐져나오려 해서 한 단계 더 넓고 쾌적한 화분으로 영양 흙 채워 분갈이를 해줬다!'
+                },
+                {
+                    id: 'rec_init_5',
+                    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    type: 'diary',
+                    memo: '📝 분갈이하고 났더니 돌돌 말린 귀여운 새 잎이 새로 돋아나고 있다! 대견해라 💚',
+                    image: 'assets/monstera.png'
+                },
+                {
+                    id: 'rec_init_6',
+                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+                    type: 'water',
+                    memo: '💧 물 듬뿍 주고 분무도 완료! 이파리 먼지도 살짝 닦아줬다.'
+                }
+            ]
+        }
+    ];
+    savePlantsToStorage();
+}
+
+function initializeDefaultUser() {
+    AppState.user = {
+        level: 1,
+        xp: 0,
+        title: "초보 식집사",
+        unlockedBadges: []
+    };
+    saveUserToStorage();
 }
 
 function savePlantsToStorage() {
-    localStorage.setItem('pot2pot_plants', JSON.stringify(AppState.plants));
+    try {
+        localStorage.setItem('pot2pot_plants', JSON.stringify(AppState.plants));
+    } catch (e) {
+        console.error("Failed to save plants to localStorage:", e);
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            // Trigger auto-compression of high-res image data
+            compressStoredPlants();
+        }
+    }
 }
 
 function saveUserToStorage() {
-    localStorage.setItem('pot2pot_user', JSON.stringify(AppState.user));
+    try {
+        localStorage.setItem('pot2pot_user', JSON.stringify(AppState.user));
+    } catch (e) {
+        console.error("Failed to save user to localStorage:", e);
+    }
+}
+
+function compressStoredPlants() {
+    let compressedCount = 0;
+    AppState.plants.forEach(plant => {
+        if (plant.image && plant.image.startsWith('data:image') && plant.image.length > 150000) {
+            const img = new Image();
+            img.onload = () => {
+                const maxDim = 300;
+                const width = img.width;
+                const height = img.height;
+                if (width > maxDim || height > maxDim) {
+                    const scale = maxDim / Math.max(width, height);
+                    const w = Math.round(width * scale);
+                    const h = Math.round(height * scale);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    
+                    plant.image = canvas.toDataURL('image/png');
+                    compressedCount++;
+                    
+                    try {
+                        localStorage.setItem('pot2pot_plants', JSON.stringify(AppState.plants));
+                        console.log(`Compressed image for plant ${plant.nickname} to save storage space.`);
+                    } catch (err) {
+                        console.error("Still exceeding quota after compression:", err);
+                    }
+                }
+            };
+            img.src = plant.image;
+        }
+    });
 }
 
 // --- Navigation ---
