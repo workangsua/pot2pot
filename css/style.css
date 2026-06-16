@@ -515,6 +515,9 @@ body {
 .plant-card .info {
     text-align: center;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .plant-card .nickname {
@@ -552,6 +555,7 @@ body {
     gap: 4px;
     cursor: pointer;
     transition: var(--transition-smooth);
+    margin-top: auto;
 }
 
 .plant-card .quick-care-btn:hover {
