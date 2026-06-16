@@ -899,9 +899,13 @@ let logPhotoBase64 = null;
 function initDetailModalFlow() {
     const modal = document.getElementById('detail-modal');
     const closeBtn = document.getElementById('detail-modal-close');
+    const deleteBtn = document.getElementById('btn-detail-delete');
     
     // Close modal
     closeBtn.addEventListener('click', closeDetailModal);
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', deleteCurrentPlant);
+    }
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeDetailModal();
     });
@@ -1050,6 +1054,21 @@ function openDetailModal(plantId) {
 function closeDetailModal() {
     document.getElementById('detail-modal').classList.remove('active');
     currentDetailPlantId = null;
+}
+
+function deleteCurrentPlant() {
+    if (!currentDetailPlantId) return;
+    
+    const plant = AppState.plants.find(p => p.id === currentDetailPlantId);
+    if (!plant) return;
+    
+    if (confirm(`정말 [${plant.nickname}] 화분을 정원에서 삭제하시겠습니까?\n등록된 성장 기록과 다이어리가 모두 삭제되며 복구할 수 없습니다.`)) {
+        AppState.plants = AppState.plants.filter(p => p.id !== currentDetailPlantId);
+        savePlantsToStorage();
+        renderArchive();
+        closeDetailModal();
+        showAlert(`🪴 [${plant.nickname}] 화분이 안전하게 삭제되었습니다.`);
+    }
 }
 
 function switchDetailTab(tabName) {

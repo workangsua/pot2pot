@@ -1778,6 +1778,27 @@ body {
     gap: 8px;
 }
 
+.detail-delete-btn {
+    background: rgba(204, 112, 82, 0.18);
+    border: none;
+    color: var(--terracotta-light);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 14px;
+    transition: var(--transition-smooth);
+}
+
+.detail-delete-btn:hover {
+    background: rgba(204, 112, 82, 0.28);
+    color: #ffbba6;
+}
+
+.detail-delete-btn:active {
+    transform: scale(0.95);
+}
+
 .btn-share-icon {
     background: var(--sand-dark);
     border: none;
