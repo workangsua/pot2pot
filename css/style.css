@@ -1096,50 +1096,6 @@ body {
     transform: scale(0.85);
 }
 
-/* Quick Plant Preset Select Chips */
-.presets-section {
-    margin-top: 5px;
-}
-
-.presets-section p {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-}
-
-.preset-chips-list {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 5px;
-    scrollbar-width: none;
-}
-
-.preset-chips-list::-webkit-scrollbar {
-    display: none;
-}
-
-.preset-chip {
-    padding: 8px 14px;
-    background: white;
-    border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 18px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--forest-deep);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    flex-shrink: 0;
-}
-
-.preset-chip:hover {
-    background: var(--forest-pastel);
-    border-color: var(--forest-light);
-}
 
 /* ==========================================
    Step 2: AI BG Remove (Canvas Editor)
