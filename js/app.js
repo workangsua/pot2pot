@@ -110,6 +110,9 @@ function loadDataFromStorage() {
         initializeDefaultUser();
     }
     
+    // Migrate and crop transparent borders from existing images (Gymnocalycium fix)
+    migrateAndCropExistingPlants();
+    
     try {
         const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key');
         if (savedGeminiKey) {
@@ -128,6 +131,55 @@ function loadDataFromStorage() {
 function initializeDefaultPlants() {
     AppState.plants = [];
     savePlantsToStorage();
+}
+
+function migrateAndCropExistingPlants() {
+    if (!AppState.plants || AppState.plants.length === 0) return;
+    
+    let updated = false;
+    const promises = AppState.plants.map(plant => {
+        return new Promise((resolve) => {
+            // Check if it is a base64 PNG image (cutout)
+            if (!plant.image || !plant.image.startsWith('data:image/png;base64,')) {
+                resolve();
+                return;
+            }
+            
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || img.width;
+                    canvas.height = img.naturalHeight || img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    if (window.cropTransparentCanvas) {
+                        const croppedCanvas = window.cropTransparentCanvas(canvas);
+                        // Only update if dimensions actually changed (i.e. margins were cropped)
+                        if (croppedCanvas.width !== canvas.width || croppedCanvas.height !== canvas.height) {
+                            plant.image = croppedCanvas.toDataURL('image/png');
+                            updated = true;
+                            console.log(`Cropped and centered existing plant: ${plant.nickname}`);
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Failed to crop existing plant ${plant.nickname}:`, e);
+                }
+                resolve();
+            };
+            img.onerror = () => resolve();
+            img.src = plant.image;
+        });
+    });
+    
+    Promise.all(promises).then(() => {
+        if (updated) {
+            savePlantsToStorage();
+            renderArchive();
+        }
+    });
 }
 
 function initializeDefaultUser() {

@@ -694,6 +694,8 @@ class PlantSegmenter {
         const width = this.displayCanvas.width;
         const height = this.displayCanvas.height;
         
+        let canvasToExport = this.displayCanvas;
+        
         if (width > maxExportDim || height > maxExportDim) {
             const scale = maxExportDim / Math.max(width, height);
             const exportWidth = Math.round(width * scale);
@@ -706,9 +708,66 @@ class PlantSegmenter {
             
             // Draw displayCanvas downscaled
             exportCtx.drawImage(this.displayCanvas, 0, 0, exportWidth, exportHeight);
-            return exportCanvas.toDataURL('image/png');
+            canvasToExport = exportCanvas;
         }
         
-        return this.displayCanvas.toDataURL('image/png');
+        // Crop transparent edges so that the sticker is perfectly tight and centered
+        const croppedCanvas = cropTransparentCanvas(canvasToExport);
+        return croppedCanvas.toDataURL('image/png');
     }
 }
+
+function cropTransparentCanvas(canvas) {
+    try {
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const imgData = ctx.getImageData(0, 0, width, height);
+        const data = imgData.data;
+        
+        let minX = width;
+        let minY = height;
+        let maxX = -1;
+        let maxY = -1;
+        
+        // Find boundaries of non-transparent pixels (alpha > 8 to ignore faint edge/shadow noise)
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const alpha = data[((y * width + x) * 4) + 3];
+                if (alpha > 8) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        
+        // If the canvas is fully transparent, return it as is
+        if (maxX === -1 || maxY === -1) {
+            return canvas;
+        }
+        
+        // Add a safety margin of 2px
+        const margin = 2;
+        minX = Math.max(0, minX - margin);
+        minY = Math.max(0, minY - margin);
+        maxX = Math.min(width - 1, maxX + margin);
+        maxY = Math.min(height - 1, maxY + margin);
+        
+        const croppedWidth = (maxX - minX) + 1;
+        const croppedHeight = (maxY - minY) + 1;
+        
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = croppedWidth;
+        croppedCanvas.height = croppedHeight;
+        const croppedCtx = croppedCanvas.getContext('2d');
+        
+        croppedCtx.drawImage(canvas, minX, minY, croppedWidth, croppedHeight, 0, 0, croppedWidth, croppedHeight);
+        return croppedCanvas;
+    } catch (e) {
+        console.error("Failed to crop transparent canvas:", e);
+        return canvas;
+    }
+}
+window.cropTransparentCanvas = cropTransparentCanvas;
