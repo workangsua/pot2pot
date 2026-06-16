@@ -318,24 +318,26 @@ body {
 }
 
 .dashboard-hero {
-    background: linear-gradient(135deg, var(--forest-pastel) 0%, rgba(238,245,241,0.5) 100%);
-    border: 1px solid rgba(45, 91, 67, 0.08);
-    border-radius: 24px;
-    padding: 18px;
+    background: transparent;
+    border: none;
+    padding: 4px 4px 12px 4px;
     margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .dashboard-hero h2 {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.6rem;
+    font-weight: 800;
     color: var(--forest-deep);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
 }
 
 .dashboard-hero p {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.05em;
 }
 
 /* Plants Grid */
