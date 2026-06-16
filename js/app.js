@@ -666,12 +666,17 @@ function setupCanvasEditor() {
                     new Promise(resolve => setTimeout(() => resolve(null), 2500))
                 ]);
                 const badge = document.getElementById('ai-status-badge');
-                if (aiResult) {
+                if (AppState.selectedPreset) {
+                    if (badge) {
+                        badge.textContent = "🪴 샘플 이미지";
+                        badge.className = "ai-status-badge ai-preset";
+                    }
+                } else if (aiResult) {
                     console.log("Gemini AI detected result:", aiResult);
                     AppState.aiBoundingBox = aiResult.box_2d || null;
                     AppState.aiPolygon = aiResult.polygon || null;
                     if (badge) {
-                        badge.textContent = "✨ AI 누끼 적용됨";
+                        badge.textContent = "✨ AI 스마트 누끼";
                         badge.className = "ai-status-badge ai-active";
                     }
                 } else {
@@ -679,7 +684,7 @@ function setupCanvasEditor() {
                     AppState.aiBoundingBox = null;
                     AppState.aiPolygon = null;
                     if (badge) {
-                        badge.textContent = "⚠️ 일반 누끼 (AI Key 미등록)";
+                        badge.textContent = "🪄 일반 색상 누끼";
                         badge.className = "ai-status-badge ai-inactive";
                     }
                 }
