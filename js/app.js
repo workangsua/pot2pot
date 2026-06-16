@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initRegistrationFlow();
     initDetailModalFlow();
+    initGeminiGuideFlow();
     renderArchive();
     renderBadges();
     updateUserBadgeUI();
@@ -1703,6 +1704,53 @@ async function fetchNaverEncyclopedia(species) {
     } catch (err) {
         console.error("NAVER API call failed:", err);
         return null;
+    }
+}
+
+// --- Gemini API Key Help & Guide Flow ---
+function initGeminiGuideFlow() {
+    const trigger = document.getElementById('btn-gemini-guide');
+    const modal = document.getElementById('gemini-guide-modal');
+    const closeBtn = document.getElementById('gemini-guide-close');
+    const confirmBtn = document.getElementById('btn-gemini-guide-confirm');
+    const saveBtn = document.getElementById('btn-guide-modal-save');
+    const modalInput = document.getElementById('guide-modal-key-input');
+    const settingsInput = document.getElementById('settings-gemini-key');
+
+    if (trigger && modal) {
+        // Open guide modal
+        trigger.addEventListener('click', () => {
+            // Populate modal input with current key
+            if (modalInput && settingsInput) {
+                modalInput.value = settingsInput.value;
+            }
+            modal.classList.add('active');
+        });
+
+        // Close guide modal
+        const closeModal = () => {
+            modal.classList.remove('active');
+        };
+
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (confirmBtn) confirmBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Inline save key inside modal
+        if (saveBtn && modalInput && settingsInput) {
+            saveBtn.addEventListener('click', () => {
+                const val = modalInput.value.trim();
+                settingsInput.value = val;
+                
+                // Trigger change event to fire settings input's save handler
+                const event = new Event('change');
+                settingsInput.dispatchEvent(event);
+                
+                closeModal();
+            });
+        }
     }
 }
 
