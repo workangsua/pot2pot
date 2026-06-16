@@ -61,73 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initRegistrationFlow();
     initDetailModalFlow();
-    initGeminiGuideFlow();
     renderArchive();
     renderBadges();
     updateUserBadgeUI();
     
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
-    
-    // Load and bind Gemini Key
-    const keyInput = document.getElementById('settings-gemini-key');
-    if (keyInput) {
-        const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key') || '';
-        keyInput.value = savedGeminiKey;
-        
-        keyInput.addEventListener('change', (e) => {
-            const val = e.target.value.trim();
-            if (val) {
-                localStorage.setItem('pot2pot_gemini_key', val);
-                AppState.geminiKey = val;
-                showAlert("⚙️ Gemini API Key가 개별 저장되었습니다.");
-            } else {
-                localStorage.removeItem('pot2pot_gemini_key');
-                AppState.geminiKey = '';
-                showAlert("⚙️ 개별 Gemini API Key가 삭제되었습니다. 기본 키를 사용합니다.");
-            }
-        });
-    }
-
-    // Load and bind Naver Credentials
-    const naverIdInput = document.getElementById('settings-naver-id');
-    const naverSecretInput = document.getElementById('settings-naver-secret');
-    
-    if (naverIdInput) {
-        const savedNaverId = localStorage.getItem('pot2pot_naver_client_id') || '';
-        naverIdInput.value = savedNaverId;
-        
-        naverIdInput.addEventListener('change', (e) => {
-            const val = e.target.value.trim();
-            if (val) {
-                localStorage.setItem('pot2pot_naver_client_id', val);
-                AppState.naverId = val;
-                showAlert("⚙️ 네이버 Client ID가 개별 저장되었습니다.");
-            } else {
-                localStorage.removeItem('pot2pot_naver_client_id');
-                AppState.naverId = '';
-                showAlert("⚙️ 개별 네이버 Client ID가 삭제되었습니다. 기본 설정을 사용합니다.");
-            }
-        });
-    }
-    
-    if (naverSecretInput) {
-        const savedNaverSecret = localStorage.getItem('pot2pot_naver_client_secret') || '';
-        naverSecretInput.value = savedNaverSecret;
-        
-        naverSecretInput.addEventListener('change', (e) => {
-            const val = e.target.value.trim();
-            if (val) {
-                localStorage.setItem('pot2pot_naver_client_secret', val);
-                AppState.naverSecret = val;
-                showAlert("⚙️ 네이버 Client Secret이 개별 저장되었습니다.");
-            } else {
-                localStorage.removeItem('pot2pot_naver_client_secret');
-                AppState.naverSecret = '';
-                showAlert("⚙️ 개별 네이버 Client Secret이 삭제되었습니다. 기본 설정을 사용합니다.");
-            }
-        });
-    }
     
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
@@ -1470,17 +1409,10 @@ async function analyzePlantWithAI() {
     const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
     
     if (isLocal && !apiKey) {
-        showAlert("⚠️ Local 환경에서는 Gemini API Key가 등록되어야 합니다. 설정 화면에서 입력해 주세요.");
+        showAlert("⚠️ 로컬 개발 환경에서는 콘솔을 통해 API Key를 등록해야 AI 스캔이 가능합니다. (콘솔창에 localStorage.setItem('pot2pot_gemini_key', '발급받은_키') 입력)");
         // Clear placeholders so they don't say "AI 분석 중..." forever
         document.getElementById('plant-species').value = '';
         document.getElementById('plant-nickname').value = '';
-        
-        closeRegisterModal();
-        switchView('settings');
-        setTimeout(() => {
-            const keyInput = document.getElementById('settings-gemini-key');
-            if (keyInput) keyInput.focus();
-        }, 300);
         return;
     }
 
@@ -1613,13 +1545,7 @@ async function analyzePlantWithAI() {
         // If the error indicates missing API key, prompt to enter it in settings
         if (error.message.includes("Gemini API Key is missing") || error.message.includes("x-gemini-key") || error.message.includes("401")) {
             setTimeout(() => {
-                showAlert("⚙️ 설정(Settings) 화면에서 Gemini API Key를 등록하시면 개인 무료 키로 바로 AI 기능을 이용할 수 있습니다.");
-                closeRegisterModal();
-                switchView('settings');
-                setTimeout(() => {
-                    const keyInput = document.getElementById('settings-gemini-key');
-                    if (keyInput) keyInput.focus();
-                }, 400);
+                showAlert("⚙️ Vercel 환경 변수(GEMINI_API_KEY) 설정을 확인해 주세요.");
             }, 1500);
         }
         
@@ -1704,53 +1630,6 @@ async function fetchNaverEncyclopedia(species) {
     } catch (err) {
         console.error("NAVER API call failed:", err);
         return null;
-    }
-}
-
-// --- Gemini API Key Help & Guide Flow ---
-function initGeminiGuideFlow() {
-    const trigger = document.getElementById('btn-gemini-guide');
-    const modal = document.getElementById('gemini-guide-modal');
-    const closeBtn = document.getElementById('gemini-guide-close');
-    const confirmBtn = document.getElementById('btn-gemini-guide-confirm');
-    const saveBtn = document.getElementById('btn-guide-modal-save');
-    const modalInput = document.getElementById('guide-modal-key-input');
-    const settingsInput = document.getElementById('settings-gemini-key');
-
-    if (trigger && modal) {
-        // Open guide modal
-        trigger.addEventListener('click', () => {
-            // Populate modal input with current key
-            if (modalInput && settingsInput) {
-                modalInput.value = settingsInput.value;
-            }
-            modal.classList.add('active');
-        });
-
-        // Close guide modal
-        const closeModal = () => {
-            modal.classList.remove('active');
-        };
-
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (confirmBtn) confirmBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        // Inline save key inside modal
-        if (saveBtn && modalInput && settingsInput) {
-            saveBtn.addEventListener('click', () => {
-                const val = modalInput.value.trim();
-                settingsInput.value = val;
-                
-                // Trigger change event to fire settings input's save handler
-                const event = new Event('change');
-                settingsInput.dispatchEvent(event);
-                
-                closeModal();
-            });
-        }
     }
 }
 
