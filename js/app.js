@@ -262,6 +262,21 @@ function initNavigation() {
     addPlantBtn.addEventListener('click', () => {
         openRegisterModal();
     });
+    
+    // Trophy Button click to go to settings/achievements
+    const heroTrophyBtn = document.getElementById('btn-hero-trophy');
+    if (heroTrophyBtn) {
+        heroTrophyBtn.addEventListener('click', () => {
+            switchView('settings');
+            // Smooth scroll to achievements section
+            setTimeout(() => {
+                const badgeSection = document.querySelector('.settings-badges-section');
+                if (badgeSection) {
+                    badgeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        });
+    }
 }
 
 function switchView(viewName) {
@@ -405,8 +420,13 @@ function checkBadgeTriggers() {
 }
 
 function updateUserBadgeUI() {
-    document.getElementById('user-lvl').textContent = AppState.user.level;
-    document.getElementById('user-title').textContent = AppState.user.title;
+    const userLvl = document.getElementById('user-lvl');
+    const userTitle = document.getElementById('user-title');
+    const heroUserLvl = document.getElementById('hero-user-lvl');
+    
+    if (userLvl) userLvl.textContent = AppState.user.level;
+    if (userTitle) userTitle.textContent = AppState.user.title;
+    if (heroUserLvl) heroUserLvl.textContent = AppState.user.level;
 }
 
 // --- Plant Registration Flow ---
