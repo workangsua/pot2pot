@@ -263,18 +263,11 @@ function initNavigation() {
         openRegisterModal();
     });
     
-    // Trophy Button click to go to settings/achievements
+    // Trophy Button click to go to settings
     const heroTrophyBtn = document.getElementById('btn-hero-trophy');
     if (heroTrophyBtn) {
         heroTrophyBtn.addEventListener('click', () => {
             switchView('settings');
-            // Smooth scroll to achievements section
-            setTimeout(() => {
-                const badgeSection = document.querySelector('.settings-badges-section');
-                if (badgeSection) {
-                    badgeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
         });
     }
 }
@@ -293,6 +286,12 @@ function switchView(viewName) {
     if (activeScreen) {
         activeScreen.classList.add('active');
         AppState.currentView = viewName;
+        
+        // Reset scroll to top when switching views
+        const scrollable = activeScreen.querySelector('.scrollable-content');
+        if (scrollable) {
+            scrollable.scrollTop = 0;
+        }
     }
     
     const activeNavItem = document.querySelector(`.nav-item[data-view="${viewName}"]`);
