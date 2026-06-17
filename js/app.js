@@ -58,6 +58,7 @@ const BADGES = [
 // --- Initializing App ---
 document.addEventListener('DOMContentLoaded', () => {
     loadDataFromStorage();
+    syncPlantsFromDatabase(); // Background sync from Vercel KV database
     initNavigation();
     initRegistrationFlow();
     initDetailModalFlow();
@@ -202,6 +203,7 @@ function savePlantsToStorage() {
             compressStoredPlants();
         }
     }
+    syncPlantsToDatabase(); // Sync with Vercel KV database in the background
 }
 
 function saveUserToStorage() {
@@ -1744,6 +1746,51 @@ async function fetchNaverEncyclopedia(species) {
     } catch (err) {
         console.error("NAVER API call failed:", err);
         return null;
+    }
+}
+
+// --- Vercel KV Automatic Background Sync ---
+async function syncPlantsFromDatabase() {
+    try {
+        const response = await fetch('/api/get-plants');
+        if (!response.ok) {
+            throw new Error(`DB fetch failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.plants && Array.isArray(data.plants)) {
+            const currentStr = JSON.stringify(AppState.plants);
+            const newStr = JSON.stringify(data.plants);
+            if (currentStr !== newStr) {
+                console.log("Syncing plants from Vercel KV database...", data.plants);
+                AppState.plants = data.plants;
+                try {
+                    localStorage.setItem('pot2pot_plants', newStr);
+                } catch (e) {
+                    console.error("Failed to update local cache during DB sync:", e);
+                }
+                renderArchive();
+            }
+        }
+    } catch (err) {
+        console.warn("Database sync fetch failed (using local storage cache):", err);
+    }
+}
+
+async function syncPlantsToDatabase() {
+    try {
+        const response = await fetch('/api/save-plants', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plants: AppState.plants })
+        });
+        if (!response.ok) {
+            throw new Error(`DB save failed with status ${response.status}`);
+        }
+        console.log("Successfully synced plants to Vercel KV database.");
+    } catch (err) {
+        console.warn("Database sync save failed (will retry on next change):", err);
     }
 }
 
