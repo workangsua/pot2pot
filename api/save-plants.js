@@ -29,8 +29,8 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Invalid plants array.' });
   }
 
-  const kvUrl = process.env.KV_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN;
+  const kvUrl = process.env.KV_REST_API_URL || process.env.STORAGE_REST_API_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN || process.env.STORAGE_REST_API_TOKEN;
 
   if (!kvUrl || !kvToken) {
     return res.status(500).json({ error: 'Vercel KV is not connected.' });
