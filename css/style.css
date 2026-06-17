@@ -389,7 +389,7 @@ body {
     letter-spacing: 0.05em;
 }
 
-.hero-trophy-btn, .hero-share-btn {
+.hero-trophy-btn {
     background: #1a1a1a;
     border: 1px solid rgba(255, 255, 255, 0.1);
     width: 44px;
@@ -406,13 +406,13 @@ body {
     color: #ffffff;
 }
 
-.hero-trophy-btn:hover, .hero-share-btn:hover {
+.hero-trophy-btn:hover {
     background: #2a2a2a;
     border-color: var(--forest-primary);
     transform: scale(1.08);
 }
 
-.hero-trophy-btn:active, .hero-share-btn:active {
+.hero-trophy-btn:active {
     transform: scale(0.95);
 }
 
@@ -2541,100 +2541,6 @@ body {
     background: rgba(173, 216, 230, 0.12);
     border: 1px solid rgba(173, 216, 230, 0.4);
     color: #add8e6;
-}
-
-/* Shared Garden View Banner */
-.shared-garden-banner {
-    background: var(--forest-primary);
-    color: #000000;
-    margin: 14px;
-    padding: 12px 16px;
-    border-radius: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 4px 14px rgba(191, 255, 67, 0.2);
-    animation: fadeInDown 0.4s ease-out;
-}
-
-.shared-garden-banner .banner-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.shared-garden-banner .banner-icon {
-    font-size: 1.1rem;
-}
-
-.shared-garden-banner .banner-text {
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-}
-
-.shared-garden-banner .banner-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.shared-garden-banner .banner-btn {
-    padding: 7px 14px;
-    font-size: 0.78rem;
-    font-weight: 800;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.shared-garden-banner .banner-btn:active {
-    transform: scale(0.95);
-}
-
-.shared-garden-banner .banner-btn.btn-import {
-    background: #111111;
-    color: #ffffff;
-}
-
-.shared-garden-banner .banner-btn.btn-import:hover {
-    background: #252525;
-}
-
-.shared-garden-banner .banner-btn.btn-exit {
-    background: rgba(0, 0, 0, 0.08);
-    color: #111111;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-}
-
-.shared-garden-banner .banner-btn.btn-exit:hover {
-    background: rgba(0, 0, 0, 0.16);
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Adjust layout on small screens */
-@media (max-width: 420px) {
-    .shared-garden-banner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    .shared-garden-banner .banner-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
 }
 
 

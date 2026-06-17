@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initRegistrationFlow();
     initDetailModalFlow();
-    initSharingFlow();
     renderArchive();
     renderBadges();
     updateUserBadgeUI();
@@ -885,9 +884,7 @@ function renderArchive() {
     const grid = document.getElementById('plants-grid');
     grid.innerHTML = '';
     
-    const plantsToRender = AppState.isSharedView ? AppState.sharedPlants : AppState.plants;
-    
-    if (plantsToRender.length === 0) {
+    if (AppState.plants.length === 0) {
         grid.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🪴</div>
@@ -897,7 +894,7 @@ function renderArchive() {
         return;
     }
     
-    plantsToRender.forEach(plant => {
+    AppState.plants.forEach(plant => {
         const daysRemaining = getDaysRemaining(plant);
         const ddayInfo = getDDayClassAndText(daysRemaining);
         
@@ -931,20 +928,15 @@ function renderArchive() {
 
 // Water Plant Care Logic
 window.waterPlant = function(plantId) {
-    const plantsList = AppState.isSharedView ? AppState.sharedPlants : AppState.plants;
-    const plant = plantsList.find(p => p.id === plantId);
+    const plant = AppState.plants.find(p => p.id === plantId);
     if (plant) {
         plant.lastWatered = new Date().toISOString();
-        if (AppState.isSharedView) {
-            renderArchive();
-            showAlert(`💧 [${plant.nickname}]에게 임시로 물을 주었습니다. 내 정원에 저장하려면 상단 [가져오기]를 눌러주세요!`);
-        } else {
-            savePlantsToStorage();
-            renderArchive();
-            showAlert(`💧 [${plant.nickname}]에게 물을 주었습니다. 다음 D-Day 일정이 자동으로 갱신되었습니다!`);
-            addXP(25);
-            unlockBadge('oasis');
-        }
+        savePlantsToStorage();
+        renderArchive();
+        
+        showAlert(`💧 [${plant.nickname}]에게 물을 주었습니다. 다음 D-Day 일정이 자동으로 갱신되었습니다!`);
+        addXP(25);
+        unlockBadge('oasis');
     }
 };
 
@@ -1056,24 +1048,8 @@ function initDetailModalFlow() {
 }
 
 function openDetailModal(plantId) {
-    const plantsList = AppState.isSharedView ? AppState.sharedPlants : AppState.plants;
-    const plant = plantsList.find(p => p.id === plantId);
+    const plant = AppState.plants.find(p => p.id === plantId);
     if (!plant) return;
-
-    // Toggle actions visibility based on shared view
-    const deleteBtn = document.getElementById('btn-detail-delete');
-    const openLogFormBtn = document.getElementById('btn-open-log-form');
-    const careQuickActions = document.querySelector('.care-quick-actions');
-
-    if (AppState.isSharedView) {
-        if (deleteBtn) deleteBtn.style.display = 'none';
-        if (openLogFormBtn) openLogFormBtn.style.display = 'none';
-        if (careQuickActions) careQuickActions.style.display = 'none';
-    } else {
-        if (deleteBtn) deleteBtn.style.display = 'block';
-        if (openLogFormBtn) openLogFormBtn.style.display = 'block';
-        if (careQuickActions) careQuickActions.style.display = 'grid';
-    }
     
     currentDetailPlantId = plantId;
     currentCalendarMonth = new Date(); // Reset to current month
@@ -1153,11 +1129,6 @@ function closeDetailModal() {
 
 function deleteCurrentPlant() {
     if (!currentDetailPlantId) return;
-    
-    if (AppState.isSharedView) {
-        showAlert('📢 공유받은 마이팟의 식물은 삭제할 수 없습니다.');
-        return;
-    }
     
     const plant = AppState.plants.find(p => p.id === currentDetailPlantId);
     if (!plant) return;
@@ -1773,141 +1744,6 @@ async function fetchNaverEncyclopedia(species) {
     } catch (err) {
         console.error("NAVER API call failed:", err);
         return null;
-    }
-}
-
-// --- Vercel KV Sharing Flow ---
-AppState.isSharedView = false;
-AppState.sharedPlants = [];
-
-function initSharingFlow() {
-    // 1. Bind Share Button click
-    const shareBtn = document.getElementById('btn-hero-share');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', shareGarden);
-    }
-
-    // 2. Bind Banner actions
-    const importBtn = document.getElementById('btn-banner-import');
-    const exitBtn = document.getElementById('btn-banner-exit');
-
-    if (importBtn) {
-        importBtn.addEventListener('click', () => {
-            if (AppState.sharedPlants && AppState.sharedPlants.length > 0) {
-                AppState.plants = [...AppState.sharedPlants];
-                savePlantsToStorage();
-                AppState.isSharedView = false;
-                showAlert('📥 공유받은 마이팟을 내 정원으로 성공적으로 가져왔습니다!');
-                setTimeout(() => {
-                    window.location.href = window.location.origin + window.location.pathname;
-                }, 1000);
-            }
-        });
-    }
-
-    if (exitBtn) {
-        exitBtn.addEventListener('click', () => {
-            window.location.href = window.location.origin + window.location.pathname;
-        });
-    }
-
-    // 3. Detect ?share=ID parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const shareId = urlParams.get('share');
-    if (shareId) {
-        loadSharedGarden(shareId);
-    }
-}
-
-async function shareGarden() {
-    if (AppState.plants.length === 0) {
-        showAlert('🌱 공유할 식물이 없습니다. 마이팟을 먼저 등록해주세요!');
-        return;
-    }
-
-    const shareBtn = document.getElementById('btn-hero-share');
-    const originalContent = shareBtn.innerHTML;
-    shareBtn.disabled = true;
-    shareBtn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>';
-
-    try {
-        const response = await fetch('/api/share-garden', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ plants: AppState.plants })
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error || 'Server error');
-        }
-
-        const data = await response.json();
-        const shareUrl = `${window.location.origin}/?share=${data.id}`;
-        
-        // Copy to clipboard
-        await navigator.clipboard.writeText(shareUrl);
-        showAlert('🔗 내 마이팟 공유 링크가 복사되었습니다! 친구에게 보내보세요.');
-    } catch (err) {
-        console.error('Failed to share garden:', err);
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            showAlert('⚙️ 로컬 환경에서는 Vercel KV 공유를 사용할 수 없습니다. 배포 환경에서 연동 후 사용해주세요!');
-        } else {
-            showAlert(`❌ 공유 실패: ${err.message}`);
-        }
-    } finally {
-        shareBtn.disabled = false;
-        shareBtn.innerHTML = originalContent;
-    }
-}
-
-async function loadSharedGarden(shareId) {
-    const grid = document.getElementById('plants-grid');
-    if (grid) {
-        grid.innerHTML = `
-            <div class="empty-state">
-                <div class="loading-spinner" style="margin-bottom: 15px;"></div>
-                <h3>공유받은 마이팟 불러오는 중...</h3>
-            </div>
-        `;
-    }
-
-    try {
-        const response = await fetch(`/api/get-shared-garden?id=${shareId}`);
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error || 'Shared garden not found');
-        }
-
-        const data = await response.json();
-        AppState.isSharedView = true;
-        AppState.sharedPlants = data.plants;
-        
-        // Show shared banner
-        const banner = document.getElementById('shared-garden-banner');
-        if (banner) {
-            banner.style.display = 'flex';
-        }
-
-        // Change title text
-        const titleEl = document.querySelector('.hero-text-wrapper h2');
-        if (titleEl) {
-            titleEl.textContent = '공유받은 마이팟';
-        }
-
-        // Hide add pot FAB & Settings nav item to focus on viewing
-        const addPotBtn = document.querySelector('.nav-item.add-pot');
-        if (addPotBtn) addPotBtn.style.display = 'none';
-
-        renderArchive();
-    } catch (err) {
-        console.error('Failed to load shared garden:', err);
-        showAlert(`❌ 공유 정원 로드 실패: ${err.message}`);
-        setTimeout(() => {
-            window.location.href = window.location.origin + window.location.pathname;
-        }, 3000);
     }
 }
 
