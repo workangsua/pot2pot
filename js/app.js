@@ -1760,7 +1760,12 @@ async function syncPlantsFromDatabase() {
         if (data.plants && Array.isArray(data.plants)) {
             const currentStr = JSON.stringify(AppState.plants);
             const newStr = JSON.stringify(data.plants);
-            if (currentStr !== newStr) {
+            
+            if (data.plants.length === 0 && AppState.plants.length > 0) {
+                // Database is empty but local storage has plants. Seed database!
+                console.log("Database is empty. Seeding database with local plants...");
+                syncPlantsToDatabase();
+            } else if (currentStr !== newStr) {
                 console.log("Syncing plants from Vercel KV database...", data.plants);
                 AppState.plants = data.plants;
                 try {
