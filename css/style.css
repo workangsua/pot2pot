@@ -1848,8 +1848,8 @@ body {
 
 .detail-img-container {
     width: 100%;
-    max-width: 240px;
-    height: 220px;
+    max-width: 200px;
+    height: 170px;
     border-radius: 0;
     display: flex;
     align-items: center;
@@ -1861,8 +1861,8 @@ body {
 }
 
 .detail-img-container img {
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 80%;
+    max-height: 80%;
     object-fit: contain;
     filter: drop-shadow(0 12px 24px rgba(0,0,0,0.15));
     animation: floatPlant 4s ease-in-out infinite;
@@ -2735,6 +2735,124 @@ body {
     background: rgba(173, 216, 230, 0.12);
     border: 1px solid rgba(173, 216, 230, 0.4);
     color: #add8e6;
+}
+
+/* Care Action Success Popup Modal with Checkmark Motion */
+.care-success-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.care-success-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.care-success-card {
+    background: #171d1a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.care-success-modal-overlay.active .care-success-card {
+    transform: scale(1);
+}
+
+.checkmark-wrapper {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+}
+
+.checkmark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 4;
+    stroke: #CDFF62;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #CDFF62;
+    animation: fillCheckmark .4s ease-in-out .4s forwards, scaleCheckmark .3s ease-in-out .9s alternate;
+}
+
+.checkmark-circle {
+    stroke-width: 4;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-miterlimit: 10;
+    stroke: #CDFF62;
+    fill: none;
+    animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke: #121614; /* Dark checkmark on neon green background */
+    animation: strokeCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+@keyframes strokeCircle {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes strokeCheck {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fillCheckmark {
+    100% {
+        box-shadow: inset 0px 0px 0px 40px #CDFF62;
+    }
+}
+
+@keyframes scaleCheckmark {
+    0%, 100% {
+        transform: none;
+    }
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+#care-success-title {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+#care-success-message {
+    color: #8c9c94;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 

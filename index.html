@@ -496,16 +496,16 @@
 
                                 <!-- Care Quick Action Row -->
                                 <div class="care-quick-actions">
-                                    <button class="care-action-btn water" id="btn-care-water">💧 물주기</button>
-                                    <button class="care-action-btn nutrient" id="btn-care-nutrient">💊 영양제</button>
-                                    <button class="care-action-btn repot" id="btn-care-repot">🪴 분갈이</button>
-                                    <button class="care-action-btn prune" id="btn-care-prune">✂️ 가지치기</button>
+                                    <button class="care-action-btn water" id="btn-care-water">물주기</button>
+                                    <button class="care-action-btn nutrient" id="btn-care-nutrient">영양제</button>
+                                    <button class="care-action-btn repot" id="btn-care-repot">분갈이</button>
+                                    <button class="care-action-btn prune" id="btn-care-prune">가지치기</button>
                                 </div>
 
                                 <!-- Naver Encyclopedia Description Card -->
                                 <div id="detail-naver-card" class="detail-naver-card" style="display: none;">
                                     <div class="naver-card-header">
-                                        <span class="naver-title">📚 네이버 백과사전 정보</span>
+                                        <span class="naver-title">네이버 백과사전 정보</span>
                                         <a id="detail-naver-link" href="#" target="_blank" class="naver-link">자세히 보기 ↗</a>
                                     </div>
                                     <p id="detail-naver-desc" class="naver-desc"></p>
@@ -513,20 +513,20 @@
 
                                 <!-- Tabs: Timeline vs Calendar -->
                                 <div class="detail-tabs">
-                                    <button class="tab-btn active" data-tab="timeline">📜 성장 다이어리</button>
-                                    <button class="tab-btn" data-tab="calendar">📅 관리 캘린더</button>
+                                    <button class="tab-btn active" data-tab="timeline">성장 다이어리</button>
+                                    <button class="tab-btn" data-tab="calendar">관리 캘린더</button>
                                 </div>
 
                                 <!-- Tab Content: Timeline -->
                                 <div id="tab-content-timeline" class="tab-content active">
                                     <!-- Add Growth Log Inline Trigger -->
                                     <button id="btn-open-log-form" class="btn-open-log-form">
-                                        ✍️ 오늘 하루 성장 일지 남기기
+                                        오늘 하루 성장 일지 남기기
                                     </button>
 
                                     <!-- Growth Log Form (Hidden by default) -->
                                     <form id="growth-log-form" class="growth-log-form" style="display: none;">
-                                        <h4>🌱 오늘의 기록 추가</h4>
+                                        <h4>오늘의 기록 추가</h4>
                                         
                                         <div class="form-row-2">
                                             <div class="form-group">
@@ -537,10 +537,10 @@
                                                 <label for="log-care-type">돌봄 활동</label>
                                                 <select id="log-care-type" class="form-input-text">
                                                     <option value="none">기록만 (활동 없음)</option>
-                                                    <option value="water">💧 물주기</option>
-                                                    <option value="nutrient">💊 영양제 투여</option>
-                                                    <option value="repot">🪴 분갈이</option>
-                                                    <option value="prune">✂️ 가지치기</option>
+                                                    <option value="water">물주기</option>
+                                                    <option value="nutrient">영양제 투여</option>
+                                                    <option value="repot">분갈이</option>
+                                                    <option value="prune">가지치기</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -554,7 +554,7 @@
                                             <label>식물 사진 추가 (선택)</label>
                                             <div class="log-photo-upload-row">
                                                 <label class="btn-log-photo-upload">
-                                                    <span>📷 사진 선택</span>
+                                                    <span>사진 선택</span>
                                                     <input type="file" id="log-photo-input" accept="image/*" style="display: none;">
                                                 </label>
                                                 <div id="log-photo-preview" class="log-photo-preview checkerboard-bg" style="display: none;">
@@ -594,11 +594,11 @@
                                         <!-- Dynamic Calendar cells -->
                                     </div>
                                     <div class="calendar-legend">
-                                        <span>💧 물주기</span>
-                                        <span>💊 영양제</span>
-                                        <span>🪴 분갈이</span>
-                                        <span>✂️ 가지치기</span>
-                                        <span>📝 일지</span>
+                                        <span>물주기</span>
+                                        <span>영양제</span>
+                                        <span>분갈이</span>
+                                        <span>가지치기</span>
+                                        <span>일지</span>
                                     </div>
                                 </div>
                             </div>
@@ -616,6 +616,20 @@
                                 </svg>
                                 물주기 완료
                             </button>
+                        </div>
+
+                        <!-- Care Action Success Popup Modal -->
+                        <div id="care-success-modal" class="care-success-modal-overlay">
+                            <div class="care-success-card">
+                                <div class="checkmark-wrapper">
+                                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                    </svg>
+                                </div>
+                                <h3 id="care-success-title">물주기 완료</h3>
+                                <p id="care-success-message">초록이에게 물을 주었습니다!</p>
+                            </div>
                         </div>
 
                     </div>

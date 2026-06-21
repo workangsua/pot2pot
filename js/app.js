@@ -1185,18 +1185,17 @@ function renderTimeline(plant) {
         ev.className = `timeline-event ${rec.type}`;
         
         let typeLabel = '';
-        let careEmoji = '';
-        if (rec.type === 'adopt') { typeLabel = '정원 등록'; careEmoji = '🌱'; }
-        else if (rec.type === 'water') { typeLabel = '물주기 완료'; careEmoji = '💧'; }
-        else if (rec.type === 'nutrient') { typeLabel = '영양제 투여'; careEmoji = '💊'; }
-        else if (rec.type === 'repot') { typeLabel = '분갈이 완료'; careEmoji = '🪴'; }
-        else if (rec.type === 'prune') { typeLabel = '가지치기 완료'; careEmoji = '✂️'; }
-        else if (rec.type === 'diary') { typeLabel = '성장 다이어리'; careEmoji = '📝'; }
+        if (rec.type === 'adopt') { typeLabel = '정원 등록'; }
+        else if (rec.type === 'water') { typeLabel = '물주기 완료'; }
+        else if (rec.type === 'nutrient') { typeLabel = '영양제 투여'; }
+        else if (rec.type === 'repot') { typeLabel = '분갈이 완료'; }
+        else if (rec.type === 'prune') { typeLabel = '가지치기 완료'; }
+        else if (rec.type === 'diary') { typeLabel = '성장 다이어리'; }
         
         const dateStr = formatDate(new Date(rec.date));
         
         ev.innerHTML = `
-            <div class="timeline-node" title="${typeLabel}">${careEmoji}</div>
+            <div class="timeline-node" title="${typeLabel}"></div>
             <span class="timeline-time">${dateStr}</span>
             <span class="timeline-title">${typeLabel}</span>
             ${rec.memo ? `<p class="timeline-memo">${rec.memo}</p>` : ''}
@@ -1331,14 +1330,61 @@ function addCareActivity(type, memo = '') {
     if (type === 'water') {
         unlockBadge('oasis');
     }
+    
+    // Trigger Success Modal with checkmark animation
+    showCareSuccessModal(type, plant.nickname);
+}
+
+function showCareSuccessModal(type, nickname) {
+    const successModal = document.getElementById('care-success-modal');
+    const successTitle = document.getElementById('care-success-title');
+    const successMessage = document.getElementById('care-success-message');
+    
+    if (!successModal || !successTitle || !successMessage) return;
+    
+    let title = '';
+    let message = '';
+    
+    switch(type) {
+        case 'water':
+            title = '물주기 완료';
+            message = `${nickname}에게 물을 주었습니다.`;
+            break;
+        case 'nutrient':
+            title = '영양제 투여';
+            message = `${nickname}에게 영양제를 주었습니다.`;
+            break;
+        case 'repot':
+            title = '분갈이 완료';
+            message = `${nickname}의 분갈이를 완료했습니다.`;
+            break;
+        case 'prune':
+            title = '가지치기 완료';
+            message = `${nickname}의 가지치기를 완료했습니다.`;
+            break;
+        default:
+            title = '기록 완료';
+            message = `${nickname}의 돌봄 일지를 기록했습니다.`;
+    }
+    
+    successTitle.textContent = title;
+    successMessage.textContent = message;
+    
+    // Show modal
+    successModal.classList.add('active');
+    
+    // Hide automatically after 2.5 seconds
+    setTimeout(() => {
+        successModal.classList.remove('active');
+    }, 2500);
 }
 
 function getDefaultCareMemo(type, nickname) {
     switch(type) {
-        case 'water': return `💧 ${nickname}에게 시원하게 물을 듬뿍 주었습니다.`;
-        case 'nutrient': return `💊 ${nickname}에게 영양 풍부한 식물 영양제를 투여했습니다.`;
-        case 'repot': return `🪴 ${nickname}에게 더 넓고 숨쉬기 편한 흙으로 이사시켜주었습니다. (분갈이)`;
-        case 'prune': return `✂️ ${nickname}의 마르고 힘없는 줄기와 이파리를 이쁘게 가듬고 다듬었습니다.`;
+        case 'water': return `${nickname}에게 물을 주었습니다.`;
+        case 'nutrient': return `${nickname}에게 영양제를 투여했습니다.`;
+        case 'repot': return `${nickname}의 흙과 화분을 갈아주었습니다. (분갈이)`;
+        case 'prune': return `${nickname}의 마른 줄기와 이파리를 다듬어 주었습니다.`;
         default: return '';
     }
 }
@@ -1404,7 +1450,7 @@ function saveGrowthLog(e) {
         id: 'rec_' + Date.now(),
         date: logDateObj.toISOString(),
         type: type,
-        memo: memo || (isActivity ? getDefaultCareMemo(type, plant.nickname) : '📝 오늘 하루 성장 일지를 귀엽게 기록했습니다.'),
+        memo: memo || (isActivity ? getDefaultCareMemo(type, plant.nickname) : '오늘 하루 성장 일지를 기록했습니다.'),
         image: logPhotoBase64 || null
     };
     
@@ -1427,7 +1473,7 @@ function saveGrowthLog(e) {
         unlockBadge('oasis');
     }
     
-    showAlert(`🌱 [${plant.nickname}]의 성장 다이어리를 정상적으로 보관했습니다!`);
+    showCareSuccessModal(type, plant.nickname);
     closeLogForm();
 }
 
