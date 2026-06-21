@@ -913,9 +913,6 @@ function renderArchive() {
             <div class="info">
                 <h4 class="nickname">${plant.nickname}</h4>
                 <p class="species">${plant.species}</p>
-                <button class="quick-care-btn" onclick="event.stopPropagation(); waterPlant('${plant.id}')">
-                    원터치 물주기
-                </button>
             </div>
         `;
         
