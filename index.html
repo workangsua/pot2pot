@@ -393,149 +393,233 @@
                         <!-- Drag bar simulation -->
                         <div class="modal-drag-handle"></div>
                         
-                        <header class="modal-header">
-                            <div class="detail-header-title">
-                                <h3 id="detail-nickname">초록이</h3>
-                                <span id="detail-species" class="detail-subtitle">몬스테라</span>
-                            </div>
-                            <div class="detail-header-actions">
-                                <button id="btn-detail-delete" class="detail-delete-btn">삭제하기</button>
-                                <button id="detail-modal-close" class="modal-close-btn">&times;</button>
-                            </div>
-                        </header>
-
                         <div class="scrollable-content detail-scroll-content">
-                            <!-- Plant Hero/Card Section -->
-                            <div class="detail-hero-card">
+                            <!-- 1. White Card for plant image -->
+                            <div class="detail-image-card">
+                                <button id="detail-modal-close" class="detail-action-circle-btn left-btn" aria-label="Close modal">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                
+                                <button id="btn-detail-delete" class="detail-action-circle-btn right-btn" aria-label="Delete plant">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                                
                                 <div class="detail-img-container checkerboard-bg">
                                     <img id="detail-img" src="" alt="식물 이미지">
                                 </div>
-                                <div class="detail-stats">
-                                    <div class="stat-badge d-day" id="detail-dday">D-Day</div>
-                                    <div class="stat-badge age" id="detail-age">함께한 지 1일</div>
-                                    <div class="stat-badge cycle" id="detail-cycle">물주기: 7일</div>
+
+                                <div class="detail-image-indicators">
+                                    <span class="dot active"></span>
+                                    <span class="dot"></span>
+                                    <span class="dot"></span>
                                 </div>
+                            </div>
+
+                            <!-- 2. Neon-Lime Info Card -->
+                            <div class="detail-lime-info-card">
+                                <div class="lime-info-text">
+                                    <h3 id="detail-nickname">초록이</h3>
+                                    <span id="detail-species" class="detail-subtitle">몬스테라</span>
+                                </div>
+                                <div class="lime-info-badge-row">
+                                    <div class="lime-info-stars">
+                                        <span class="star-icon">★</span>
+                                        <span class="star-icon">★</span>
+                                        <span class="star-icon">★</span>
+                                        <span class="star-icon">★</span>
+                                        <span class="star-icon">★</span>
+                                    </div>
+                                    <span class="lime-info-review-count">Health 5.0</span>
+                                </div>
+                            </div>
+
+                            <!-- 3. Dark Details Section -->
+                            <div class="detail-dark-card">
                                 
+                                <!-- Four Circular Stats -->
+                                <div class="detail-stats-grid">
+                                    <div class="detail-stat-item">
+                                        <span class="stat-label">함께한 지</span>
+                                        <span class="stat-value" id="detail-age">0일</span>
+                                        <div class="stat-circle">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none">
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="detail-stat-item">
+                                        <span class="stat-label">물주기 주기</span>
+                                        <span class="stat-value" id="detail-cycle">0일</span>
+                                        <div class="stat-circle">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="detail-stat-item">
+                                        <span class="stat-label">수분 지수</span>
+                                        <span class="stat-value" id="water-progress-percent">0%</span>
+                                        <div class="stat-circle">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none">
+                                                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="detail-stat-item">
+                                        <span class="stat-label">D-Day</span>
+                                        <span class="stat-value stat-badge d-day" id="detail-dday">D-Day</span>
+                                        <div class="stat-circle">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <circle cx="12" cy="12" r="6"></circle>
+                                                <circle cx="12" cy="12" r="2"></circle>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Progress Bar for Water D-Day -->
                                 <div class="water-progress-bar-wrapper">
-                                    <div class="water-progress-label">
-                                        <span>수분 지수</span>
-                                        <span id="water-progress-percent">80%</span>
-                                    </div>
                                     <div class="water-progress-track">
                                         <div id="water-progress-fill" class="water-progress-fill"></div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Care Quick Action Row -->
-                            <div class="care-quick-actions">
-                                <button class="care-action-btn water" id="btn-care-water">물주기</button>
-                                <button class="care-action-btn nutrient" id="btn-care-nutrient">영양제</button>
-                                <button class="care-action-btn repot" id="btn-care-repot">분갈이</button>
-                                <button class="care-action-btn prune" id="btn-care-prune">가지치기</button>
-                            </div>
-
-                            <!-- Naver Encyclopedia Description Card (Displays detailed academic info dynamically) -->
-                            <div id="detail-naver-card" class="detail-naver-card" style="display: none; background: rgba(0,0,0,0.15); border: 1px solid var(--sand-dark); border-radius: 20px; padding: 14px; margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
-                                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--forest-primary); display: flex; align-items: center; gap: 6px;">📚 네이버 백과사전 정보</span>
-                                    <a id="detail-naver-link" href="#" target="_blank" style="font-size: 0.72rem; color: var(--text-muted); text-decoration: underline; font-weight: 600;">자세히 보기 ↗</a>
+                                <!-- Care Quick Action Row -->
+                                <div class="care-quick-actions">
+                                    <button class="care-action-btn water" id="btn-care-water">💧 물주기</button>
+                                    <button class="care-action-btn nutrient" id="btn-care-nutrient">💊 영양제</button>
+                                    <button class="care-action-btn repot" id="btn-care-repot">🪴 분갈이</button>
+                                    <button class="care-action-btn prune" id="btn-care-prune">✂️ 가지치기</button>
                                 </div>
-                                <p id="detail-naver-desc" style="font-size: 0.78rem; line-height: 1.45; color: var(--text-dark); margin: 0; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;"></p>
-                            </div>
 
-                            <!-- Tabs: Timeline vs Calendar -->
-                            <div class="detail-tabs">
-                                <button class="tab-btn active" data-tab="timeline">📜 성장 다이어리</button>
-                                <button class="tab-btn" data-tab="calendar">📅 관리 캘린더</button>
-                            </div>
-
-                            <!-- Tab Content: Timeline -->
-                            <div id="tab-content-timeline" class="tab-content active">
-                                <!-- Add Growth Log Inline Trigger -->
-                                <button id="btn-open-log-form" class="btn-open-log-form">
-                                    ✍️ 오늘 하루 성장 일지 남기기
-                                </button>
-
-                                <!-- Growth Log Form (Hidden by default) -->
-                                <form id="growth-log-form" class="growth-log-form" style="display: none;">
-                                    <h4>🌱 오늘의 기록 추가</h4>
-                                    
-                                    <div class="form-row-2">
-                                        <div class="form-group">
-                                            <label for="log-date">기록일</label>
-                                            <input type="date" id="log-date" class="form-input-text" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="log-care-type">돌봄 활동</label>
-                                            <select id="log-care-type" class="form-input-text">
-                                                <option value="none">기록만 (활동 없음)</option>
-                                                <option value="water">💧 물주기</option>
-                                                <option value="nutrient">💊 영양제 투여</option>
-                                                <option value="repot">🪴 분갈이</option>
-                                                <option value="prune">✂️ 가지치기</option>
-                                            </select>
-                                        </div>
+                                <!-- Naver Encyclopedia Description Card -->
+                                <div id="detail-naver-card" class="detail-naver-card" style="display: none;">
+                                    <div class="naver-card-header">
+                                        <span class="naver-title">📚 네이버 백과사전 정보</span>
+                                        <a id="detail-naver-link" href="#" target="_blank" class="naver-link">자세히 보기 ↗</a>
                                     </div>
+                                    <p id="detail-naver-desc" class="naver-desc"></p>
+                                </div>
 
-                                    <div class="form-group">
-                                        <label for="log-memo">돌봄 메모</label>
-                                        <textarea id="log-memo" class="form-input-text" rows="2" placeholder="식물의 변화나 메모를 적어주세요."></textarea>
-                                    </div>
+                                <!-- Tabs: Timeline vs Calendar -->
+                                <div class="detail-tabs">
+                                    <button class="tab-btn active" data-tab="timeline">📜 성장 다이어리</button>
+                                    <button class="tab-btn" data-tab="calendar">📅 관리 캘린더</button>
+                                </div>
 
-                                    <div class="form-group">
-                                        <label>식물 사진 추가 (선택)</label>
-                                        <div class="log-photo-upload-row">
-                                            <label class="btn-log-photo-upload">
-                                                <span>📷 사진 선택</span>
-                                                <input type="file" id="log-photo-input" accept="image/*" style="display: none;">
-                                            </label>
-                                            <div id="log-photo-preview" class="log-photo-preview checkerboard-bg" style="display: none;">
-                                                <img id="log-preview-img" src="" alt="미리보기">
-                                                <button type="button" id="btn-remove-log-photo" class="btn-remove-photo">&times;</button>
+                                <!-- Tab Content: Timeline -->
+                                <div id="tab-content-timeline" class="tab-content active">
+                                    <!-- Add Growth Log Inline Trigger -->
+                                    <button id="btn-open-log-form" class="btn-open-log-form">
+                                        ✍️ 오늘 하루 성장 일지 남기기
+                                    </button>
+
+                                    <!-- Growth Log Form (Hidden by default) -->
+                                    <form id="growth-log-form" class="growth-log-form" style="display: none;">
+                                        <h4>🌱 오늘의 기록 추가</h4>
+                                        
+                                        <div class="form-row-2">
+                                            <div class="form-group">
+                                                <label for="log-date">기록일</label>
+                                                <input type="date" id="log-date" class="form-input-text" required>
                                             </div>
-                                            <!-- AI Bg Remove toggle for logs -->
-                                            <label id="log-bg-remove-label" class="log-bg-remove-toggle" style="display: none;">
-                                                <input type="checkbox" id="log-bg-remove-checkbox"> AI 누끼 적용
-                                            </label>
+                                            <div class="form-group">
+                                                <label for="log-care-type">돌봄 활동</label>
+                                                <select id="log-care-type" class="form-input-text">
+                                                    <option value="none">기록만 (활동 없음)</option>
+                                                    <option value="water">💧 물주기</option>
+                                                    <option value="nutrient">💊 영양제 투여</option>
+                                                    <option value="repot">🪴 분갈이</option>
+                                                    <option value="prune">✂️ 가지치기</option>
+                                                </select>
+                                            </div>
                                         </div>
+
+                                        <div class="form-group">
+                                            <label for="log-memo">돌봄 메모</label>
+                                            <textarea id="log-memo" class="form-input-text" rows="2" placeholder="식물의 변화나 메모를 적어주세요."></textarea>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>식물 사진 추가 (선택)</label>
+                                            <div class="log-photo-upload-row">
+                                                <label class="btn-log-photo-upload">
+                                                    <span>📷 사진 선택</span>
+                                                    <input type="file" id="log-photo-input" accept="image/*" style="display: none;">
+                                                </label>
+                                                <div id="log-photo-preview" class="log-photo-preview checkerboard-bg" style="display: none;">
+                                                    <img id="log-preview-img" src="" alt="미리보기">
+                                                    <button type="button" id="btn-remove-log-photo" class="btn-remove-photo">&times;</button>
+                                                </div>
+                                                <!-- AI Bg Remove toggle for logs -->
+                                                <label id="log-bg-remove-label" class="log-bg-remove-toggle" style="display: none;">
+                                                    <input type="checkbox" id="log-bg-remove-checkbox"> AI 누끼 적용
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-actions-row">
+                                            <button type="button" id="btn-cancel-log-form" class="btn-secondary-sm">취소</button>
+                                            <button type="submit" class="btn-primary-sm">기록하기</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Timeline Vertical Stream -->
+                                    <div id="timeline-stream" class="timeline-stream">
+                                        <!-- Dynamic elements -->
                                     </div>
+                                </div>
 
-                                    <div class="form-actions-row">
-                                        <button type="button" id="btn-cancel-log-form" class="btn-secondary-sm">취소</button>
-                                        <button type="submit" class="btn-primary-sm">기록하기</button>
+                                <!-- Tab Content: Calendar -->
+                                <div id="tab-content-calendar" class="tab-content">
+                                    <div class="calendar-header-row">
+                                        <button id="btn-cal-prev" class="btn-cal-nav">&lt;</button>
+                                        <h4 id="calendar-title">2026년 6월</h4>
+                                        <button id="btn-cal-next" class="btn-cal-nav">&gt;</button>
                                     </div>
-                                </form>
-
-                                <!-- Timeline Vertical Stream -->
-                                <div id="timeline-stream" class="timeline-stream">
-                                    <!-- Dynamic elements -->
-                                </div>
-                            </div>
-
-                            <!-- Tab Content: Calendar -->
-                            <div id="tab-content-calendar" class="tab-content">
-                                <div class="calendar-header-row">
-                                    <button id="btn-cal-prev" class="btn-cal-nav">&lt;</button>
-                                    <h4 id="calendar-title">2026년 6월</h4>
-                                    <button id="btn-cal-next" class="btn-cal-nav">&gt;</button>
-                                </div>
-                                <div class="calendar-grid-header">
-                                    <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-                                </div>
-                                <div id="calendar-grid-body" class="calendar-grid-body">
-                                    <!-- Dynamic Calendar cells -->
-                                </div>
-                                <div class="calendar-legend">
-                                    <span>💧 물주기</span>
-                                    <span>💊 영양제</span>
-                                    <span>🪴 분갈이</span>
-                                    <span>✂️ 가지치기</span>
-                                    <span>📝 일지</span>
+                                    <div class="calendar-grid-header">
+                                        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+                                    </div>
+                                    <div id="calendar-grid-body" class="calendar-grid-body">
+                                        <!-- Dynamic Calendar cells -->
+                                    </div>
+                                    <div class="calendar-legend">
+                                        <span>💧 물주기</span>
+                                        <span>💊 영양제</span>
+                                        <span>🪴 분갈이</span>
+                                        <span>✂️ 가지치기</span>
+                                        <span>📝 일지</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 4. Premium Sticky Footer Bar -->
+                        <div class="detail-sticky-footer">
+                            <div class="footer-left-info">
+                                <span class="footer-label">수분 지수</span>
+                                <span id="detail-footer-moisture" class="footer-value">0%</span>
+                            </div>
+                            <button id="btn-footer-water-action" class="btn-footer-action">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none" style="vertical-align: middle; margin-right: 4px; margin-top: -2px;">
+                                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                                </svg>
+                                물주기 완료
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
                     </div>
                 </div>
 

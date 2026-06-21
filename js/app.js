@@ -986,6 +986,11 @@ function initDetailModalFlow() {
     document.getElementById('btn-care-repot').addEventListener('click', () => addCareActivity('repot'));
     document.getElementById('btn-care-prune').addEventListener('click', () => addCareActivity('prune'));
     
+    const footerWaterBtn = document.getElementById('btn-footer-water-action');
+    if (footerWaterBtn) {
+        footerWaterBtn.addEventListener('click', () => addCareActivity('water'));
+    }
+    
     // Tabs click
     document.querySelectorAll('#detail-modal .tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1085,10 +1090,10 @@ function openDetailModal(plantId) {
     adoptDate.setHours(0,0,0,0);
     const diffTime = today.getTime() - adoptDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    document.getElementById('detail-age').textContent = `함께한 지 ${diffDays}일째`;
+    document.getElementById('detail-age').textContent = `${diffDays}일`;
     
     // Cycle
-    document.getElementById('detail-cycle').textContent = `물주기: ${plant.waterInterval}일`;
+    document.getElementById('detail-cycle').textContent = `${plant.waterInterval}일`;
     
     // Water index progress fill
     let progressPercent = 0;
@@ -1097,6 +1102,11 @@ function openDetailModal(plantId) {
     }
     document.getElementById('water-progress-percent').textContent = `${progressPercent}%`;
     document.getElementById('water-progress-fill').style.width = `${progressPercent}%`;
+    
+    const footerMoisture = document.getElementById('detail-footer-moisture');
+    if (footerMoisture) {
+        footerMoisture.textContent = `${progressPercent}%`;
+    }
     
     // Render Naver Encyclopedia details
     const naverCard = document.getElementById('detail-naver-card');
