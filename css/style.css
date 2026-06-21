@@ -2981,10 +2981,10 @@ body {
 
 @keyframes gooeyPulse {
     0%, 100% {
-        transform: scale(1.15);
+        transform: scale(1);
     }
     45%, 55% {
-        transform: scale(0.9);
+        transform: scale(1);
     }
 }
 
