@@ -1,4 +1,4 @@
-// Serverless function to save global plants to Vercel KV
+// Serverless function to save global plants to Supabase
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,26 +29,29 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Invalid plants array.' });
   }
 
-  const kvUrl = process.env.KV_REST_API_URL || process.env.STORAGE_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN || process.env.STORAGE_REST_API_TOKEN;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  if (!kvUrl || !kvToken) {
-    return res.status(500).json({ error: 'Vercel KV is not connected.' });
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ error: 'Supabase configuration (SUPABASE_URL, SUPABASE_ANON_KEY) is missing.' });
   }
 
   try {
-    const response = await fetch(kvUrl, {
+    const url = `${supabaseUrl}/rest/v1/global_settings`;
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${kvToken}`,
-        'Content-Type': 'application/json'
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
       },
-      body: JSON.stringify(['SET', 'global:plants', JSON.stringify(plants)])
+      body: JSON.stringify({ key: 'plants', value: plants, updated_at: new Date().toISOString() })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(response.status).json({ error: `Vercel KV Error: ${errText}` });
+      return res.status(response.status).json({ error: `Supabase Error: ${errText}` });
     }
 
     return res.status(200).json({ success: true });

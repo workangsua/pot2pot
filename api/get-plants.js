@@ -1,4 +1,4 @@
-// Serverless function to retrieve global plants from Vercel KV
+// Serverless function to retrieve global plants from Supabase
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,37 +13,37 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const kvUrl = process.env.KV_REST_API_URL || process.env.STORAGE_REST_API_URL;
-  const kvToken = process.env.KV_REST_API_TOKEN || process.env.STORAGE_REST_API_TOKEN;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  if (!kvUrl || !kvToken) {
-    return res.status(500).json({ error: 'Vercel KV is not connected.' });
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ error: 'Supabase configuration (SUPABASE_URL, SUPABASE_ANON_KEY) is missing.' });
   }
 
   try {
-    const response = await fetch(kvUrl, {
-      method: 'POST',
+    const url = `${supabaseUrl}/rest/v1/global_settings?key=eq.plants&select=value`;
+    const response = await fetch(url, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${kvToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(['GET', 'global:plants'])
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(response.status).json({ error: `Vercel KV Error: ${errText}` });
+      return res.status(response.status).json({ error: `Supabase Error: ${errText}` });
     }
 
     const data = await response.json();
-    const result = data.result;
-
-    if (!result) {
+    
+    if (!data || data.length === 0) {
       return res.status(200).json({ plants: [] });
     }
 
-    const plants = JSON.parse(result);
-    return res.status(200).json({ plants });
+    // Since 'value' is a jsonb column, PostgREST returns it as a parsed JSON array/object directly
+    const plants = data[0].value;
+    return res.status(200).json({ plants: plants || [] });
   } catch (error) {
     console.error('Get plants error:', error);
     return res.status(500).json({ error: error.message });
