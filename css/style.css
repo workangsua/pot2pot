@@ -2744,7 +2744,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: flex;
@@ -2753,7 +2753,7 @@ body {
     z-index: 2000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .care-success-modal-overlay.active {
@@ -2764,19 +2764,21 @@ body {
 .care-success-card {
     background: #171d1a;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 28px;
+    border-radius: 32px;
     padding: 30px 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    transform: scale(0.9);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(20px) scale(0.92);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .care-success-modal-overlay.active .care-success-card {
-    transform: scale(1);
+    transform: translateY(0) scale(1);
+    opacity: 1;
 }
 
 .checkmark-wrapper {
@@ -2785,6 +2787,7 @@ body {
     margin-bottom: 20px;
 }
 
+/* Base checkmark styles */
 .checkmark {
     width: 80px;
     height: 80px;
@@ -2794,7 +2797,6 @@ body {
     stroke: #CDFF62;
     stroke-miterlimit: 10;
     box-shadow: inset 0px 0px 0px #CDFF62;
-    animation: fillCheckmark .4s ease-in-out .4s forwards, scaleCheckmark .3s ease-in-out .9s alternate;
 }
 
 .checkmark-circle {
@@ -2804,7 +2806,6 @@ body {
     stroke-miterlimit: 10;
     stroke: #CDFF62;
     fill: none;
-    animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
 }
 
 .checkmark-check {
@@ -2812,7 +2813,19 @@ body {
     stroke-dasharray: 48;
     stroke-dashoffset: 48;
     stroke: #121614; /* Dark checkmark on neon green background */
-    animation: strokeCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+/* Animations scoped to active modal */
+.care-success-modal-overlay.active .checkmark-circle {
+    animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.1s forwards;
+}
+
+.care-success-modal-overlay.active .checkmark {
+    animation: fillCheckmark 0.4s ease-in-out 0.5s forwards, scaleCheckmark 0.3s ease-in-out 0.9s alternate;
+}
+
+.care-success-modal-overlay.active .checkmark-check {
+    animation: strokeCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.7s forwards;
 }
 
 @keyframes strokeCircle {
