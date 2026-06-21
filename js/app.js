@@ -69,15 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
     
-    // Onboarding Screen Start button click handler
+    // Onboarding Screen Start button click handler & dynamic label
     const onboardingStartBtn = document.getElementById('btn-onboarding-start');
     if (onboardingStartBtn) {
+        if (AppState.plants && AppState.plants.length > 0) {
+            onboardingStartBtn.textContent = '시작하기';
+        } else {
+            onboardingStartBtn.textContent = '첫 마이팟 등록하고 시작하기';
+        }
+        
         onboardingStartBtn.addEventListener('click', () => {
             const onboarding = document.getElementById('onboarding-screen');
             if (onboarding) {
                 onboarding.classList.remove('active');
             }
-            openRegisterModal();
+            // Only open registration modal if user has no plants
+            if (!AppState.plants || AppState.plants.length === 0) {
+                openRegisterModal();
+            }
         });
     }
     
@@ -897,16 +906,6 @@ function getDDayClassAndText(days) {
 function renderArchive() {
     const grid = document.getElementById('plants-grid');
     grid.innerHTML = '';
-    
-    // Toggle onboarding overlay screen based on plant list
-    const onboarding = document.getElementById('onboarding-screen');
-    if (onboarding) {
-        if (AppState.plants.length === 0) {
-            onboarding.classList.add('active');
-        } else {
-            onboarding.classList.remove('active');
-        }
-    }
     
     if (AppState.plants.length === 0) {
         grid.innerHTML = `
