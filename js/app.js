@@ -1003,9 +1003,8 @@ function initDetailModalFlow() {
     
     // Quick care actions
     document.getElementById('btn-care-water').addEventListener('click', () => addCareActivity('water'));
-    document.getElementById('btn-care-nutrient').addEventListener('click', () => addCareActivity('nutrient'));
-    document.getElementById('btn-care-repot').addEventListener('click', () => addCareActivity('repot'));
-    document.getElementById('btn-care-prune').addEventListener('click', () => addCareActivity('prune'));
+    document.getElementById('btn-care-rotate').addEventListener('click', () => addCareActivity('rotate'));
+    document.getElementById('btn-care-trim').addEventListener('click', () => addCareActivity('trim'));
     
     const footerWaterBtn = document.getElementById('btn-footer-water-action');
     if (footerWaterBtn) {
@@ -1208,6 +1207,8 @@ function renderTimeline(plant) {
         let typeLabel = '';
         if (rec.type === 'adopt') { typeLabel = '정원 등록'; }
         else if (rec.type === 'water') { typeLabel = '물주기 완료'; }
+        else if (rec.type === 'rotate') { typeLabel = '화분 돌리기'; }
+        else if (rec.type === 'trim') { typeLabel = '하엽 정리'; }
         else if (rec.type === 'nutrient') { typeLabel = '영양제 투여'; }
         else if (rec.type === 'repot') { typeLabel = '분갈이 완료'; }
         else if (rec.type === 'prune') { typeLabel = '가지치기 완료'; }
@@ -1343,7 +1344,9 @@ function addCareActivity(type, memo = '') {
     openDetailModal(plant.id);
     
     let xpAward = 25;
-    if (type === 'repot') xpAward = 40;
+    if (type === 'rotate') xpAward = 20;
+    else if (type === 'trim') xpAward = 25;
+    else if (type === 'repot') xpAward = 40;
     else if (type === 'nutrient') xpAward = 30;
     else if (type === 'prune') xpAward = 20;
     addXP(xpAward);
@@ -1370,6 +1373,14 @@ function showCareSuccessModal(type, nickname) {
         case 'water':
             title = '물주기 완료';
             message = `${nickname}에게 물을 주었습니다.`;
+            break;
+        case 'rotate':
+            title = '화분 돌리기 완료';
+            message = `${nickname}의 화분을 돌려주었습니다.`;
+            break;
+        case 'trim':
+            title = '하엽 정리 완료';
+            message = `${nickname}의 하엽을 정리했습니다.`;
             break;
         case 'nutrient':
             title = '영양제 투여';
@@ -1414,6 +1425,8 @@ function showCareSuccessModal(type, nickname) {
 function getDefaultCareMemo(type, nickname) {
     switch(type) {
         case 'water': return `${nickname}에게 물을 주었습니다.`;
+        case 'rotate': return `${nickname}의 화분을 돌려 햇빛을 고르게 받게 해주었습니다.`;
+        case 'trim': return `${nickname}의 시들고 마른 하엽을 다듬고 정리했습니다.`;
         case 'nutrient': return `${nickname}에게 영양제를 투여했습니다.`;
         case 'repot': return `${nickname}의 흙과 화분을 갈아주었습니다. (분갈이)`;
         case 'prune': return `${nickname}의 마른 줄기와 이파리를 다듬어 주었습니다.`;

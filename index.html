@@ -496,10 +496,34 @@
 
                                 <!-- Care Quick Action Row -->
                                 <div class="care-quick-actions">
-                                    <button class="care-action-btn water" id="btn-care-water">물주기</button>
-                                    <button class="care-action-btn nutrient" id="btn-care-nutrient">영양제</button>
-                                    <button class="care-action-btn repot" id="btn-care-repot">분갈이</button>
-                                    <button class="care-action-btn prune" id="btn-care-prune">가지치기</button>
+                                    <div class="care-action-wrapper">
+                                        <button class="care-action-btn water" id="btn-care-water">
+                                            <svg class="care-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z"/>
+                                            </svg>
+                                        </button>
+                                        <span class="care-action-label">물주기</span>
+                                    </div>
+                                    <div class="care-action-wrapper">
+                                        <button class="care-action-btn rotate" id="btn-care-rotate">
+                                            <svg class="care-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="23 4 23 10 17 10"></polyline>
+                                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                            </svg>
+                                        </button>
+                                        <span class="care-action-label">화분 돌리기</span>
+                                    </div>
+                                    <div class="care-action-wrapper">
+                                        <button class="care-action-btn trim" id="btn-care-trim">
+                                            <svg class="care-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="6" cy="6" r="3"></circle>
+                                                <circle cx="6" cy="18" r="3"></circle>
+                                                <line x1="9.8" y1="8.2" x2="21" y2="19"></line>
+                                                <line x1="9.8" y1="15.8" x2="21" y2="5"></line>
+                                            </svg>
+                                        </button>
+                                        <span class="care-action-label">하엽 정리</span>
+                                    </div>
                                 </div>
 
                                 <!-- Naver Encyclopedia Description Card -->
@@ -594,11 +618,10 @@
                                         <!-- Dynamic Calendar cells -->
                                     </div>
                                     <div class="calendar-legend">
-                                        <span>물주기</span>
-                                        <span>영양제</span>
-                                        <span>분갈이</span>
-                                        <span>가지치기</span>
-                                        <span>일지</span>
+                                        <span><span class="cal-dot water" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>물주기</span>
+                                        <span><span class="cal-dot rotate" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>화분 돌리기</span>
+                                        <span><span class="cal-dot trim" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>하엽 정리</span>
+                                        <span><span class="cal-dot diary" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>일지</span>
                                     </div>
                                 </div>
                             </div>
@@ -643,7 +666,7 @@
                 <div id="onboarding-screen" class="onboarding-screen active">
                     <div class="onboarding-content">
                         <h1 class="onboarding-logo">POT2POT</h1>
-                        <p class="onboarding-subtitle">HOW TO LUV MA PLANT ♥</p>
+                        <p class="onboarding-subtitle">HOW TO LUV MA PLANT</p>
                         
                         <!-- Gooey metaball container -->
                         <div class="gooey-container">

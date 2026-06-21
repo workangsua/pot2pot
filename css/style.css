@@ -2049,57 +2049,93 @@ body {
 
 /* Care Quick Actions Row */
 .care-quick-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 16px;
+    margin: 20px 0 24px;
+    padding: 0 8px;
+}
+
+.care-action-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 8px;
-    margin-bottom: 20px;
+    flex: 1;
 }
 
 .care-action-btn {
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    padding: 12px 4px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 700;
     cursor: pointer;
-    background: #202824;
-    color: #ffffff;
     transition: var(--transition-smooth);
-    box-shadow: var(--shadow-sm);
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .care-action-btn:hover {
-    transform: translateY(-1px);
-    background: #28332e;
-    border-color: #CDFF62;
-    color: #CDFF62;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .care-action-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
 
 .care-action-btn.water {
     color: #60a5fa;
     border-color: rgba(96, 165, 250, 0.2);
 }
+.care-action-btn.water:hover {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: #60a5fa;
+}
 
-.care-action-btn.nutrient {
+.care-action-btn.rotate {
     color: #fbbf24;
     border-color: rgba(251, 191, 36, 0.2);
 }
-
-.care-action-btn.repot {
-    color: #a8a29e;
-    border-color: rgba(168, 162, 158, 0.2);
+.care-action-btn.rotate:hover {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: #fbbf24;
 }
 
-.care-action-btn.prune {
+.care-action-btn.trim {
     color: #34d399;
     border-color: rgba(52, 211, 153, 0.2);
+}
+.care-action-btn.trim:hover {
+    background: rgba(52, 211, 153, 0.1);
+    border-color: #34d399;
+}
+
+.care-action-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: var(--transition-smooth);
+}
+
+.care-action-wrapper:hover .care-action-label {
+    color: #ffffff;
+}
+
+.care-icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 /* Naver Card Accordion style matching */
@@ -2623,6 +2659,8 @@ body {
 }
 
 .cal-dot.water { background: #3b82f6; }
+.cal-dot.rotate { background: #f59e0b; }
+.cal-dot.trim { background: #10b981; }
 .cal-dot.nutrient { background: #f59e0b; }
 .cal-dot.repot { background: #78716c; }
 .cal-dot.prune { background: #10b981; }
