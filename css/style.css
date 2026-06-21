@@ -2868,5 +2868,152 @@ body {
     font-weight: 600;
 }
 
+/* ==========================================
+   Onboarding Overlay Screen & Gooey Animation
+   ========================================== */
+.onboarding-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #CDFF62; /* Neon Lime */
+    z-index: 1100; /* Sit above navigation and home indicator */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    box-sizing: border-box;
+    color: #121614; /* Deep Charcoal */
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.05);
+}
+
+.onboarding-screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.onboarding-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+}
+
+.onboarding-logo {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin-top: 60px;
+    margin-bottom: 8px;
+    color: #121614;
+}
+
+.onboarding-subtitle {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: rgba(18, 22, 20, 0.7);
+    line-height: 1.5;
+    max-width: 240px;
+    margin-bottom: auto;
+}
+
+.gooey-container {
+    position: relative;
+    width: 280px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: url('#gooey-filter');
+    margin: auto 0;
+    background: transparent;
+}
+
+.gooey-dot {
+    position: absolute;
+    top: calc(50% - 25px);
+    left: calc(50% - 25px);
+    width: 50px;
+    height: 50px;
+    background: #121614; /* Deep Charcoal */
+    border-radius: 50%;
+    will-change: transform;
+}
+
+.gooey-dot.dot-1 {
+    animation: gooeyMoveLeft 3.6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+.gooey-dot.dot-2 {
+    animation: gooeyPulse 3.6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+.gooey-dot.dot-3 {
+    animation: gooeyMoveRight 3.6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+@keyframes gooeyMoveLeft {
+    0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    45%, 55% {
+        transform: translate3d(-72px, 0, 0) scale(1);
+    }
+}
+
+@keyframes gooeyMoveRight {
+    0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    45%, 55% {
+        transform: translate3d(72px, 0, 0) scale(1);
+    }
+}
+
+@keyframes gooeyPulse {
+    0%, 100% {
+        transform: scale(1.15);
+    }
+    45%, 55% {
+        transform: scale(0.9);
+    }
+}
+
+.btn-onboarding-start {
+    width: 100%;
+    max-width: 320px;
+    background: #121614;
+    color: #CDFF62;
+    border: none;
+    padding: 18px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 25px rgba(18, 22, 20, 0.15);
+}
+
+.btn-onboarding-start:hover {
+    background: #252e2a;
+    transform: scale(1.03);
+    box-shadow: 0 12px 30px rgba(18, 22, 20, 0.25);
+}
+
+.btn-onboarding-start:active {
+    transform: scale(0.97);
+}
+
+
 
 
