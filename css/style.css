@@ -2078,43 +2078,22 @@ body {
     transition: var(--transition-smooth);
     position: relative;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: var(--text-muted); /* Default: App's text-muted gray */
 }
 
 .care-action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 16px rgba(205, 255, 98, 0.2);
+    background: rgba(205, 255, 98, 0.08); /* Hover: App's main neon-lime glow bg */
+    border-color: var(--forest-primary); /* Hover: App's main neon-lime border */
+    color: var(--forest-primary); /* Hover: App's main neon-lime icon */
 }
 
 .care-action-btn:active {
     transform: scale(0.94);
-}
-
-.care-action-btn.water {
-    color: #60a5fa;
-    border-color: rgba(96, 165, 250, 0.2);
-}
-.care-action-btn.water:hover {
-    background: rgba(96, 165, 250, 0.1);
-    border-color: #60a5fa;
-}
-
-.care-action-btn.rotate {
-    color: #fbbf24;
-    border-color: rgba(251, 191, 36, 0.2);
-}
-.care-action-btn.rotate:hover {
-    background: rgba(251, 191, 36, 0.1);
-    border-color: #fbbf24;
-}
-
-.care-action-btn.trim {
-    color: #34d399;
-    border-color: rgba(52, 211, 153, 0.2);
-}
-.care-action-btn.trim:hover {
-    background: rgba(52, 211, 153, 0.1);
-    border-color: #34d399;
+    background: rgba(205, 255, 98, 0.16); /* Active: App's main neon-lime active bg */
+    border-color: var(--forest-primary);
+    color: var(--forest-primary);
 }
 
 .care-action-label {
