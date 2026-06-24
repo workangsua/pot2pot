@@ -83,211 +83,13 @@ class PlantSegmenter {
             const width = this.width;
             const height = this.height;
 
-            // Sample border colors (with a tiny inset to avoid absolute edge artifacts)
-            const insetX = Math.max(2, Math.floor(width * 0.015));
-            const insetY = Math.max(2, Math.floor(height * 0.015));
-            
-            const borderColors = [];
-            const step = 6; // Densely sample every 6 pixels
-            
-            const addBorderColor = (x, y) => {
-                const idx = (y * width + x) * 4;
-                borderColors.push({
-                    r: pixels[idx],
-                    g: pixels[idx + 1],
-                    b: pixels[idx + 2]
-                });
-            };
-            
-            // Sample border colors (only top-left, top-right, and upper-sides to avoid pot and tall center plants)
-            // 1. Sample Top border but skip the middle 40% (x from 30% to 70% of width) where the plant is centered
-            const leftLimit = Math.floor(width * 0.30);
-            const rightLimit = Math.floor(width * 0.70);
-            for (let x = insetX; x < width - insetX; x += step) {
-                if (x < leftLimit || x > rightLimit) {
-                    addBorderColor(x, insetY);
-                }
-            }
-            // 2. Sample Left & Right borders but ONLY up to 60% of the height to avoid the pot
-            const maxHeightToSample = Math.floor(height * 0.60);
-            for (let y = insetY; y < maxHeightToSample; y += step) {
-                addBorderColor(insetX, y);
-                addBorderColor(width - 1 - insetX, y);
-            }
-
-            // Cluster colors to find distinct background color profiles
-            const uniqueColors = [];
-            const colorDiff = (c1, c2) => {
-                return Math.sqrt(
-                    Math.pow(c1.r - c2.r, 2) +
-                    Math.pow(c1.g - c2.g, 2) +
-                    Math.pow(c1.b - c2.b, 2)
-                );
-            };
-
-            borderColors.forEach(color => {
-                let found = false;
-                for (let uc of uniqueColors) {
-                    if (colorDiff(color, uc) < 18) { // Threshold for clustering
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    uniqueColors.push(color);
-                }
-            });
-
-            console.log(`Smart cutout: Sampled ${borderColors.length} border pixels, clustered into ${uniqueColors.length} unique colors.`);
-
-            // Initialize visited array and BFS queue
-            const visited = new Uint8Array(width * height);
-            const queue = [];
-            
-            const pushToQueue = (x, y) => {
-                const idx = y * width + x;
-                if (!visited[idx]) {
-                    visited[idx] = 1;
-                    queue.push(x, y);
-                }
-            };
-
-            // Calculate bounding box pixel boundaries if provided by Gemini AI
-            let pxYmin = 0, pxXmin = 0, pxYmax = height - 1, pxXmax = width - 1;
-            const hasBox = boundingBox && Array.isArray(boundingBox) && boundingBox.length === 4;
-            
-            if (hasBox) {
-                const [ymin, xmin, ymax, xmax] = boundingBox;
-                pxYmin = Math.max(0, Math.floor(ymin / 1000 * height));
-                pxXmin = Math.max(0, Math.floor(xmin / 1000 * width));
-                pxYmax = Math.min(height - 1, Math.floor(ymax / 1000 * height));
-                pxXmax = Math.min(width - 1, Math.floor(xmax / 1000 * width));
-
-                // 1. Mark everything OUTSIDE the bounding box as visited and transparent background in the mask
-                for (let y = 0; y < height; y++) {
-                    for (let x = 0; x < width; x++) {
-                        if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
-                            const idx = y * width + x;
-                            visited[idx] = 1; // Mark as visited so BFS doesn't process it
-                            
-                            const pixelIdx = idx * 4;
-                            maskPixels[pixelIdx] = 0;
-                            maskPixels[pixelIdx + 1] = 0;
-                            maskPixels[pixelIdx + 2] = 0;
-                            maskPixels[pixelIdx + 3] = 0;
-                        }
-                    }
-                }
-
-                // 2. Seed BFS from the perimeter of the bounding box
-                for (let x = pxXmin; x <= pxXmax; x++) {
-                    pushToQueue(x, pxYmin);
-                    pushToQueue(x, pxYmax);
-                }
-                for (let y = pxYmin; y <= pxYmax; y++) {
-                    pushToQueue(pxXmin, y);
-                    pushToQueue(pxXmax, y);
-                }
-            } else {
-                // No bounding box: seed from the absolute outer borders of the canvas
-                for (let x = 0; x < width; x++) {
-                    pushToQueue(x, 0);
-                    pushToQueue(x, height - 1);
-                }
-                for (let y = 1; y < height - 1; y++) {
-                    pushToQueue(0, y);
-                    pushToQueue(width - 1, y);
-                }
-            }
-
-            let head = 0;
-            const dx = [1, -1, 0, 0];
-            const dy = [0, 0, 1, -1];
-            
-            // Run BFS flood fill
-            while (head < queue.length) {
-                const cx = queue[head++];
-                const cy = queue[head++];
-                
-                // Mark as background in mask (transparent)
-                const cPixelIdx = (cy * width + cx) * 4;
-                maskPixels[cPixelIdx] = 0;
-                maskPixels[cPixelIdx + 1] = 0;
-                maskPixels[cPixelIdx + 2] = 0;
-                maskPixels[cPixelIdx + 3] = 0;
-                
-                for (let i = 0; i < 4; i++) {
-                    const nx = cx + dx[i];
-                    const ny = cy + dy[i];
-                    
-                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                        const nIdx = ny * width + nx;
-                        if (!visited[nIdx]) {
-                            const nPixelIdx = nIdx * 4;
-                            const nColor = {
-                                r: pixels[nPixelIdx],
-                                g: pixels[nPixelIdx + 1],
-                                b: pixels[nPixelIdx + 2]
-                            };
-                            
-                            // Check if neighbor matches any clustered border background color
-                            let matchesBg = false;
-                            for (let uc of uniqueColors) {
-                                if (colorDiff(nColor, uc) < tolerance) {
-                                    matchesBg = true;
-                                    break;
-                                }
-                            }
-                            
-                            if (matchesBg) {
-                                visited[nIdx] = 1;
-                                queue.push(nx, ny);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Mark all unvisited pixels as foreground (white/opaque)
-            for (let y = 0; y < height; y++) {
-                for (let x = 0; x < width; x++) {
-                    const idx = y * width + x;
-                    if (!visited[idx]) {
-                        const mIdx = idx * 4;
-                        maskPixels[mIdx] = 255;
-                        maskPixels[mIdx + 1] = 255;
-                        maskPixels[mIdx + 2] = 255;
-                        maskPixels[mIdx + 3] = 255;
-                    }
-                }
-            }
-
-            // Apply bounding box restriction if provided by Gemini AI (keeps only the plant + pot)
-            if (boundingBox) {
-                const [ymin, xmin, ymax, xmax] = boundingBox;
-                const pxYmin = Math.floor(ymin / 1000 * height);
-                const pxXmin = Math.floor(xmin / 1000 * width);
-                const pxYmax = Math.floor(ymax / 1000 * height);
-                const pxXmax = Math.floor(xmax / 1000 * width);
-                
-                for (let y = 0; y < height; y++) {
-                    for (let x = 0; x < width; x++) {
-                        if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
-                            const idx = (y * width + x) * 4;
-                            maskPixels[idx] = 0;
-                            maskPixels[idx + 1] = 0;
-                            maskPixels[idx + 2] = 0;
-                            maskPixels[idx + 3] = 0;
-                        }
-                    }
-                }
-            }
-            
-            // Apply polygon restriction if provided by Gemini AI (keeps only the plant + pot outline)
+            // 1. If Gemini AI polygon is provided, perform pixel-perfect Semantic Segmentation directly
             if (polygon && Array.isArray(polygon) && polygon.length >= 3) {
-                // Snap polygon to image edges for pixel-perfect contour alignment
+                console.log("AI Segmenter: Using snapped polygon for semantic segmentation.");
+                // Snap coarse polygon coordinates to local high-contrast color boundaries
                 const snappedPoints = this.snapPolygonToEdges(polygon, imgData, width, height);
                 
+                // Draw mask outline on a temp canvas to generate binary mask
                 const polyCanvas = document.createElement('canvas');
                 polyCanvas.width = width;
                 polyCanvas.height = height;
@@ -307,11 +109,206 @@ class PlantSegmenter {
                 for (let y = 0; y < height; y++) {
                     for (let x = 0; x < width; x++) {
                         const idx = (y * width + x) * 4;
-                        if (polyData[idx] === 0) { // If it's black (outside the polygon mask)
+                        if (polyData[idx] > 127) { // Inside the snapped polygon
+                            maskPixels[idx] = 255;
+                            maskPixels[idx + 1] = 255;
+                            maskPixels[idx + 2] = 255;
+                            maskPixels[idx + 3] = 255; // Keep foreground opaque
+                        } else { // Outside
                             maskPixels[idx] = 0;
                             maskPixels[idx + 1] = 0;
                             maskPixels[idx + 2] = 0;
-                            maskPixels[idx + 3] = 0;
+                            maskPixels[idx + 3] = 0; // Transparent background
+                        }
+                    }
+                }
+            } else {
+                // 2. FALLBACK: Color-based BFS flood-fill (useful for pure white or clean studio backgrounds)
+                console.log("Local Segmenter: Falling back to border-color based flood-fill BFS.");
+                
+                // Sample border colors (with a tiny inset to avoid absolute edge artifacts)
+                const insetX = Math.max(2, Math.floor(width * 0.015));
+                const insetY = Math.max(2, Math.floor(height * 0.015));
+                
+                const borderColors = [];
+                const step = 6; // Densely sample every 6 pixels
+                
+                const addBorderColor = (x, y) => {
+                    const idx = (y * width + x) * 4;
+                    borderColors.push({
+                        r: pixels[idx],
+                        g: pixels[idx + 1],
+                        b: pixels[idx + 2]
+                    });
+                };
+                
+                // Sample border colors (only top-left, top-right, and upper-sides to avoid pot and tall center plants)
+                const leftLimit = Math.floor(width * 0.30);
+                const rightLimit = Math.floor(width * 0.70);
+                for (let x = insetX; x < width - insetX; x += step) {
+                    if (x < leftLimit || x > rightLimit) {
+                        addBorderColor(x, insetY);
+                    }
+                }
+                const maxHeightToSample = Math.floor(height * 0.60);
+                for (let y = insetY; y < maxHeightToSample; y += step) {
+                    addBorderColor(insetX, y);
+                    addBorderColor(width - 1 - insetX, y);
+                }
+
+                // Cluster colors to find background profiles
+                const uniqueColors = [];
+                const colorDiff = (c1, c2) => {
+                    return Math.sqrt(
+                        Math.pow(c1.r - c2.r, 2) +
+                        Math.pow(c1.g - c2.g, 2) +
+                        Math.pow(c1.b - c2.b, 2)
+                    );
+                };
+
+                borderColors.forEach(color => {
+                    let found = false;
+                    for (let uc of uniqueColors) {
+                        if (colorDiff(color, uc) < 18) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) uniqueColors.push(color);
+                });
+
+                // Initialize visited array and BFS queue
+                const visited = new Uint8Array(width * height);
+                const queue = [];
+                
+                const pushToQueue = (x, y) => {
+                    const idx = y * width + x;
+                    if (!visited[idx]) {
+                        visited[idx] = 1;
+                        queue.push(x, y);
+                    }
+                };
+
+                // Seed BFS
+                let pxYmin = 0, pxXmin = 0, pxYmax = height - 1, pxXmax = width - 1;
+                const hasBox = boundingBox && Array.isArray(boundingBox) && boundingBox.length === 4;
+                
+                if (hasBox) {
+                    const [ymin, xmin, ymax, xmax] = boundingBox;
+                    pxYmin = Math.max(0, Math.floor(ymin / 1000 * height));
+                    pxXmin = Math.max(0, Math.floor(xmin / 1000 * width));
+                    pxYmax = Math.min(height - 1, Math.floor(ymax / 1000 * height));
+                    pxXmax = Math.min(width - 1, Math.floor(xmax / 1000 * width));
+
+                    for (let y = 0; y < height; y++) {
+                        for (let x = 0; x < width; x++) {
+                            if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
+                                const idx = y * width + x;
+                                visited[idx] = 1;
+                                
+                                const pixelIdx = idx * 4;
+                                maskPixels[pixelIdx] = 0;
+                                maskPixels[pixelIdx + 1] = 0;
+                                maskPixels[pixelIdx + 2] = 0;
+                                maskPixels[pixelIdx + 3] = 0;
+                            }
+                        }
+                    }
+
+                    for (let x = pxXmin; x <= pxXmax; x++) {
+                        pushToQueue(x, pxYmin);
+                        pushToQueue(x, pxYmax);
+                    }
+                    for (let y = pxYmin; y <= pxYmax; y++) {
+                        pushToQueue(pxXmin, y);
+                        pushToQueue(pxXmax, y);
+                    }
+                } else {
+                    for (let x = 0; x < width; x++) {
+                        pushToQueue(x, 0);
+                        pushToQueue(x, height - 1);
+                    }
+                    for (let y = 1; y < height - 1; y++) {
+                        pushToQueue(0, y);
+                        pushToQueue(width - 1, y);
+                    }
+                }
+
+                let head = 0;
+                const dx = [1, -1, 0, 0];
+                const dy = [0, 0, 1, -1];
+                
+                while (head < queue.length) {
+                    const cx = queue[head++];
+                    const cy = queue[head++];
+                    
+                    const cPixelIdx = (cy * width + cx) * 4;
+                    maskPixels[cPixelIdx] = 0;
+                    maskPixels[cPixelIdx + 1] = 0;
+                    maskPixels[cPixelIdx + 2] = 0;
+                    maskPixels[cPixelIdx + 3] = 0;
+                    
+                    for (let i = 0; i < 4; i++) {
+                        const nx = cx + dx[i];
+                        const ny = cy + dy[i];
+                        
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                            const nIdx = ny * width + nx;
+                            if (!visited[nIdx]) {
+                                const nPixelIdx = nIdx * 4;
+                                const nColor = {
+                                    r: pixels[nPixelIdx],
+                                    g: pixels[nPixelIdx + 1],
+                                    b: pixels[nPixelIdx + 2]
+                                };
+                                
+                                let matchesBg = false;
+                                for (let uc of uniqueColors) {
+                                    if (colorDiff(nColor, uc) < tolerance) {
+                                        matchesBg = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if (matchesBg) {
+                                    visited[nIdx] = 1;
+                                    queue.push(nx, ny);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const idx = y * width + x;
+                        if (!visited[idx]) {
+                            const mIdx = idx * 4;
+                            maskPixels[mIdx] = 255;
+                            maskPixels[mIdx + 1] = 255;
+                            maskPixels[mIdx + 2] = 255;
+                            maskPixels[mIdx + 3] = 255;
+                        }
+                    }
+                }
+
+                // Apply bounding box restriction if provided
+                if (boundingBox) {
+                    const [ymin, xmin, ymax, xmax] = boundingBox;
+                    const pxYmin = Math.floor(ymin / 1000 * height);
+                    const pxXmin = Math.floor(xmin / 1000 * width);
+                    const pxYmax = Math.floor(ymax / 1000 * height);
+                    const pxXmax = Math.floor(xmax / 1000 * width);
+                    
+                    for (let y = 0; y < height; y++) {
+                        for (let x = 0; x < width; x++) {
+                            if (x < pxXmin || x > pxXmax || y < pxYmin || y > pxYmax) {
+                                const idx = (y * width + x) * 4;
+                                maskPixels[idx] = 0;
+                                maskPixels[idx + 1] = 0;
+                                maskPixels[idx + 2] = 0;
+                                maskPixels[idx + 3] = 0;
+                            }
                         }
                     }
                 }
