@@ -232,6 +232,8 @@ function migrateExistingPlantsTo3D() {
             target3D = 'assets/clay_cactus_sticker.png';
         } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || theme === 'snake') {
             target3D = 'assets/clay_snake_sticker.png';
+        } else {
+            target3D = 'assets/clay_generic_sticker.png';
         }
         
         if (target3D && plant.image !== target3D) {
@@ -892,6 +894,9 @@ function saveNewPlant() {
         originalImage = realCutout;
     } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || AppState.selectedPreset === 'snake') {
         displayImage = 'assets/clay_snake_sticker.png';
+        originalImage = realCutout;
+    } else {
+        displayImage = 'assets/clay_generic_sticker.png';
         originalImage = realCutout;
     }
     
