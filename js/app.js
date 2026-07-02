@@ -1126,62 +1126,19 @@ function createStickerFromImage(croppedCanvas) {
 }
 
 async function generate3DClayStickerOnTheFly(speciesName) {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-    const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
-    
-    let base64Data;
     const prompt = `Minimalist 3D render of a cute ${speciesName} plant in a simple smooth matte beige ceramic pot. Stylized, smooth matte plastic/clay textures, clean shading, rounded shapes, pure solid white background, isolated, soft lighting, 3D asset style.`;
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=500&height=500&nologo=true&private=true&enhance=false`;
 
-    if (isLocal) {
-        if (!apiKey) {
-            throw new Error("Local API Key is missing. Configure it in settings or console.");
-        }
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [
-                    {
-                        role: "user",
-                        parts: [{ text: prompt }]
-                    }
-                ],
-                generationConfig: {
-                    responseModalities: ["IMAGE"],
-                    imageConfig: {
-                        aspectRatio: "1:1",
-                        imageSize: "1K"
-                    }
-                }
-            })
-        });
-        if (!res.ok) {
-            const txt = await res.text();
-            throw new Error(`Local Gemini 3.1 Image API error: ${txt}`);
-        }
-        const data = await res.json();
-        if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-            throw new Error("No image returned from local Gemini 3.1 Image API.");
-        }
-        base64Data = data.candidates[0].content.parts[0].inlineData.data;
-    } else {
-        const headers = { 'Content-Type': 'application/json' };
-        if (apiKey) {
-            headers['x-gemini-key'] = apiKey;
-        }
-        const res = await fetch('/api/gemini-image', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({ species: speciesName })
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Failed to generate image');
-        }
-        const data = await res.json();
-        base64Data = data.image;
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error('Failed to generate image from Pollinations AI');
     }
+    const blob = await res.blob();
+    const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+    });
     
     const stickerDataUrl = await new Promise((resolve, reject) => {
         const img = new Image();
@@ -1205,7 +1162,7 @@ async function generate3DClayStickerOnTheFly(speciesName) {
             }
         };
         img.onerror = () => reject(new Error('Failed to load generated image into canvas'));
-        img.src = `data:image/png;base64,${base64Data}`;
+        img.src = dataUrl;
     });
     
     return stickerDataUrl;
