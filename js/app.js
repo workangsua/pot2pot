@@ -1187,31 +1187,49 @@ async function saveNewPlant() {
         let displayImage = null;
         let originalImage = realCutout;
         
-        // 1. Check if it matches preset 3D icons first
-        if (species.includes('비모란') || nickname.includes('비모란')) {
+        // Smart Semantic Mapping to Curated 3D Clay Plant Stickers
+        const specLower = species.toLowerCase();
+        const nickLower = nickname.toLowerCase();
+        
+        function matches(keywords) {
+            return keywords.some(k => specLower.includes(k) || nickLower.includes(k));
+        }
+
+        if (matches(['비모란', 'graft cactus', 'bimoran'])) {
             displayImage = 'assets/clay_bimoran_sticker.png';
-        } else if (species.includes('레드베리') || nickname.includes('레드베리')) {
+        } else if (matches(['레드베리', 'redberry', 'red berry'])) {
             displayImage = 'assets/clay_redberry_sticker.png';
-        } else if (species.includes('오십령옥') || nickname.includes('오십령옥')) {
+        } else if (matches(['오십령옥', 'baby toes', 'babytoes', 'fenestraria'])) {
             displayImage = 'assets/clay_babytoes_sticker.png';
-        } else if (species.includes('크리스마스') || nickname.includes('크리스마스')) {
+        } else if (matches(['크리스마스', 'christmas', 'echeveria christmas'])) {
             displayImage = 'assets/clay_christmas_sticker.png';
-        } else if (species.includes('캐라리언') || nickname.includes('캐라리언') || AppState.selectedPreset === 'carlyan') {
+        } else if (matches(['캐라리언', 'carlyan', 'succulent carlyan'])) {
             displayImage = 'assets/clay_succulent_carlyan_sticker.png';
-        } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || AppState.selectedPreset === 'monstera') {
+        } else if (matches(['몬스테라', 'monstera', '필로덴드론', 'philodendron', '안스리움', 'anthurium', '칼라테아', 'calathea', '알로카시아', 'alocasia'])) {
             displayImage = 'assets/clay_monstera_sticker.png';
-        } else if (species.includes('선인장') || nickname.includes('선인장') || AppState.selectedPreset === 'cactus') {
+        } else if (matches(['선인장', 'cactus', '다육', 'succulent', '용과'])) {
             displayImage = 'assets/clay_cactus_sticker.png';
-        } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || AppState.selectedPreset === 'snake') {
+        } else if (matches(['산세베리아', 'sansevieria', '금전수', '돈나무', '스투키', 'stuckyi', 'zz plant', '스네이크', 'snake plant'])) {
+            displayImage = 'assets/clay_snake_sticker.png';
+        } else if (matches(['페페', '필레아', '동전패패', 'pepe', 'pilea', 'peperomia'])) {
+            displayImage = 'assets/clay_pepe_sticker.png';
+        } else if (matches(['아이비', 'ivy', '스킨답서스', 'scindapsus', '포토스', 'pothos', '싱고니움', 'syngonium', '트리안'])) {
+            displayImage = 'assets/clay_ivy_sticker.png';
+        } else if (matches(['야자', 'palm', '테이블야자', '아레카', '켄차', '야자수'])) {
+            displayImage = 'assets/clay_palm_sticker.png';
+        } else if (matches(['로즈마리', 'rosemary', '라벤더', 'lavender', '허브', 'herb', '민트', 'mint', '바질', 'basil', '유칼립투스', 'eucalyptus'])) {
+            displayImage = 'assets/clay_herb_sticker.png';
+        } else if (AppState.selectedPreset === 'carlyan') {
+            displayImage = 'assets/clay_succulent_carlyan_sticker.png';
+        } else if (AppState.selectedPreset === 'monstera') {
+            displayImage = 'assets/clay_monstera_sticker.png';
+        } else if (AppState.selectedPreset === 'cactus') {
+            displayImage = 'assets/clay_cactus_sticker.png';
+        } else if (AppState.selectedPreset === 'snake') {
             displayImage = 'assets/clay_snake_sticker.png';
         } else {
-            // 2. Custom Plant: Generate custom 3D clay plant icon using Imagen 3 on-the-fly!
-            try {
-                displayImage = await generate3DClayStickerOnTheFly(species);
-            } catch (genErr) {
-                console.error("Failed to generate custom 3D sticker on-the-fly, falling back to generic sprout:", genErr);
-                displayImage = 'assets/clay_generic_sticker.png';
-            }
+            // Default fallback is the generic sprout, which is extremely cute and matches the style perfectly!
+            displayImage = 'assets/clay_generic_sticker.png';
         }
     
         const newPlant = {
