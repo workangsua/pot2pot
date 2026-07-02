@@ -879,89 +879,426 @@ function initCanvasSegmenter() {
     tempImg.src = AppState.capturedImageSrc;
 }
 
-// Save Plant to Archive
-function saveNewPlant() {
-    const nickname = document.getElementById('plant-nickname').value.trim() || '내 식물';
-    const species = document.getElementById('plant-species').value.trim() || '반려식물';
-    const interval = parseInt(document.getElementById('water-slider').value);
-    const adoptionDate = document.getElementById('plant-adoption').value || new Date().toISOString();
+// --- On-the-fly 3D Clay Sticker Generation Canvas Helpers ---
+function removeBackgroundCanvas(ctx, width, height) {
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const data = imgData.data;
     
-    const realCutout = AppState.segmenter.getMaskedBase64();
-    let displayImage = realCutout;
-    let originalImage = null;
+    // Detect background color at top-left corner
+    const bgR = data[0];
+    const bgG = data[1];
+    const bgB = data[2];
     
-    // Check if it's '비모란', '레드베리', '오십령옥', '크리스마스', '캐라리언' or other presets and apply 3D icons
-    if (species.includes('비모란') || nickname.includes('비모란')) {
-        displayImage = 'assets/clay_bimoran_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('레드베리') || nickname.includes('레드베리')) {
-        displayImage = 'assets/clay_redberry_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('오십령옥') || nickname.includes('오십령옥')) {
-        displayImage = 'assets/clay_babytoes_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('크리스마스') || nickname.includes('크리스마스')) {
-        displayImage = 'assets/clay_christmas_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('캐라리언') || nickname.includes('캐라리언') || AppState.selectedPreset === 'carlyan') {
-        displayImage = 'assets/clay_succulent_carlyan_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || AppState.selectedPreset === 'monstera') {
-        displayImage = 'assets/clay_monstera_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('선인장') || nickname.includes('선인장') || AppState.selectedPreset === 'cactus') {
-        displayImage = 'assets/clay_cactus_sticker.png';
-        originalImage = realCutout;
-    } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || AppState.selectedPreset === 'snake') {
-        displayImage = 'assets/clay_snake_sticker.png';
-        originalImage = realCutout;
-    } else {
-        displayImage = 'assets/clay_generic_sticker.png';
-        originalImage = realCutout;
+    const potRimY = Math.floor(height * 0.55);
+    
+    // BFS for lower part (shadows)
+    const bfsMask = new Uint8Array(width * height);
+    const visited = new Uint8Array(width * height);
+    const queue = [];
+    
+    // Seed all edge pixels
+    for (let x = 0; x < width; x++) {
+        queue.push(0 * width + x); // top
+        queue.push((height - 1) * width + x); // bottom
+        visited[0 * width + x] = 1;
+        visited[(height - 1) * width + x] = 1;
+    }
+    for (let y = 1; y < height - 1; y++) {
+        queue.push(y * width + 0); // left
+        queue.push(y * width + (width - 1)); // right
+        visited[y * width + 0] = 1;
+        visited[y * width + (width - 1)] = 1;
     }
     
-    const newPlant = {
-        id: 'plant_' + Date.now(),
-        nickname: nickname,
-        species: species,
-        theme: AppState.selectedPreset || 'custom',
-        image: displayImage,
-        originalImage: originalImage,
-        waterInterval: interval,
-        lastWatered: new Date().toISOString(), // set last watered to today
-        adoptionDate: new Date(adoptionDate).toISOString(),
-        naverDesc: AppState.currentNaverData?.description || null,
-        naverLink: AppState.currentNaverData?.link || null,
-        records: [
-            {
-                id: 'rec_' + Date.now() + '_adopt',
-                date: new Date(adoptionDate).toISOString(),
-                type: 'adopt',
-                memo: `🌱 [${nickname}] 입양 및 POT2POT 화분 등록 완료!`
-            },
-            {
-                id: 'rec_' + Date.now() + '_water',
-                date: new Date().toISOString(),
-                type: 'water',
-                memo: `💧 정원 등록과 함께 첫 물주기 완료! (D-Day 주기가 오늘을 기점으로 자동 갱신되었습니다.)`
+    let head = 0;
+    while (head < queue.length) {
+        const curr = queue[head++];
+        const cy = Math.floor(curr / width);
+        const cx = curr % width;
+        
+        const idx = curr * 4;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        
+        const distBg = Math.sqrt((r - bgR)**2 + (g - bgG)**2 + (b - bgB)**2);
+        const isBgColor = distBg < 50;
+        
+        const colorRange = Math.max(r, g, b) - Math.min(r, g, b);
+        const isNeutralGray = colorRange < 20 && r > 80;
+        
+        if (isBgColor || isNeutralGray) {
+            bfsMask[curr] = 1;
+            for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+                const nx = cx + dx;
+                const ny = cy + dy;
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const nidx = ny * width + nx;
+                    if (visited[nidx] === 0) {
+                        visited[nidx] = 1;
+                        queue.push(nidx);
+                    }
+                }
             }
-        ]
-    };
+        }
+    }
     
-    AppState.plants.push(newPlant);
-    savePlantsToStorage();
+    // Apply hybrid mask
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            
+            if (y < potRimY) {
+                // Upper part: very tight global check (tolerance < 15)
+                const distBg = Math.sqrt((r - bgR)**2 + (g - bgG)**2 + (b - bgB)**2);
+                if (distBg < 15) {
+                    data[idx + 3] = 0; // transparent
+                }
+            } else {
+                // Lower part: BFS check
+                if (bfsMask[y * width + x] === 1) {
+                    data[idx + 3] = 0;
+                }
+            }
+        }
+    }
     
-    // Award XP
-    addXP(100);
-    checkBadgeTriggers();
+    ctx.putImageData(imgData, 0, 0);
+}
+
+function cleanCanvasStrayNoise(ctx, width, height) {
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const data = imgData.data;
     
-    // Refresh GUI
-    renderArchive();
+    const compIds = new Int32Array(width * height).fill(-1);
+    const compSizes = [];
+    let currentId = 0;
     
-    showAlert(`🌱 [${nickname}] 화분이 정상적으로 등록되었습니다!`);
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * 4;
+            const alpha = data[idx + 3];
+            
+            if (alpha > 8 && compIds[y * width + x] === -1) {
+                const component = [];
+                const queue = [y * width + x];
+                compIds[y * width + x] = currentId;
+                
+                let head = 0;
+                while (head < queue.length) {
+                    const curr = queue[head++];
+                    component.push(curr);
+                    
+                    const cy = Math.floor(curr / width);
+                    const cx = curr % width;
+                    
+                    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+                        const nx = cx + dx;
+                        const ny = cy + dy;
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                            const nidx = ny * width + nx;
+                            const nPixelIdx = nidx * 4;
+                            if (data[nPixelIdx + 3] > 8 && compIds[nidx] === -1) {
+                                compIds[nidx] = currentId;
+                                queue.push(nidx);
+                            }
+                        }
+                    }
+                }
+                
+                compSizes[currentId] = component.length;
+                currentId++;
+            }
+        }
+    }
     
-    // Close Modal
-    closeRegisterModal();
+    if (compSizes.length === 0) return;
+    
+    let largestId = 0;
+    let maxVal = 0;
+    for (let i = 0; i < compSizes.length; i++) {
+        if (compSizes[i] > maxVal) {
+            maxVal = compSizes[i];
+            largestId = i;
+        }
+    }
+    
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const idx = y * width + x;
+            if (compIds[idx] !== largestId) {
+                const pixelIdx = idx * 4;
+                data[pixelIdx + 3] = 0;
+            }
+        }
+    }
+    
+    ctx.putImageData(imgData, 0, 0);
+}
+
+function cropCanvasTransparent(canvas) {
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const data = imgData.data;
+    
+    let minX = width, maxX = 0, minY = height, maxY = 0;
+    
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const alpha = data[(y * width + x) * 4 + 3];
+            if (alpha > 8) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+        }
+    }
+    
+    if (maxX < minX || maxY < minY) return canvas;
+    
+    const cropW = (maxX - minX) + 1;
+    const cropH = (maxY - minY) + 1;
+    
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = cropW;
+    croppedCanvas.height = cropH;
+    croppedCanvas.getContext('2d').drawImage(canvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+    
+    return croppedCanvas;
+}
+
+function createStickerFromImage(croppedCanvas) {
+    const w = croppedCanvas.width;
+    const h = croppedCanvas.height;
+    
+    const outlineRadius = Math.max(6, Math.round(w * 0.022));
+    const shadowBlur = Math.max(4, Math.round(w * 0.012));
+    const shadowOffsetY = Math.max(2, Math.round(w * 0.008));
+    
+    const padding = outlineRadius + shadowBlur + shadowOffsetY + 15;
+    const newW = w + padding * 2;
+    const newH = h + padding * 2;
+    
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = newW;
+    finalCanvas.height = newH;
+    const finalCtx = finalCanvas.getContext('2d');
+    
+    finalCtx.save();
+    finalCtx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+    finalCtx.shadowBlur = shadowBlur;
+    finalCtx.shadowOffsetY = shadowOffsetY;
+    
+    const silCanvas = document.createElement('canvas');
+    silCanvas.width = newW;
+    silCanvas.height = newH;
+    const silCtx = silCanvas.getContext('2d');
+    silCtx.drawImage(croppedCanvas, padding, padding);
+    silCtx.globalCompositeOperation = 'source-in';
+    silCtx.fillStyle = '#FFFFFF';
+    silCtx.fillRect(0, 0, newW, newH);
+    
+    const steps = Math.max(16, Math.round(outlineRadius * 1.5));
+    for (let i = 0; i < steps; i++) {
+        const angle = (i / steps) * Math.PI * 2;
+        const dx = Math.round(Math.cos(angle) * outlineRadius);
+        const dy = Math.round(Math.sin(angle) * outlineRadius);
+        finalCtx.drawImage(silCanvas, dx, dy);
+    }
+    
+    for (let dx = -outlineRadius; dx <= outlineRadius; dx++) {
+        for (let dy = -outlineRadius; dy <= outlineRadius; dy++) {
+            if (dx*dx + dy*dy <= outlineRadius*outlineRadius) {
+                finalCtx.drawImage(silCanvas, dx, dy);
+            }
+        }
+    }
+    finalCtx.restore();
+    
+    finalCtx.drawImage(croppedCanvas, padding, padding);
+    return cropCanvasTransparent(finalCanvas);
+}
+
+async function generate3DClayStickerOnTheFly(speciesName) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+    const apiKey = localStorage.getItem('pot2pot_gemini_key') || AppState.geminiKey;
+    
+    let base64Data;
+    const prompt = `Minimalist 3D render of a cute ${speciesName} plant in a simple smooth matte beige ceramic pot. Stylized, smooth matte plastic/clay textures, clean shading, rounded shapes, pure solid white background, isolated, soft lighting, 3D asset style.`;
+
+    if (isLocal) {
+        if (!apiKey) {
+            throw new Error("Local API Key is missing. Configure it in settings or console.");
+        }
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                instances: [{ prompt: prompt }],
+                parameters: {
+                    sampleCount: 1,
+                    outputMimeType: "image/png",
+                    aspectRatio: "1:1"
+                }
+            })
+        });
+        if (!res.ok) {
+            const txt = await res.text();
+            throw new Error(`Local Imagen 3 API error: ${txt}`);
+        }
+        const data = await res.json();
+        if (!data.predictions || data.predictions.length === 0) {
+            throw new Error("No predictions returned from local Imagen API.");
+        }
+        base64Data = data.predictions[0].bytesBase64Encoded;
+    } else {
+        const headers = { 'Content-Type': 'application/json' };
+        if (apiKey) {
+            headers['x-gemini-key'] = apiKey;
+        }
+        const res = await fetch('/api/gemini-image', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ species: speciesName })
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to generate image');
+        }
+        const data = await res.json();
+        base64Data = data.image;
+    }
+    
+    const stickerDataUrl = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                
+                removeBackgroundCanvas(ctx, img.width, img.height);
+                cleanCanvasStrayNoise(ctx, img.width, img.height);
+                const croppedCanvas = cropCanvasTransparent(canvas);
+                const stickerCanvas = createStickerFromImage(croppedCanvas);
+                
+                resolve(stickerCanvas.toDataURL('image/png'));
+            } catch (err) {
+                reject(err);
+            }
+        };
+        img.onerror = () => reject(new Error('Failed to load generated image into canvas'));
+        img.src = `data:image/png;base64,${base64Data}`;
+    });
+    
+    return stickerDataUrl;
+}
+
+// Save Plant to Archive
+async function saveNewPlant() {
+    const btnSubmit = document.querySelector('.btn-submit-plant');
+    const originalBtnHTML = btnSubmit.innerHTML;
+    
+    // Disable submit button and show spinner
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<div class="ai-spinner" style="display:inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top: 2px solid #FFFFFF; border-radius: 50%; animation: ai-spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle;"></div> 3D 캐릭터 화분 생성 중...`;
+    
+    try {
+        const nickname = document.getElementById('plant-nickname').value.trim() || '내 식물';
+        const species = document.getElementById('plant-species').value.trim() || '반려식물';
+        const interval = parseInt(document.getElementById('water-slider').value);
+        const adoptionDate = document.getElementById('plant-adoption').value || new Date().toISOString();
+        
+        const realCutout = AppState.segmenter.getMaskedBase64();
+        let displayImage = null;
+        let originalImage = realCutout;
+        
+        // 1. Check if it matches preset 3D icons first
+        if (species.includes('비모란') || nickname.includes('비모란')) {
+            displayImage = 'assets/clay_bimoran_sticker.png';
+        } else if (species.includes('레드베리') || nickname.includes('레드베리')) {
+            displayImage = 'assets/clay_redberry_sticker.png';
+        } else if (species.includes('오십령옥') || nickname.includes('오십령옥')) {
+            displayImage = 'assets/clay_babytoes_sticker.png';
+        } else if (species.includes('크리스마스') || nickname.includes('크리스마스')) {
+            displayImage = 'assets/clay_christmas_sticker.png';
+        } else if (species.includes('캐라리언') || nickname.includes('캐라리언') || AppState.selectedPreset === 'carlyan') {
+            displayImage = 'assets/clay_succulent_carlyan_sticker.png';
+        } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || AppState.selectedPreset === 'monstera') {
+            displayImage = 'assets/clay_monstera_sticker.png';
+        } else if (species.includes('선인장') || nickname.includes('선인장') || AppState.selectedPreset === 'cactus') {
+            displayImage = 'assets/clay_cactus_sticker.png';
+        } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || AppState.selectedPreset === 'snake') {
+            displayImage = 'assets/clay_snake_sticker.png';
+        } else {
+            // 2. Custom Plant: Generate custom 3D clay plant icon using Imagen 3 on-the-fly!
+            try {
+                displayImage = await generate3DClayStickerOnTheFly(species);
+            } catch (genErr) {
+                console.error("Failed to generate custom 3D sticker on-the-fly, falling back to generic sprout:", genErr);
+                displayImage = 'assets/clay_generic_sticker.png';
+            }
+        }
+    
+        const newPlant = {
+            id: 'plant_' + Date.now(),
+            nickname: nickname,
+            species: species,
+            theme: AppState.selectedPreset || 'custom',
+            image: displayImage,
+            originalImage: originalImage,
+            waterInterval: interval,
+            lastWatered: new Date().toISOString(), // set last watered to today
+            adoptionDate: new Date(adoptionDate).toISOString(),
+            naverDesc: AppState.currentNaverData?.description || null,
+            naverLink: AppState.currentNaverData?.link || null,
+            records: [
+                {
+                    id: 'rec_' + Date.now() + '_adopt',
+                    date: new Date(adoptionDate).toISOString(),
+                    type: 'adopt',
+                    memo: `🌱 [${nickname}] 입양 및 POT2POT 화분 등록 완료!`
+                },
+                {
+                    id: 'rec_' + Date.now() + '_water',
+                    date: new Date().toISOString(),
+                    type: 'water',
+                    memo: `💧 정원 등록과 함께 첫 물주기 완료! (D-Day 주기가 오늘을 기점으로 자동 갱신되었습니다.)`
+                }
+            ]
+        };
+        
+        AppState.plants.push(newPlant);
+        savePlantsToStorage();
+        
+        // Award XP
+        addXP(100);
+        checkBadgeTriggers();
+        
+        // Refresh GUI
+        renderArchive();
+        
+        showAlert(`🌱 [${nickname}] 화분이 정상적으로 등록되었습니다!`);
+        
+        // Close Modal
+        closeRegisterModal();
+    } catch (err) {
+        console.error("Failed to save plant:", err);
+        showAlert("⚠️ 식물 등록 중에 오류가 발생했습니다.");
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalBtnHTML;
+    }
 }
 
 // --- D-Day Helper Calculations ---
