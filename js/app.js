@@ -224,7 +224,15 @@ function migrateExistingPlantsTo3D() {
         
         let target3D = null;
         
-        if (species.includes('캐라리언') || nickname.includes('캐라리언') || theme === 'carlyan') {
+        if (species.includes('비모란') || nickname.includes('비모란')) {
+            target3D = 'assets/clay_bimoran_sticker.png';
+        } else if (species.includes('레드베리') || nickname.includes('레드베리')) {
+            target3D = 'assets/clay_redberry_sticker.png';
+        } else if (species.includes('오십령옥') || nickname.includes('오십령옥')) {
+            target3D = 'assets/clay_babytoes_sticker.png';
+        } else if (species.includes('크리스마스') || nickname.includes('크리스마스')) {
+            target3D = 'assets/clay_christmas_sticker.png';
+        } else if (species.includes('캐라리언') || nickname.includes('캐라리언') || theme === 'carlyan') {
             target3D = 'assets/clay_succulent_carlyan_sticker.png';
         } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || theme === 'monstera') {
             target3D = 'assets/clay_monstera_sticker.png';
@@ -882,8 +890,20 @@ function saveNewPlant() {
     let displayImage = realCutout;
     let originalImage = null;
     
-    // Check if it's '캐라리언' (Echeveria Carlyan) or other presets and apply 3D icons
-    if (species.includes('캐라리언') || nickname.includes('캐라리언') || AppState.selectedPreset === 'carlyan') {
+    // Check if it's '비모란', '레드베리', '오십령옥', '크리스마스', '캐라리언' or other presets and apply 3D icons
+    if (species.includes('비모란') || nickname.includes('비모란')) {
+        displayImage = 'assets/clay_bimoran_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('레드베리') || nickname.includes('레드베리')) {
+        displayImage = 'assets/clay_redberry_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('오십령옥') || nickname.includes('오십령옥')) {
+        displayImage = 'assets/clay_babytoes_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('크리스마스') || nickname.includes('크리스마스')) {
+        displayImage = 'assets/clay_christmas_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('캐라리언') || nickname.includes('캐라리언') || AppState.selectedPreset === 'carlyan') {
         displayImage = 'assets/clay_succulent_carlyan_sticker.png';
         originalImage = realCutout;
     } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || AppState.selectedPreset === 'monstera') {
