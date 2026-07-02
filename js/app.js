@@ -1136,17 +1136,15 @@ async function generate3DClayStickerOnTheFly(speciesName) {
         if (!apiKey) {
             throw new Error("Local API Key is missing. Configure it in settings or console.");
         }
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`;
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                instances: [{ prompt: prompt }],
-                parameters: {
-                    sampleCount: 1,
-                    outputMimeType: "image/png",
-                    aspectRatio: "1:1"
-                }
+                prompt: prompt,
+                numberOfImages: 1,
+                outputMimeType: "image/png",
+                aspectRatio: "1:1"
             })
         });
         if (!res.ok) {
@@ -1154,10 +1152,10 @@ async function generate3DClayStickerOnTheFly(speciesName) {
             throw new Error(`Local Imagen 3 API error: ${txt}`);
         }
         const data = await res.json();
-        if (!data.predictions || data.predictions.length === 0) {
-            throw new Error("No predictions returned from local Imagen API.");
+        if (!data.generatedImages || data.generatedImages.length === 0) {
+            throw new Error("No generatedImages returned from local Imagen API.");
         }
-        base64Data = data.predictions[0].bytesBase64Encoded;
+        base64Data = data.generatedImages[0].image.imageBytes;
     } else {
         const headers = { 'Content-Type': 'application/json' };
         if (apiKey) {

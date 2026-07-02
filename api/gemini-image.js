@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${apiKey}`;
     
     // Construct the 3D clay plant generation prompt
     const prompt = `Minimalist 3D render of a cute ${species} plant in a simple smooth matte beige ceramic pot. Stylized, smooth matte plastic/clay textures, clean shading, rounded shapes, pure solid white background, isolated, soft lighting, 3D asset style.`;
@@ -43,14 +43,10 @@ module.exports = async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        instances: [
-          { prompt: prompt }
-        ],
-        parameters: {
-          sampleCount: 1,
-          outputMimeType: "image/png",
-          aspectRatio: "1:1"
-        }
+        prompt: prompt,
+        numberOfImages: 1,
+        outputMimeType: "image/png",
+        aspectRatio: "1:1"
       })
     });
 
@@ -61,11 +57,11 @@ module.exports = async (req, res) => {
 
     const data = await response.json();
     
-    if (!data.predictions || data.predictions.length === 0) {
-      return res.status(500).json({ error: 'No predictions returned from Gemini API (Imagen).' });
+    if (!data.generatedImages || data.generatedImages.length === 0) {
+      return res.status(500).json({ error: 'No generatedImages returned from Gemini API (Imagen).' });
     }
 
-    const base64Image = data.predictions[0].bytesBase64Encoded;
+    const base64Image = data.generatedImages[0].image.imageBytes;
     return res.status(200).json({ image: base64Image });
   } catch (error) {
     console.error('Gemini image serverless function error:', error);
