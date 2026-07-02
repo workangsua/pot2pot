@@ -45,6 +45,12 @@ const PLANT_PRESETS = {
         image: 'assets/snake.png',
         theme: 'snake',
         waterInterval: 10
+    },
+    carlyan: {
+        name: '캐라리언',
+        image: 'assets/clay_succulent_carlyan.png',
+        theme: 'carlyan',
+        waterInterval: 12
     }
 };
 
@@ -135,6 +141,9 @@ function loadDataFromStorage() {
     // Migrate and crop transparent borders from existing images (Gymnocalycium fix)
     migrateAndCropExistingPlants();
     
+    // Migrate existing plants to 3D clay icons if applicable
+    migrateExistingPlantsTo3D();
+    
     try {
         const savedGeminiKey = localStorage.getItem('pot2pot_gemini_key');
         if (savedGeminiKey) {
@@ -202,6 +211,43 @@ function migrateAndCropExistingPlants() {
             renderArchive();
         }
     });
+}
+
+function migrateExistingPlantsTo3D() {
+    if (!AppState.plants || AppState.plants.length === 0) return;
+    
+    let updated = false;
+    AppState.plants.forEach(plant => {
+        const species = plant.species || '';
+        const nickname = plant.nickname || '';
+        const theme = plant.theme || '';
+        
+        let target3D = null;
+        
+        if (species.includes('캐라리언') || nickname.includes('캐라리언') || theme === 'carlyan') {
+            target3D = 'assets/clay_succulent_carlyan_sticker.png';
+        } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || theme === 'monstera') {
+            target3D = 'assets/clay_monstera_sticker.png';
+        } else if (species.includes('선인장') || nickname.includes('선인장') || theme === 'cactus') {
+            target3D = 'assets/clay_cactus_sticker.png';
+        } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || theme === 'snake') {
+            target3D = 'assets/clay_snake_sticker.png';
+        }
+        
+        if (target3D && plant.image !== target3D) {
+            if (!plant.originalImage) {
+                plant.originalImage = plant.image;
+            }
+            plant.image = target3D;
+            updated = true;
+            console.log(`Migrated existing plant ${plant.nickname} to 3D thumbnail: ${target3D}`);
+        }
+    });
+    
+    if (updated) {
+        savePlantsToStorage();
+        renderArchive();
+    }
 }
 
 function initializeDefaultUser() {
@@ -830,12 +876,32 @@ function saveNewPlant() {
     const interval = parseInt(document.getElementById('water-slider').value);
     const adoptionDate = document.getElementById('plant-adoption').value || new Date().toISOString();
     
+    const realCutout = AppState.segmenter.getMaskedBase64();
+    let displayImage = realCutout;
+    let originalImage = null;
+    
+    // Check if it's '캐라리언' (Echeveria Carlyan) or other presets and apply 3D icons
+    if (species.includes('캐라리언') || nickname.includes('캐라리언') || AppState.selectedPreset === 'carlyan') {
+        displayImage = 'assets/clay_succulent_carlyan_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('몬스테라') || nickname.includes('몬스테라') || AppState.selectedPreset === 'monstera') {
+        displayImage = 'assets/clay_monstera_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('선인장') || nickname.includes('선인장') || AppState.selectedPreset === 'cactus') {
+        displayImage = 'assets/clay_cactus_sticker.png';
+        originalImage = realCutout;
+    } else if (species.includes('산세베리아') || nickname.includes('산세베리아') || AppState.selectedPreset === 'snake') {
+        displayImage = 'assets/clay_snake_sticker.png';
+        originalImage = realCutout;
+    }
+    
     const newPlant = {
         id: 'plant_' + Date.now(),
         nickname: nickname,
         species: species,
         theme: AppState.selectedPreset || 'custom',
-        image: AppState.segmenter.getMaskedBase64(),
+        image: displayImage,
+        originalImage: originalImage,
         waterInterval: interval,
         lastWatered: new Date().toISOString(), // set last watered to today
         adoptionDate: new Date(adoptionDate).toISOString(),
@@ -1093,7 +1159,7 @@ function openDetailModal(plantId) {
     // Fill text details
     document.getElementById('detail-nickname').textContent = plant.nickname;
     document.getElementById('detail-species').textContent = plant.species;
-    document.getElementById('detail-img').src = plant.image;
+    document.getElementById('detail-img').src = plant.originalImage || plant.image;
     
     // Calculate D-day stats
     const daysRemaining = getDaysRemaining(plant);
@@ -1799,6 +1865,10 @@ async function fetchNaverEncyclopedia(species) {
             '산세베리아': {
                 description: "산세베리아(Sansevieria)는 아스파라거스과의 한 속이다. 건조에 극도로 강하여 몇 달 동안 물을 주지 않아도 죽지 않는 생명력을 자랑한다. 공기 정화 능력이 탁월하고 밤에 산소를 배출하는 특성이 있어 침실용 식물로 추천된다.",
                 link: "https://terms.naver.com/entry.naver?docId=1108643&cid=40942&categoryId=32696"
+            },
+            '캐라리언': {
+                description: "캐라리언(Carlyan)은 에케베리아(Echeveria) 속의 다육식물로, 장미꽃 모양으로 촘촘히 돋아나는 도톰한 잎이 특징입니다. 햇빛을 충분히 받으면 끝 부분이 붉고 화사한 핑크빛으로 물들며, 건조에 강하고 과습에 약해 흙이 바짝 말랐을 때 물을 주어야 합니다.",
+                link: "https://terms.naver.com/search.naver?query=" + encodeURIComponent("다육 캐라리언")
             }
         };
         
