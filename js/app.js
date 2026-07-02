@@ -1136,28 +1136,35 @@ async function generate3DClayStickerOnTheFly(speciesName) {
         if (!apiKey) {
             throw new Error("Local API Key is missing. Configure it in settings or console.");
         }
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-fast-generate-001:predict?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                instances: [{ prompt: prompt }],
-                parameters: {
-                    sampleCount: 1,
-                    outputMimeType: "image/png",
-                    aspectRatio: "1:1"
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{ text: prompt }]
+                    }
+                ],
+                generationConfig: {
+                    responseModalities: ["IMAGE"],
+                    imageConfig: {
+                        aspectRatio: "1:1",
+                        imageSize: "1K"
+                    }
                 }
             })
         });
         if (!res.ok) {
             const txt = await res.text();
-            throw new Error(`Local Imagen 4 API error: ${txt}`);
+            throw new Error(`Local Gemini 3.1 Image API error: ${txt}`);
         }
         const data = await res.json();
-        if (!data.predictions || data.predictions.length === 0) {
-            throw new Error("No predictions returned from local Imagen API.");
+        if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+            throw new Error("No image returned from local Gemini 3.1 Image API.");
         }
-        base64Data = data.predictions[0].bytesBase64Encoded;
+        base64Data = data.candidates[0].content.parts[0].inlineData.data;
     } else {
         const headers = { 'Content-Type': 'application/json' };
         if (apiKey) {

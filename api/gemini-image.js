@@ -1,4 +1,4 @@
-// Serverless function to proxy Imagen 4 Fast API calls and hide API Key
+// Serverless function to proxy Gemini 3.1 Flash Image calls and hide API Key
 module.exports = async (req, res) => {
   // Set CORS Headers to allow client-side browser access
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -32,7 +32,8 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-fast-generate-001:predict?key=${apiKey}`;
+    // Use the newly listed Google AI Studio free tier model supporting native image generation: gemini-3.1-flash-image
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
     
     // Construct the 3D clay plant generation prompt
     const prompt = `Minimalist 3D render of a cute ${species} plant in a simple smooth matte beige ceramic pot. Stylized, smooth matte plastic/clay textures, clean shading, rounded shapes, pure solid white background, isolated, soft lighting, 3D asset style.`;
@@ -43,29 +44,34 @@ module.exports = async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        instances: [
-          { prompt: prompt }
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }]
+          }
         ],
-        parameters: {
-          sampleCount: 1,
-          outputMimeType: "image/png",
-          aspectRatio: "1:1"
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          imageConfig: {
+            aspectRatio: "1:1",
+            imageSize: "1K"
+          }
         }
       })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(response.status).json({ error: `Gemini API (Imagen 4) error: ${errText}` });
+      return res.status(response.status).json({ error: `Gemini API (Gemini 3.1 Image) error: ${errText}` });
     }
 
     const data = await response.json();
     
-    if (!data.predictions || data.predictions.length === 0) {
-      return res.status(500).json({ error: 'No predictions returned from Gemini API (Imagen 4).' });
+    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+      return res.status(500).json({ error: 'No image parts returned from Gemini API (Gemini 3.1 Image).' });
     }
 
-    const base64Image = data.predictions[0].bytesBase64Encoded;
+    const base64Image = data.candidates[0].content.parts[0].inlineData.data;
     return res.status(200).json({ image: base64Image });
   } catch (error) {
     console.error('Gemini image serverless function error:', error);
