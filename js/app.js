@@ -1315,45 +1315,143 @@ function getDDayClassAndText(days) {
 // Render Archive / Home dashboard
 function renderArchive() {
     const grid = document.getElementById('plants-grid');
-    grid.innerHTML = '';
+    const overviewContainer = document.getElementById('garden-overview');
     
-    if (AppState.plants.length === 0) {
-        grid.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🪴</div>
-                <h3>마이팟을 등록해보세요!</h3>
-            </div>
-        `;
-        return;
-    }
-    
-    AppState.plants.forEach(plant => {
-        const daysRemaining = getDaysRemaining(plant);
-        const ddayInfo = getDDayClassAndText(daysRemaining);
+    // 1. Calculate and Render Overall Garden Status (Overview)
+    if (overviewContainer) {
+        let urgentCount = 0;
+        let warningCount = 0;
+        let safeCount = 0;
+        const total = AppState.plants.length;
         
-        const card = document.createElement('div');
-        card.className = 'plant-card';
-        card.setAttribute('data-theme', plant.theme);
-        card.setAttribute('data-id', plant.id);
-        
-        card.innerHTML = `
-            <span class="d-day-badge ${ddayInfo.class}">${ddayInfo.text}</span>
-            <div class="img-wrapper">
-                <img src="${plant.image}" alt="${plant.nickname}">
-            </div>
-            <div class="info">
-                <h4 class="nickname">${plant.nickname}</h4>
-                <p class="species">${plant.species}</p>
-            </div>
-        `;
-        
-        // Show detailed view overlay on click
-        card.addEventListener('click', () => {
-            openDetailModal(plant.id);
+        AppState.plants.forEach(plant => {
+            const daysRemaining = getDaysRemaining(plant);
+            if (daysRemaining <= 0) {
+                urgentCount++;
+            } else if (daysRemaining <= 3) {
+                warningCount++;
+            } else {
+                safeCount++;
+            }
         });
         
-        grid.appendChild(card);
-    });
+        let score = 0;
+        let emoji = '🌱';
+        let summaryText = '';
+        
+        if (total === 0) {
+            score = 0;
+            emoji = '🌱';
+            summaryText = '🪴 아직 등록된 식물이 없습니다. 하단의 "+" 버튼을 눌러 첫 반려식물을 등록해 보세요!';
+        } else {
+            // Safe has weight 1.0, warning has weight 0.5, urgent has weight 0
+            score = Math.round(((safeCount + warningCount * 0.5) / total) * 100);
+            if (score >= 80) {
+                emoji = '🌿';
+                summaryText = '🟢 정원의 모든 식물들이 물을 듬뿍 머금고 건강하게 자라는 중입니다!';
+            } else if (score >= 40) {
+                emoji = '🪴';
+                summaryText = `⚠️ 조만간 물을 줘야 하는 식물이 <strong>${warningCount}개</strong> 있습니다. 일정을 체크해 주세요.`;
+            } else {
+                emoji = '🥀';
+                summaryText = `🚨 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
+            }
+            
+            // Overwrite summary if urgent count is greater than 0
+            if (urgentCount > 0) {
+                emoji = '🥀';
+                summaryText = `🚨 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
+            }
+        }
+        
+        const strokeDashOffset = total === 0 ? 251.2 : 251.2 - (251.2 * score) / 100;
+        
+        overviewContainer.innerHTML = `
+            <div class="overview-card">
+                <div class="overview-header">
+                    <h3 class="overview-title">정원 건강지수 Dashboard</h3>
+                </div>
+                <div class="overview-main">
+                    <div class="progress-circle-wrapper">
+                        <svg viewBox="0 0 100 100" class="progress-circle">
+                            <circle cx="50" cy="50" r="40" stroke="rgba(255, 255, 255, 0.06)" stroke-width="8" fill="transparent"></circle>
+                            <circle cx="50" cy="50" r="40" stroke="#CDFF62" stroke-width="8" fill="transparent"
+                                    stroke-dasharray="251.2" stroke-dashoffset="${strokeDashOffset}"
+                                    stroke-linecap="round" class="progress-circle-bar" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.8s ease-out;"></circle>
+                        </svg>
+                        <div class="progress-inner-content">
+                            <span class="progress-emoji">${emoji}</span>
+                            <span class="progress-percent">${total === 0 ? '-' : score + '%'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-legend">
+                        <div class="legend-item safe">
+                            <span class="dot"></span>
+                            <span class="label">안전함</span>
+                            <span class="count">${safeCount}개</span>
+                        </div>
+                        <div class="legend-item warning">
+                            <span class="dot"></span>
+                            <span class="label">주의 (3일 내)</span>
+                            <span class="count">${warningCount}개</span>
+                        </div>
+                        <div class="legend-item urgent">
+                            <span class="dot"></span>
+                            <span class="label">물 필요</span>
+                            <span class="count">${urgentCount}개</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="overview-summary-box">
+                    <p class="summary-text">${summaryText}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 2. Render Plants Grid
+    if (grid) {
+        grid.innerHTML = '';
+        
+        if (AppState.plants.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🪴</div>
+                    <h3>마이팟을 등록해보세요!</h3>
+                </div>
+            `;
+            return;
+        }
+        
+        AppState.plants.forEach(plant => {
+            const daysRemaining = getDaysRemaining(plant);
+            const ddayInfo = getDDayClassAndText(daysRemaining);
+            
+            const card = document.createElement('div');
+            card.className = 'plant-card';
+            card.setAttribute('data-theme', plant.theme);
+            card.setAttribute('data-id', plant.id);
+            
+            card.innerHTML = `
+                <span class="d-day-badge ${ddayInfo.class}">${ddayInfo.text}</span>
+                <div class="img-wrapper">
+                    <img src="${plant.image}" alt="${plant.nickname}">
+                </div>
+                <div class="info">
+                    <h4 class="nickname">${plant.nickname}</h4>
+                    <p class="species">${plant.species}</p>
+                </div>
+            `;
+            
+            // Show detailed view overlay on click
+            card.addEventListener('click', () => {
+                openDetailModal(plant.id);
+            });
+            
+            grid.appendChild(card);
+        });
+    }
 }
 
 // Water Plant Care Logic

@@ -432,6 +432,153 @@ body {
     display: none; /* Chrome/Safari */
 }
 
+
+/* ==========================================
+   Garden Overview Dashboard (Stats Circular Progress)
+   ========================================== */
+.garden-overview-container {
+    margin-bottom: 8px;
+    padding: 0 4px;
+}
+
+.overview-card {
+    background: #1e1e1e; /* dark container matching PWA theme */
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px;
+    padding: 16px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.overview-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    letter-spacing: -0.3px;
+    margin: 0;
+    text-transform: uppercase;
+    opacity: 0.95;
+}
+
+.overview-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+/* Donut Progress Circle */
+.progress-circle-wrapper {
+    position: relative;
+    width: 82px;
+    height: 82px;
+    flex-shrink: 0;
+}
+
+.progress-circle {
+    width: 100%;
+    height: 100%;
+}
+
+.progress-circle-bar {
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 3px rgba(205, 255, 98, 0.3)); /* neon glow */
+}
+
+.progress-inner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.1;
+}
+
+.progress-emoji {
+    font-size: 1.4rem;
+    margin-bottom: 1px;
+}
+
+.progress-percent {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--forest-primary);
+}
+
+/* Legend items list */
+.overview-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-grow: 1;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.legend-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-item.safe .dot {
+    background: #10b981; /* emerald safe */
+}
+
+.legend-item.warning .dot {
+    background: #f59e0b; /* amber warning */
+}
+
+.legend-item.urgent .dot {
+    background: #ef4444; /* red urgent */
+}
+
+.legend-item .label {
+    color: var(--text-muted);
+    flex-grow: 1;
+}
+
+.legend-item .count {
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+/* Summary Box */
+.overview-summary-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.summary-text {
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.35;
+}
+
+.summary-text strong {
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
 /* Plant Card (Lime Circular Sticker Design) */
 .plant-card {
     flex: 0 0 210px; /* fixed width in horizontal scroll */
