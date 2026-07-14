@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUserBadgeUI();
     initGardenCalendarFlow();
     initActionSelectionFlow();
+    initGrowthRecordFlow();
     
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
@@ -1548,51 +1549,11 @@ function initDetailModalFlow() {
         });
     });
     
-    // Open/Close Growth Log Form
-    document.getElementById('btn-open-log-form').addEventListener('click', openLogForm);
-    document.getElementById('btn-cancel-log-form').addEventListener('click', closeLogForm);
-    document.getElementById('btn-remove-log-photo').addEventListener('click', removeLogPhoto);
-    
-    // Log Photo Input
-    const logPhotoInput = document.getElementById('log-photo-input');
-    const logPhotoPreview = document.getElementById('log-photo-preview');
-    const logPreviewImg = document.getElementById('log-preview-img');
-    const logBgRemoveToggle = document.getElementById('log-bg-remove-label');
-    const logBgRemoveCheckbox = document.getElementById('log-bg-remove-checkbox');
-    
-    logPhotoInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                logPhotoBase64 = event.target.result;
-                logPreviewImg.src = logPhotoBase64;
-                logPhotoPreview.style.display = 'flex';
-                logBgRemoveToggle.style.display = 'flex';
-                logBgRemoveCheckbox.checked = false;
-            };
-            reader.readAsDataURL(file);
-        }
+    // Open Growth Log Wizard Modal
+    document.getElementById('btn-open-log-form').addEventListener('click', () => {
+        closeDetailModal();
+        openGrowthRecordModal(currentDetailPlantId);
     });
-    
-    logBgRemoveCheckbox.addEventListener('change', () => {
-        if (logBgRemoveCheckbox.checked && logPhotoBase64) {
-            const tempImg = new Image();
-            tempImg.onload = () => {
-                const tempCanvas = document.createElement('canvas');
-                const segmenter = new PlantSegmenter(tempCanvas, tempImg);
-                segmenter.autoRemoveWhiteBackground(25);
-                
-                logPhotoBase64 = segmenter.getMaskedBase64();
-                logPreviewImg.src = logPhotoBase64;
-                showAlert("🪄 사진에서 배경을 자동으로 제거(누끼)했습니다.");
-            };
-            tempImg.src = logPhotoBase64;
-        }
-    });
-    
-    // Submit log form
-    document.getElementById('growth-log-form').addEventListener('submit', saveGrowthLog);
     
     // Calendar Navigation
     document.getElementById('btn-cal-prev').addEventListener('click', () => navigateCalendar(-1));
@@ -2305,22 +2266,7 @@ function renderActionSelectPlantList() {
         
         item.addEventListener('click', () => {
             closeActionSelectionModal();
-            // Open plant details modal for this plant
-            openDetailModal(plant.id);
-            // Auto open growth log form, scroll to it, and trigger file chooser immediately
-            setTimeout(() => {
-                openLogForm();
-                const form = document.getElementById('growth-log-form');
-                if (form) {
-                    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-                
-                // Programmatically open the camera/gallery photo selector
-                const fileInput = document.getElementById('log-photo-input');
-                if (fileInput) {
-                    fileInput.click();
-                }
-            }, 300);
+            openGrowthRecordModal(plant.id);
         });
         
         list.appendChild(item);
@@ -2442,93 +2388,7 @@ function getDefaultCareMemo(type, nickname) {
     }
 }
 
-function openLogForm() {
-    document.getElementById('growth-log-form').style.display = 'flex';
-    document.getElementById('btn-open-log-form').style.display = 'none';
-    document.getElementById('log-date').valueAsDate = new Date();
-    
-    document.getElementById('log-photo-input').value = '';
-    document.getElementById('log-photo-preview').style.display = 'none';
-    document.getElementById('log-bg-remove-label').style.display = 'none';
-    document.getElementById('log-bg-remove-checkbox').checked = false;
-    logPhotoBase64 = null;
-    
-    document.getElementById('log-care-type').value = 'none';
-    document.getElementById('log-memo').value = '';
-}
 
-function closeLogForm() {
-    document.getElementById('growth-log-form').style.display = 'none';
-    document.getElementById('btn-open-log-form').style.display = 'block';
-    
-    document.getElementById('log-photo-input').value = '';
-    document.getElementById('log-photo-preview').style.display = 'none';
-    document.getElementById('log-bg-remove-label').style.display = 'none';
-    document.getElementById('log-bg-remove-checkbox').checked = false;
-    logPhotoBase64 = null;
-}
-
-function removeLogPhoto() {
-    document.getElementById('log-photo-input').value = '';
-    document.getElementById('log-photo-preview').style.display = 'none';
-    document.getElementById('log-bg-remove-label').style.display = 'none';
-    document.getElementById('log-bg-remove-checkbox').checked = false;
-    logPhotoBase64 = null;
-}
-
-function saveGrowthLog(e) {
-    e.preventDefault();
-    if (!currentDetailPlantId) return;
-    
-    const plant = AppState.plants.find(p => p.id === currentDetailPlantId);
-    if (!plant) return;
-    
-    const logDate = document.getElementById('log-date').value;
-    const careType = document.getElementById('log-care-type').value;
-    const memo = document.getElementById('log-memo').value.trim();
-    
-    const isActivity = careType !== 'none';
-    const type = isActivity ? careType : 'diary';
-    
-    const logDateObj = logDate ? new Date(logDate) : new Date();
-    // Keep today's current time for accuracy unless user changed date, in which case default to noon
-    const now = new Date();
-    if (logDateObj.toDateString() !== now.toDateString()) {
-        logDateObj.setHours(12, 0, 0, 0);
-    } else {
-        logDateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
-    }
-    
-    const newRecord = {
-        id: 'rec_' + Date.now(),
-        date: logDateObj.toISOString(),
-        type: type,
-        memo: memo || (isActivity ? getDefaultCareMemo(type, plant.nickname) : '오늘 하루 성장 일지를 기록했습니다.'),
-        image: logPhotoBase64 || null
-    };
-    
-    if (!plant.records) plant.records = [];
-    plant.records.push(newRecord);
-    
-    if (type === 'water') {
-        // Overwrite lastWatered if this is newer
-        if (!plant.lastWatered || new Date(newRecord.date) > new Date(plant.lastWatered)) {
-            plant.lastWatered = newRecord.date;
-        }
-    }
-    
-    savePlantsToStorage();
-    renderArchive();
-    openDetailModal(plant.id);
-    
-    addXP(isActivity ? 30 : 20);
-    if (type === 'water') {
-        unlockBadge('oasis');
-    }
-    
-    showCareSuccessModal(type, plant.nickname);
-    closeLogForm();
-}
 
 // --- Gemini API & AI Plant Analysis Helpers ---
 function getImageBase64(imgElement) {
@@ -2907,6 +2767,362 @@ async function syncPlantsToDatabase() {
     } catch (err) {
         console.warn("Database sync save failed (will retry on next change):", err);
     }
+}
+
+
+// --- Plant Growth Record Wizard (3-step Slider Flow) ---
+let currentGrowthRecordPlantId = null;
+let growthCameraStream = null;
+
+function initGrowthRecordFlow() {
+    const modal = document.getElementById('growth-record-modal');
+    const closeBtn = document.getElementById('growth-modal-close');
+    const backBtn = document.getElementById('growth-modal-back');
+    const container = document.getElementById('growth-step-container');
+    
+    if (!modal) return;
+    
+    closeBtn.addEventListener('click', closeGrowthRecordModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeGrowthRecordModal();
+    });
+    
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            if (AppState.growthStep > 1) {
+                goToGrowthStep(AppState.growthStep - 1);
+            }
+        });
+    }
+    
+    // Shutter capture trigger
+    document.getElementById('btn-growth-capture-shutter').addEventListener('click', () => {
+        captureGrowthSnapshot();
+    });
+    
+    // File Upload
+    const fileInput = document.getElementById('growth-file-upload-input');
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                AppState.growthCapturedImageSrc = event.target.result;
+                goToGrowthStep(2);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Brush buttons
+    const eraserBtn = document.getElementById('btn-growth-tool-erase');
+    const restoreBtn = document.getElementById('btn-growth-tool-restore');
+    const magicTapBtn = document.getElementById('btn-growth-tool-magic-tap');
+    const brushSlider = document.getElementById('growth-brush-size');
+    
+    eraserBtn.addEventListener('click', () => {
+        eraserBtn.classList.add('active');
+        restoreBtn.classList.remove('active');
+        magicTapBtn.classList.remove('active');
+        if (AppState.growthSegmenter) AppState.growthSegmenter.brushMode = 'erase';
+    });
+    
+    restoreBtn.addEventListener('click', () => {
+        restoreBtn.classList.add('active');
+        eraserBtn.classList.remove('active');
+        magicTapBtn.classList.remove('active');
+        if (AppState.growthSegmenter) AppState.growthSegmenter.brushMode = 'restore';
+    });
+    
+    magicTapBtn.addEventListener('click', () => {
+        magicTapBtn.classList.add('active');
+        eraserBtn.classList.remove('active');
+        restoreBtn.classList.remove('active');
+        if (AppState.growthSegmenter) AppState.growthSegmenter.brushMode = 'magic';
+    });
+    
+    brushSlider.addEventListener('input', (e) => {
+        if (AppState.growthSegmenter) AppState.growthSegmenter.brushSize = parseInt(e.target.value);
+    });
+    
+    // Auto remove white bg
+    document.getElementById('btn-growth-tool-magic').addEventListener('click', () => {
+        if (AppState.growthSegmenter) {
+            AppState.growthSegmenter.autoRemoveWhiteBackground(22);
+            showAlert("🪄 마법봉으로 배경을 자동으로 제거했습니다.");
+        }
+    });
+    
+    document.getElementById('btn-growth-tool-reset').addEventListener('click', () => {
+        if (AppState.growthSegmenter) {
+            AppState.growthSegmenter.resetMask();
+            showAlert("↩️ 원본 상태로 복구되었습니다.");
+        }
+    });
+    
+    // Step 2 next -> Step 3
+    document.getElementById('btn-growth-cutout-next').addEventListener('click', () => {
+        if (AppState.growthSegmenter) {
+            const cutoutBase64 = AppState.growthSegmenter.getMaskedBase64();
+            document.getElementById('growth-preview-cutout-img').src = cutoutBase64;
+            
+            const plant = AppState.plants.find(p => p.id === currentGrowthRecordPlantId);
+            if (plant) {
+                document.getElementById('growth-record-plant-name').textContent = `${plant.nickname} (${plant.species})`;
+            }
+            
+            // Set date to today
+            document.getElementById('growth-record-date').valueAsDate = new Date();
+            
+            goToGrowthStep(3);
+        }
+    });
+    
+    // Form submission
+    document.getElementById('growth-record-plant-form').addEventListener('submit', saveGrowthRecordLog);
+}
+
+function openGrowthRecordModal(plantId) {
+    currentGrowthRecordPlantId = plantId || currentDetailPlantId;
+    if (!currentGrowthRecordPlantId) return;
+    
+    const modal = document.getElementById('growth-record-modal');
+    if (modal) {
+        modal.classList.add('active');
+        goToGrowthStep(1);
+    }
+}
+
+function closeGrowthRecordModal() {
+    const modal = document.getElementById('growth-record-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+    stopGrowthCamera();
+}
+
+function goToGrowthStep(stepNum) {
+    AppState.growthStep = stepNum;
+    const container = document.getElementById('growth-step-container');
+    if (container) {
+        container.style.transform = `translateX(-${(stepNum - 1) * 100}%)`;
+    }
+    
+    // Dots
+    const dots = document.querySelectorAll('#growth-record-modal .step-indicator-dot');
+    dots.forEach((dot, idx) => {
+        if (idx < stepNum) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+    
+    // Back button visibility
+    const backBtn = document.getElementById('growth-modal-back');
+    if (backBtn) {
+        backBtn.style.visibility = stepNum > 1 ? 'visible' : 'hidden';
+    }
+    
+    // Actions based on step
+    if (stepNum === 1) {
+        startGrowthCamera();
+    } else if (stepNum === 2) {
+        stopGrowthCamera();
+        
+        // Show loading overlay
+        const overlay = document.getElementById('growth-editor-processing');
+        if (overlay) {
+            overlay.classList.add('active');
+            overlay.querySelector('p').textContent = "피사체 탐색 중... 0%";
+        }
+        
+        // Simulate progress while loading model / segmenter
+        let pct = 0;
+        const interval = setInterval(() => {
+            pct += 15;
+            if (pct >= 90) {
+                clearInterval(interval);
+            } else {
+                if (overlay) overlay.querySelector('p').textContent = `피사체 탐색 중... ${pct}%`;
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            clearInterval(interval);
+            if (overlay) {
+                overlay.querySelector('p').textContent = "피사체 탐색 중... 100%";
+            }
+            
+            if (overlay) overlay.classList.remove('active');
+            initGrowthCanvasSegmenter();
+        }, 800);
+    } else if (stepNum === 3) {
+        stopGrowthCamera();
+    }
+}
+
+function startGrowthCamera() {
+    const video = document.getElementById('growth-camera-stream');
+    const fallback = document.querySelector('#growth-step-1-view .camera-fallback-msg');
+    
+    if (!video) return;
+    
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+            growthCameraStream = stream;
+            video.srcObject = stream;
+            video.style.display = 'block';
+            if (fallback) fallback.style.display = 'none';
+        })
+        .catch(err => {
+            console.warn('Camera access failed:', err);
+            video.style.display = 'none';
+            if (fallback) fallback.style.display = 'block';
+        });
+}
+
+function stopGrowthCamera() {
+    if (growthCameraStream) {
+        growthCameraStream.getTracks().forEach(track => track.stop());
+        growthCameraStream = null;
+    }
+}
+
+function captureGrowthSnapshot() {
+    const video = document.getElementById('growth-camera-stream');
+    if (!video || !growthCameraStream) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    AppState.growthCapturedImageSrc = canvas.toDataURL('image/png');
+    goToGrowthStep(2);
+}
+
+function initGrowthCanvasSegmenter() {
+    const canvas = document.getElementById('growth-editor-canvas');
+    const tempImg = new Image();
+    
+    tempImg.onload = () => {
+        AppState.growthSegmenter = new PlantSegmenter(canvas, tempImg);
+        
+        // Touch/Mouse draw binding for Canvas
+        const getMousePos = (evt) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientX, clientY;
+            if (evt.touches) {
+                clientX = evt.touches[0].clientX;
+                clientY = evt.touches[0].clientY;
+            } else {
+                clientX = evt.clientX;
+                clientY = evt.clientY;
+            }
+            
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        };
+        
+        const handleStart = (e) => {
+            e.preventDefault();
+            const pos = getMousePos(e);
+            AppState.growthSegmenter.startDrawing(pos.x, pos.y);
+        };
+        
+        const handleMove = (e) => {
+            e.preventDefault();
+            if (AppState.growthSegmenter.isDrawing) {
+                const pos = getMousePos(e);
+                AppState.growthSegmenter.drawBrush(pos.x, pos.y);
+            }
+        };
+        
+        const handleEnd = () => {
+            AppState.growthSegmenter.stopDrawing();
+        };
+        
+        canvas.onmousedown = handleStart;
+        canvas.onmousemove = handleMove;
+        window.onmouseup = handleEnd;
+        
+        canvas.ontouchstart = handleStart;
+        canvas.ontouchmove = handleMove;
+        window.ontouchend = handleEnd;
+        
+        // Auto remove white background for uploaded files
+        if (AppState.growthCapturedImageSrc.startsWith('data:image')) {
+            AppState.growthSegmenter.autoRemoveWhiteBackground(22);
+        }
+    };
+    
+    tempImg.src = AppState.growthCapturedImageSrc;
+}
+
+function saveGrowthRecordLog(e) {
+    e.preventDefault();
+    if (!currentGrowthRecordPlantId) return;
+    
+    const plant = AppState.plants.find(p => p.id === currentGrowthRecordPlantId);
+    if (!plant) return;
+    
+    const logDate = document.getElementById('growth-record-date').value;
+    const careType = document.getElementById('growth-record-care-type').value;
+    const memo = document.getElementById('growth-record-memo').value.trim();
+    
+    const isActivity = careType !== 'none';
+    const type = isActivity ? careType : 'diary';
+    
+    const logDateObj = logDate ? new Date(logDate) : new Date();
+    const now = new Date();
+    if (logDateObj.toDateString() !== now.toDateString()) {
+        logDateObj.setHours(12, 0, 0, 0);
+    } else {
+        logDateObj.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+    }
+    
+    const cutoutBase64 = AppState.growthSegmenter ? AppState.growthSegmenter.getMaskedBase64() : null;
+    
+    const newRecord = {
+        id: 'rec_' + Date.now(),
+        date: logDateObj.toISOString(),
+        type: type,
+        memo: memo || (isActivity ? getDefaultCareMemo(type, plant.nickname) : '오늘 하루 성장 일지를 기록했습니다.'),
+        image: cutoutBase64
+    };
+    
+    if (!plant.records) plant.records = [];
+    plant.records.push(newRecord);
+    
+    if (type === 'water') {
+        if (!plant.lastWatered || new Date(newRecord.date) > new Date(plant.lastWatered)) {
+            plant.lastWatered = newRecord.date;
+        }
+    }
+    
+    savePlantsToStorage();
+    renderArchive();
+    
+    // Close growth record wizard
+    closeGrowthRecordModal();
+    
+    // Open plant details modal for this plant to let user view the archived image in carousel!
+    openDetailModal(plant.id);
+    
+    addXP(isActivity ? 30 : 20);
+    if (type === 'water') {
+        unlockBadge('oasis');
+    }
+    
+    showCareSuccessModal(type, plant.nickname);
 }
 
 

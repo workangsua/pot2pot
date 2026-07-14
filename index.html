@@ -220,6 +220,133 @@
                 </div><!-- app-viewport -->
 
                 <!-- ==========================================
+                     Modal Overlay: Plant Growth Record Wizard (3-step Slider Flow)
+                     ========================================== -->
+                <div id="growth-record-modal" class="modal-overlay">
+                    <div class="modal-sheet">
+                        
+                        <!-- Drag bar simulation -->
+                        <div class="modal-drag-handle"></div>
+                        
+                        <header class="modal-header">
+                            <button id="growth-modal-back" class="modal-back-btn" style="visibility: hidden;">&lt;</button>
+                            <h3 id="growth-modal-title">일지 기록하기</h3>
+                            <button id="growth-modal-close" class="modal-close-btn">&times;</button>
+                        </header>
+
+                        <!-- Step indicator bar -->
+                        <div class="step-indicator-bar">
+                            <div class="step-indicator-dot active"></div>
+                            <div class="step-indicator-dot"></div>
+                            <div class="step-indicator-dot"></div>
+                        </div>
+
+                        <!-- Horizontal slider steps container -->
+                        <div id="growth-step-container" class="modal-step-container">
+                            
+                            <!-- STEP 1: Camera Scan & Image Selection -->
+                            <div id="growth-step-1-view" class="modal-step-view">
+                                <div class="scan-scanner-box">
+                                    <div class="laser-line"></div>
+                                    <div class="scanner-target-overlay"></div>
+                                    <video id="growth-camera-stream" autoplay playsinline></video>
+                                    <div class="camera-fallback-msg" style="display: none;">
+                                        <span class="warn-icon">⚠️</span>
+                                        <h4>카메라 권한 / 보안 오류</h4>
+                                        <p>대신 하단의 <strong>[사진 올리기]</strong> 버튼을 통해 사진을 업로드해 주세요.</p>
+                                    </div>
+                                </div>
+                                <div class="scanner-actions">
+                                    <label class="btn-upload-file">
+                                        <div class="upload-icon">📁</div>
+                                        <span>사진 올리기</span>
+                                        <input type="file" id="growth-file-upload-input" accept="image/*" style="display: none;">
+                                    </label>
+                                    <button id="btn-growth-capture-shutter" class="btn-shutter" aria-label="셔터 촬영">
+                                        <div class="btn-shutter-inner"></div>
+                                    </button>
+                                    <div style="width: 44px; text-align: center; font-size: 0.75rem; color: var(--text-muted); opacity: 0.5;">
+                                        <span>실시간 스캔</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 2: AI BG Remove (Canvas masking) -->
+                            <div id="growth-step-2-view" class="modal-step-view">
+                                <div class="editor-canvas-container">
+                                    <div id="growth-editor-processing" class="editor-processing-overlay">
+                                        <div class="loading-spinner"></div>
+                                        <h4>AI 배경 인지 분리 중...</h4>
+                                        <p>피사체 탐색 중... 0%</p>
+                                    </div>
+                                    <canvas id="growth-editor-canvas"></canvas>
+                                </div>
+                                <div class="editor-toolbar">
+                                    <div class="brush-controls">
+                                        <div class="brush-modes">
+                                            <button id="btn-growth-tool-erase" class="btn-brush-mode active">지우개</button>
+                                            <button id="btn-growth-tool-restore" class="btn-brush-mode">그림 복원</button>
+                                            <button id="btn-growth-tool-magic-tap" class="btn-brush-mode">마법봉</button>
+                                        </div>
+                                        <div class="brush-sizes">
+                                            <span>크기</span>
+                                            <input type="range" id="growth-brush-size" class="brush-size-slider" min="5" max="60" value="24">
+                                        </div>
+                                    </div>
+                                    <div class="editor-actions-row">
+                                        <button id="btn-growth-tool-magic" class="btn-editor-util" title="흰색 배경 자동 지우기">자동 누끼</button>
+                                        <button id="btn-growth-tool-reset" class="btn-editor-util" title="초기 상태로 복구">초기화</button>
+                                        <button id="btn-growth-cutout-next" class="btn-editor-next">확인</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: Growth Log Setup Form -->
+                            <div id="growth-step-3-view" class="modal-step-view">
+                                <form id="growth-record-plant-form" class="form-scroll-container">
+                                    <div class="form-plant-preview-box">
+                                        <div class="form-plant-preview-img-wrapper">
+                                            <img id="growth-preview-cutout-img" src="" alt="식물 누끼 이미지">
+                                        </div>
+                                        <div class="form-plant-preview-info">
+                                            <h4 id="growth-record-plant-name">식물 이름</h4>
+                                            <p>성장 기록용 투명 누끼본 생성 완료</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="growth-record-date">기록일</label>
+                                        <input type="date" id="growth-record-date" class="form-input-text" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="growth-record-care-type">돌봄 활동</label>
+                                        <select id="growth-record-care-type" class="form-input-text">
+                                            <option value="none">기록만 (활동 없음)</option>
+                                            <option value="water">물주기</option>
+                                            <option value="nutrient">영양제 투여</option>
+                                            <option value="repot">분갈이</option>
+                                            <option value="prune">가지치기</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="growth-record-memo">돌봄 메모</label>
+                                        <textarea id="growth-record-memo" class="form-input-text" rows="3" placeholder="식물의 변화나 메모를 적어주세요."></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn-submit-plant">
+                                        기록하기
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div><!-- modal-step-container -->
+                        
+                    </div><!-- modal-sheet -->
+                </div><!-- modal-overlay -->
+
+                <!-- ==========================================
                      Modal Overlay: Plant Registration (3-step Slider Flow)
                      ========================================== -->
                 <div id="register-modal" class="modal-overlay">
@@ -553,55 +680,6 @@
                                         오늘 하루 성장 일지 남기기
                                     </button>
 
-                                    <!-- Growth Log Form (Hidden by default) -->
-                                    <form id="growth-log-form" class="growth-log-form" style="display: none;">
-                                        <h4>오늘의 기록 추가</h4>
-                                        
-                                        <div class="form-row-2">
-                                            <div class="form-group">
-                                                <label for="log-date">기록일</label>
-                                                <input type="date" id="log-date" class="form-input-text" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="log-care-type">돌봄 활동</label>
-                                                <select id="log-care-type" class="form-input-text">
-                                                    <option value="none">기록만 (활동 없음)</option>
-                                                    <option value="water">물주기</option>
-                                                    <option value="nutrient">영양제 투여</option>
-                                                    <option value="repot">분갈이</option>
-                                                    <option value="prune">가지치기</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="log-memo">돌봄 메모</label>
-                                            <textarea id="log-memo" class="form-input-text" rows="2" placeholder="식물의 변화나 메모를 적어주세요."></textarea>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>식물 사진 추가 (선택)</label>
-                                            <div class="log-photo-upload-row">
-                                                <label class="btn-log-photo-upload">
-                                                    <span>사진 선택</span>
-                                                    <input type="file" id="log-photo-input" accept="image/*" style="display: none;">
-                                                </label>
-                                                <div id="log-photo-preview" class="log-photo-preview checkerboard-bg" style="display: none;">
-                                                    <img id="log-preview-img" src="" alt="미리보기">
-                                                    <button type="button" id="btn-remove-log-photo" class="btn-remove-photo">&times;</button>
-                                                </div>
-                                                <!-- AI Bg Remove toggle for logs -->
-                                                <label id="log-bg-remove-label" class="log-bg-remove-toggle" style="display: none;">
-                                                    <input type="checkbox" id="log-bg-remove-checkbox"> AI 누끼 적용
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-actions-row">
-                                            <button type="button" id="btn-cancel-log-form" class="btn-secondary-sm">취소</button>
-                                            <button type="submit" class="btn-primary-sm">기록하기</button>
-                                        </div>
-                                    </form>
 
                                     <!-- Timeline Vertical Stream -->
                                     <div id="timeline-stream" class="timeline-stream">
