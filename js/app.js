@@ -2307,12 +2307,18 @@ function renderActionSelectPlantList() {
             closeActionSelectionModal();
             // Open plant details modal for this plant
             openDetailModal(plant.id);
-            // Auto open growth log form and scroll to it
+            // Auto open growth log form, scroll to it, and trigger file chooser immediately
             setTimeout(() => {
                 openLogForm();
                 const form = document.getElementById('growth-log-form');
                 if (form) {
                     form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                
+                // Programmatically open the camera/gallery photo selector
+                const fileInput = document.getElementById('log-photo-input');
+                if (fileInput) {
+                    fileInput.click();
                 }
             }, 300);
         });
