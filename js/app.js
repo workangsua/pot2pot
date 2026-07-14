@@ -1536,10 +1536,6 @@ function initDetailModalFlow() {
     document.getElementById('btn-care-rotate').addEventListener('click', () => addCareActivity('rotate'));
     document.getElementById('btn-care-trim').addEventListener('click', () => addCareActivity('trim'));
     
-    const footerWaterBtn = document.getElementById('btn-footer-water-action');
-    if (footerWaterBtn) {
-        footerWaterBtn.addEventListener('click', () => addCareActivity('water'));
-    }
     
     // Tabs click
     document.querySelectorAll('#detail-modal .tab-btn').forEach(btn => {
@@ -1645,9 +1641,9 @@ function openDetailModal(plantId) {
     document.getElementById('water-progress-percent').textContent = `${progressPercent}%`;
     document.getElementById('water-progress-fill').style.width = `${progressPercent}%`;
     
-    const footerMoisture = document.getElementById('detail-footer-moisture');
-    if (footerMoisture) {
-        footerMoisture.textContent = `${progressPercent}%`;
+    const cardMoisture = document.getElementById('detail-card-moisture');
+    if (cardMoisture) {
+        cardMoisture.textContent = `수분지수 ${progressPercent}%`;
     }
     
     // Render Naver Encyclopedia details

@@ -2011,7 +2011,7 @@ body {
 }
 
 .detail-scroll-content {
-    padding: 16px 16px 96px; /* Added large bottom padding to accommodate sticky footer */
+    padding: 16px 16px 24px;
     flex-grow: 1;
     overflow-y: auto;
 }
@@ -2536,74 +2536,12 @@ body {
     padding-bottom: 6px;
 }
 
-/* Premium Sticky Footer Bar */
-.detail-sticky-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 76px;
-    background: #CDFF62;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.2);
-    z-index: 100;
-    border-radius: 0 0 36px 36px; /* Curve with the bottom sheet */
-}
-
-/* On desktop, the sheet itself has a different border-radius or container size, let's make sure it fits */
-@media screen and (min-width: 769px) {
-    .detail-sticky-footer {
-        border-radius: 0 0 28px 28px;
-    }
-}
-
-.footer-left-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.footer-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #121614;
-    opacity: 0.6;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.footer-value {
-    font-size: 1.3rem;
-    font-weight: 850;
-    color: #121614;
-    margin-top: 1px;
-}
-
-.btn-footer-action {
-    background: #121614;
-    color: #CDFF62;
-    border: none;
-    border-radius: 16px;
-    padding: 12px 20px;
-    font-size: 0.85rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.btn-footer-action:hover {
-    transform: scale(1.02);
-    background: #1e2521;
-}
-
-.btn-footer-action:active {
-    transform: scale(0.97);
+/* Moisture Index on Lime Card */
+.lime-info-moisture {
+    font-size: 0.72rem;
+    font-weight: 750;
+    color: rgba(18, 22, 20, 0.8);
+    margin-top: 2px;
 }
 
 .form-row-2 {
