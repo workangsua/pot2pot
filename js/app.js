@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBadges();
     updateUserBadgeUI();
     initGardenCalendarFlow();
+    initActionSelectionFlow();
     
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
@@ -340,7 +341,7 @@ function initNavigation() {
     // Add Plant FAB
     const addPlantBtn = document.querySelector('.nav-item.add-pot');
     addPlantBtn.addEventListener('click', () => {
-        openRegisterModal();
+        openActionSelectionModal();
     });
     
     // Trophy Button click to open unified garden calendar modal
@@ -1621,7 +1622,21 @@ function openDetailModal(plantId) {
     // Fill text details
     document.getElementById('detail-nickname').textContent = plant.nickname;
     document.getElementById('detail-species').textContent = plant.species;
-    document.getElementById('detail-img').src = plant.originalImage || plant.image;
+    
+    // Collect all archived background-removed sticker images
+    const plantPhotos = [plant.image];
+    if (plant.records) {
+        const sortedRecsForPhotos = [...plant.records].sort((a, b) => new Date(a.date) - new Date(b.date));
+        sortedRecsForPhotos.forEach(rec => {
+            if (rec.image && !plantPhotos.includes(rec.image)) {
+                plantPhotos.push(rec.image);
+            }
+        });
+    }
+    
+    // Setup image carousel
+    currentCarouselIdx = 0;
+    setupDetailCarousel(plantPhotos);
     
     // Calculate D-day stats
     const daysRemaining = getDaysRemaining(plant);
@@ -1682,6 +1697,60 @@ function openDetailModal(plantId) {
 function closeDetailModal() {
     document.getElementById('detail-modal').classList.remove('active');
     currentDetailPlantId = null;
+}
+
+let currentCarouselIdx = 0;
+
+function setupDetailCarousel(photos) {
+    const indicatorsContainer = document.querySelector('#detail-modal .detail-image-indicators');
+    if (indicatorsContainer) {
+        indicatorsContainer.innerHTML = '';
+        if (photos.length <= 1) {
+            indicatorsContainer.style.display = 'none';
+        } else {
+            indicatorsContainer.style.display = 'flex';
+            photos.forEach((_, idx) => {
+                const dot = document.createElement('span');
+                dot.className = idx === 0 ? 'dot active' : 'dot';
+                dot.addEventListener('click', () => {
+                    switchDetailCarouselImage(idx, photos);
+                });
+                indicatorsContainer.appendChild(dot);
+            });
+        }
+    }
+    
+    // Set initial image
+    switchDetailCarouselImage(0, photos);
+    
+    // Click on image container to cycle next image
+    const imgContainer = document.querySelector('#detail-modal .detail-img-container');
+    if (imgContainer) {
+        const newImgContainer = imgContainer.cloneNode(true);
+        imgContainer.parentNode.replaceChild(newImgContainer, imgContainer);
+        
+        newImgContainer.addEventListener('click', () => {
+            if (photos.length <= 1) return;
+            currentCarouselIdx = (currentCarouselIdx + 1) % photos.length;
+            switchDetailCarouselImage(currentCarouselIdx, photos);
+        });
+    }
+}
+
+function switchDetailCarouselImage(idx, photos) {
+    currentCarouselIdx = idx;
+    const img = document.getElementById('detail-img');
+    if (img) {
+        img.src = photos[idx];
+    }
+    const dots = document.querySelectorAll('#detail-modal .detail-image-indicators .dot');
+    dots.forEach((dot, dIdx) => {
+        if (dIdx === idx) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
 }
 
 function deleteCurrentPlant() {
@@ -1988,9 +2057,9 @@ function renderGardenTimeline() {
             <span class="timeline-time">${dateStr}</span>
             <span class="timeline-title">${typeLabel}</span>
             ${rec.memo ? `<p class="timeline-memo" style="margin-top: 4px; margin-bottom: 0;">${rec.memo}</p>` : ''}
-            ${rec.photo ? `
+            ${rec.image ? `
                 <div class="timeline-photo-wrapper" style="margin-top: 8px;">
-                    <img src="${rec.photo}" alt="성장 사진" style="width: 100%; border-radius: 12px; object-fit: cover; max-height: 200px;">
+                    <img src="${rec.image}" alt="성장 사진" style="width: 100%; border-radius: 12px; object-fit: cover; max-height: 200px;">
                 </div>
             ` : ''}
         `;
@@ -2163,6 +2232,94 @@ function showGardenCalendarDayDetails(dateLabel, events) {
     
     // Smooth scroll down to details
     detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// --- Pot Action Selection Modal Flow ---
+function initActionSelectionFlow() {
+    const modal = document.getElementById('pot-action-selection-modal');
+    const closeBtn = document.getElementById('btn-close-action-selection');
+    if (!modal) return;
+    
+    closeBtn.addEventListener('click', closeActionSelectionModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeActionSelectionModal();
+    });
+    
+    // "새로운 마이팟 등록" button
+    document.getElementById('btn-select-register-new').addEventListener('click', () => {
+        closeActionSelectionModal();
+        openRegisterModal();
+    });
+    
+    // "기존 마이팟에 기록" button
+    document.getElementById('btn-select-record-existing').addEventListener('click', () => {
+        const plantSection = document.getElementById('action-select-plant-section');
+        if (plantSection.style.display === 'none') {
+            renderActionSelectPlantList();
+            plantSection.style.display = 'block';
+        } else {
+            plantSection.style.display = 'none';
+        }
+    });
+}
+
+function openActionSelectionModal() {
+    const modal = document.getElementById('pot-action-selection-modal');
+    if (!modal) return;
+    
+    // Reset plant list section
+    document.getElementById('action-select-plant-section').style.display = 'none';
+    modal.classList.add('active');
+}
+
+function closeActionSelectionModal() {
+    const modal = document.getElementById('pot-action-selection-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function renderActionSelectPlantList() {
+    const list = document.getElementById('action-select-plant-list');
+    if (!list) return;
+    list.innerHTML = '';
+    
+    if (AppState.plants.length === 0) {
+        list.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding: 10px;">등록된 식물이 없습니다.</div>';
+        return;
+    }
+    
+    AppState.plants.forEach(plant => {
+        const item = document.createElement('div');
+        item.className = 'action-select-plant-item';
+        
+        item.innerHTML = `
+            <div class="plant-info-left">
+                <img src="${plant.image}" class="plant-avatar">
+                <div style="display: flex; flex-direction: column;">
+                    <span class="plant-nickname" style="font-size: 0.82rem; font-weight:700; color:var(--text-dark);">${plant.nickname}</span>
+                    <span class="plant-species" style="font-size: 0.7rem; color:var(--text-muted);">${plant.species}</span>
+                </div>
+            </div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--forest-primary);">기록하기 &gt;</span>
+        `;
+        
+        item.addEventListener('click', () => {
+            closeActionSelectionModal();
+            // Open plant details modal for this plant
+            openDetailModal(plant.id);
+            // Auto open growth log form and scroll to it
+            setTimeout(() => {
+                openLogForm();
+                const form = document.getElementById('growth-log-form');
+                if (form) {
+                    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 300);
+        });
+        
+        list.appendChild(item);
+    });
 }
 
 function addCareActivity(type, memo = '') {

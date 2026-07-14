@@ -725,6 +725,45 @@
                     </div>
                 </div>
 
+                <!-- ==========================================
+                     Modal Overlay: Pot Action Selection Modal (Add menu)
+                     ========================================== -->
+                <div id="pot-action-selection-modal" class="modal-overlay">
+                    <div class="modal-sheet add-select-sheet" style="padding-bottom: 30px;">
+                        <div class="modal-drag-handle"></div>
+                        <div class="modal-header">
+                            <h2 class="modal-title">🪴 기록 추가하기</h2>
+                            <button id="btn-close-action-selection" class="btn-close-modal">&times;</button>
+                        </div>
+                        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Selection Buttons -->
+                            <button id="btn-select-register-new" class="btn-action-select-item">
+                                <span class="action-icon">🪴</span>
+                                <div class="action-text-wrapper">
+                                    <span class="action-title">새로운 마이팟 등록</span>
+                                    <span class="action-desc">새 화분을 정원에 새로 등록합니다.</span>
+                                </div>
+                            </button>
+                            
+                            <button id="btn-select-record-existing" class="btn-action-select-item">
+                                <span class="action-icon">📝</span>
+                                <div class="action-text-wrapper">
+                                    <span class="action-title">기존 마이팟에 기록</span>
+                                    <span class="action-desc">이미 키우고 있는 식물의 돌봄/성장 일지를 기록합니다.</span>
+                                </div>
+                            </button>
+
+                            <!-- Plant selection section (hidden by default, expands when clicking '기존 마이팟에 기록') -->
+                            <div id="action-select-plant-section" class="action-select-plant-section" style="display: none; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 8px;">
+                                <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-dark); margin-bottom: 12px;">어떤 화분에 기록할까요?</h4>
+                                <div id="action-select-plant-list" class="action-select-plant-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto;">
+                                    <!-- Dynamic list of plants -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Onboarding Overlay Screen -->
                 <div id="onboarding-screen" class="onboarding-screen active">
                     <div class="onboarding-content">

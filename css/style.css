@@ -3254,6 +3254,94 @@ body {
     transform: scale(0.97);
 }
 
+/* ==========================================
+   Pot Action Selection Modal Styling
+   ========================================== */
+.btn-action-select-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: var(--transition-bounce);
+    width: 100%;
+}
+
+.btn-action-select-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--forest-primary);
+    transform: scale(1.02);
+}
+
+.btn-action-select-item .action-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.btn-action-select-item .action-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.btn-action-select-item .action-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+
+.btn-action-select-item .action-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.action-select-plant-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.action-select-plant-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--forest-primary);
+}
+
+.action-select-plant-item .plant-info-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-select-plant-item .plant-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.action-select-plant-item .plant-nickname {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.action-select-plant-item .plant-species {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
 
 
 

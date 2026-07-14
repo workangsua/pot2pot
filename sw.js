@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pot2pot-cache-v11';
+const CACHE_NAME = 'pot2pot-cache-v12';
 
 // Assets to cache initially
 const ASSETS_TO_CACHE = [
