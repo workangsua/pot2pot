@@ -1662,55 +1662,31 @@ function closeDetailModal() {
 let currentCarouselIdx = 0;
 
 function setupDetailCarousel(photos) {
+    const imgContainer = document.querySelector('#detail-modal .detail-img-container');
+    if (!imgContainer) return;
+    
+    imgContainer.innerHTML = '';
+    
+    // Centered flex layout for single sticker, left-aligned scrollable for multiple stickers
+    if (photos.length > 1) {
+        imgContainer.style.justifyContent = 'flex-start';
+    } else {
+        imgContainer.style.justifyContent = 'center';
+    }
+    
+    photos.forEach((photoSrc, idx) => {
+        const img = document.createElement('img');
+        img.src = photoSrc;
+        img.alt = `식물 사진 ${idx + 1}`;
+        img.style.animationDelay = `${idx * 0.4}s`;
+        imgContainer.appendChild(img);
+    });
+    
+    // Hide indicators because all stickers are displayed side-by-side
     const indicatorsContainer = document.querySelector('#detail-modal .detail-image-indicators');
     if (indicatorsContainer) {
-        indicatorsContainer.innerHTML = '';
-        if (photos.length <= 1) {
-            indicatorsContainer.style.display = 'none';
-        } else {
-            indicatorsContainer.style.display = 'flex';
-            photos.forEach((_, idx) => {
-                const dot = document.createElement('span');
-                dot.className = idx === 0 ? 'dot active' : 'dot';
-                dot.addEventListener('click', () => {
-                    switchDetailCarouselImage(idx, photos);
-                });
-                indicatorsContainer.appendChild(dot);
-            });
-        }
+        indicatorsContainer.style.display = 'none';
     }
-    
-    // Set initial image
-    switchDetailCarouselImage(0, photos);
-    
-    // Click on image container to cycle next image
-    const imgContainer = document.querySelector('#detail-modal .detail-img-container');
-    if (imgContainer) {
-        const newImgContainer = imgContainer.cloneNode(true);
-        imgContainer.parentNode.replaceChild(newImgContainer, imgContainer);
-        
-        newImgContainer.addEventListener('click', () => {
-            if (photos.length <= 1) return;
-            currentCarouselIdx = (currentCarouselIdx + 1) % photos.length;
-            switchDetailCarouselImage(currentCarouselIdx, photos);
-        });
-    }
-}
-
-function switchDetailCarouselImage(idx, photos) {
-    currentCarouselIdx = idx;
-    const img = document.getElementById('detail-img');
-    if (img) {
-        img.src = photos[idx];
-    }
-    const dots = document.querySelectorAll('#detail-modal .detail-image-indicators .dot');
-    dots.forEach((dot, dIdx) => {
-        if (dIdx === idx) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
 }
 
 function deleteCurrentPlant() {
