@@ -2088,7 +2088,6 @@ body {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.15));
     transition: filter 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -2145,7 +2144,7 @@ body {
 /* Hover and active states */
 @media (hover: hover) {
     .sticker-wrapper:hover img {
-        filter: brightness(0.18) blur(1px) drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+        filter: brightness(0.18) blur(1px);
     }
     .sticker-wrapper:hover .sticker-overlay {
         opacity: 1;
@@ -2153,7 +2152,7 @@ body {
 }
 
 .sticker-wrapper.active img {
-    filter: brightness(0.18) blur(1px) drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+    filter: brightness(0.18) blur(1px);
 }
 .sticker-wrapper.active .sticker-overlay {
     opacity: 1;
