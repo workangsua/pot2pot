@@ -1624,7 +1624,7 @@ function openDetailModal(plantId) {
     document.getElementById('detail-species').textContent = plant.species;
     
     // Collect all archived background-removed sticker images
-    const plantPhotos = [plant.image];
+    const plantPhotos = [plant.originalImage || plant.image];
     if (plant.records) {
         const sortedRecsForPhotos = [...plant.records].sort((a, b) => new Date(a.date) - new Date(b.date));
         sortedRecsForPhotos.forEach(rec => {
@@ -2301,7 +2301,6 @@ function renderActionSelectPlantList() {
                     <span class="plant-species" style="font-size: 0.7rem; color:var(--text-muted);">${plant.species}</span>
                 </div>
             </div>
-            <span style="font-size: 0.72rem; font-weight: 700; color: var(--forest-primary);">기록하기 &gt;</span>
         `;
         
         item.addEventListener('click', () => {
