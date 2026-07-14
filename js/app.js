@@ -2905,7 +2905,8 @@ function goToGrowthStep(stepNum) {
     AppState.growthStep = stepNum;
     const container = document.getElementById('growth-step-container');
     if (container) {
-        container.style.transform = `translateX(-${(stepNum - 1) * 100}%)`;
+        const offset = -(stepNum - 1) * 33.333;
+        container.style.transform = `translateX(${offset}%)`;
     }
     
     // Dots
