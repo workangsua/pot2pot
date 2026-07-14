@@ -610,6 +610,9 @@ body {
 }
 
 .summary-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.76rem;
     font-weight: 500;
     color: var(--text-muted);
@@ -620,6 +623,30 @@ body {
 .summary-text strong {
     color: var(--text-dark);
     font-weight: 700;
+}
+
+.summary-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.summary-status-dot.safe {
+    background: #10b981;
+}
+
+.summary-status-dot.warning {
+    background: #f59e0b;
+}
+
+.summary-status-dot.urgent {
+    background: #ef4444;
+}
+
+.summary-status-dot.empty {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Plant Card (Lime Circular Sticker Design) */

@@ -1345,7 +1345,7 @@ function renderArchive() {
         if (total === 0) {
             score = 0;
             emoji = '🌱';
-            summaryText = '🪴 아직 등록된 식물이 없습니다. 하단의 "+" 버튼을 눌러 첫 반려식물을 등록해 보세요!';
+            summaryText = '<span class="summary-status-dot empty"></span> <strong>등록 대기</strong> : 아직 등록된 식물이 없습니다. 하단의 "+" 버튼을 눌러 첫 반려식물을 등록해 보세요!';
             tagText = '등록 대기';
             tagClass = 'empty';
             gardenStateName = '새로운 시작';
@@ -1354,19 +1354,19 @@ function renderArchive() {
             score = Math.round(((safeCount + warningCount * 0.5) / total) * 100);
             if (score >= 80) {
                 emoji = '🌿';
-                summaryText = '🟢 정원의 모든 식물들이 물을 듬뿍 머금고 건강하게 자라는 중입니다!';
+                summaryText = '<span class="summary-status-dot safe"></span> <strong>안전함</strong> : 정원의 모든 식물들이 물을 듬뿍 머금고 건강하게 자라는 중입니다!';
                 tagText = '정원 안전';
                 tagClass = 'safe';
                 gardenStateName = '싱그러운 초록숲';
             } else if (score >= 40) {
                 emoji = '🪴';
-                summaryText = `⚠️ 조만간 물을 줘야 하는 식물이 <strong>${warningCount}개</strong> 있습니다. 일정을 체크해 주세요.`;
+                summaryText = `<span class="summary-status-dot warning"></span> <strong>주의</strong> : 조만간 물을 줘야 하는 식물이 <strong>${warningCount}개</strong> 있습니다. 일정을 체크해 주세요.`;
                 tagText = '물주기 주의';
                 tagClass = 'warning';
                 gardenStateName = '목마른 꽃밭';
             } else {
                 emoji = '🥀';
-                summaryText = `🚨 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
+                summaryText = `<span class="summary-status-dot urgent"></span> <strong>경고</strong> : 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
                 tagText = '수분 부족 경고';
                 tagClass = 'urgent';
                 gardenStateName = '바짝 마른 사막';
@@ -1375,7 +1375,7 @@ function renderArchive() {
             // Overwrite summary/tag if urgent count is greater than 0
             if (urgentCount > 0) {
                 emoji = '🥀';
-                summaryText = `🚨 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
+                summaryText = `<span class="summary-status-dot urgent"></span> <strong>경고</strong> : 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
                 tagText = '수분 부족 경고';
                 tagClass = 'urgent';
                 gardenStateName = '바짝 마른 사막';
