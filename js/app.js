@@ -1584,15 +1584,20 @@ function openDetailModal(plantId) {
     document.getElementById('detail-nickname').textContent = plant.nickname;
     document.getElementById('detail-species').textContent = plant.species;
     
-    // Collect all archived background-removed sticker images
-    const plantPhotos = [plant.originalImage || plant.image];
+    // Collect all archived background-removed sticker images (newest first)
+    const plantPhotos = [];
     if (plant.records) {
-        const sortedRecsForPhotos = [...plant.records].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const sortedRecsForPhotos = [...plant.records].sort((a, b) => new Date(b.date) - new Date(a.date));
         sortedRecsForPhotos.forEach(rec => {
             if (rec.image && !plantPhotos.includes(rec.image)) {
                 plantPhotos.push(rec.image);
             }
         });
+    }
+    // Add the oldest initial photo at the end
+    const initialPhoto = plant.originalImage || plant.image;
+    if (initialPhoto && !plantPhotos.includes(initialPhoto)) {
+        plantPhotos.push(initialPhoto);
     }
     
     // Setup image carousel
