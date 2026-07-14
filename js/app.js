@@ -1650,7 +1650,6 @@ function openDetailModal(plantId) {
     switchDetailTab('timeline');
     renderTimeline(plant);
     renderCalendar(plant);
-    closeLogForm();
     
     document.getElementById('detail-modal').classList.add('active');
 }
