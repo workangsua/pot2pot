@@ -1641,10 +1641,7 @@ function openDetailModal(plantId) {
     document.getElementById('water-progress-percent').textContent = `${progressPercent}%`;
     document.getElementById('water-progress-fill').style.width = `${progressPercent}%`;
     
-    const cardMoisture = document.getElementById('detail-card-moisture');
-    if (cardMoisture) {
-        cardMoisture.textContent = `수분지수 ${progressPercent}%`;
-    }
+
     
     // Render Naver Encyclopedia details
     const naverCard = document.getElementById('detail-naver-card');
