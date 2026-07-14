@@ -1338,29 +1338,47 @@ function renderArchive() {
         let score = 0;
         let emoji = '🌱';
         let summaryText = '';
+        let tagText = '등록 대기';
+        let tagClass = 'empty';
+        let gardenStateName = '새로운 시작';
         
         if (total === 0) {
             score = 0;
             emoji = '🌱';
             summaryText = '🪴 아직 등록된 식물이 없습니다. 하단의 "+" 버튼을 눌러 첫 반려식물을 등록해 보세요!';
+            tagText = '🌱 등록 대기';
+            tagClass = 'empty';
+            gardenStateName = '새로운 시작';
         } else {
             // Safe has weight 1.0, warning has weight 0.5, urgent has weight 0
             score = Math.round(((safeCount + warningCount * 0.5) / total) * 100);
             if (score >= 80) {
                 emoji = '🌿';
                 summaryText = '🟢 정원의 모든 식물들이 물을 듬뿍 머금고 건강하게 자라는 중입니다!';
+                tagText = '🟢 정원 안전';
+                tagClass = 'safe';
+                gardenStateName = '싱그러운 초록숲';
             } else if (score >= 40) {
                 emoji = '🪴';
                 summaryText = `⚠️ 조만간 물을 줘야 하는 식물이 <strong>${warningCount}개</strong> 있습니다. 일정을 체크해 주세요.`;
+                tagText = '⚠️ 물주기 주의';
+                tagClass = 'warning';
+                gardenStateName = '목마른 꽃밭';
             } else {
                 emoji = '🥀';
                 summaryText = `🚨 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
+                tagText = '🚨 수분 부족 경고';
+                tagClass = 'urgent';
+                gardenStateName = '바짝 마른 사막';
             }
             
-            // Overwrite summary if urgent count is greater than 0
+            // Overwrite summary/tag if urgent count is greater than 0
             if (urgentCount > 0) {
                 emoji = '🥀';
                 summaryText = `🚨 목마른 식물이 <strong>${urgentCount}개</strong> 있습니다! 빠르게 물을 주어 돌봐주세요.`;
+                tagText = '🚨 수분 부족 경고';
+                tagClass = 'urgent';
+                gardenStateName = '바짝 마른 사막';
             }
         }
         
@@ -1369,7 +1387,8 @@ function renderArchive() {
         overviewContainer.innerHTML = `
             <div class="overview-card">
                 <div class="overview-header">
-                    <h3 class="overview-title">정원 건강지수 Dashboard</h3>
+                    <span class="overview-status-tag ${tagClass}">${tagText}</span>
+                    <h3 class="overview-title">수아 님의 정원은 현재 <strong>"${gardenStateName}"</strong> 입니다</h3>
                 </div>
                 <div class="overview-main">
                     <div class="progress-circle-wrapper">
