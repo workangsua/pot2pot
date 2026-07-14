@@ -1584,25 +1584,38 @@ function openDetailModal(plantId) {
     document.getElementById('detail-nickname').textContent = plant.nickname;
     document.getElementById('detail-species').textContent = plant.species;
     
-    // Collect all archived background-removed sticker images (newest first)
-    const plantPhotos = [];
+    // Collect all archived background-removed sticker images (newest first) with metadata
+    const plantStickers = [];
     if (plant.records) {
         const sortedRecsForPhotos = [...plant.records].sort((a, b) => new Date(b.date) - new Date(a.date));
         sortedRecsForPhotos.forEach(rec => {
-            if (rec.image && !plantPhotos.includes(rec.image)) {
-                plantPhotos.push(rec.image);
+            if (rec.image) {
+                const exists = plantStickers.some(s => s.image === rec.image);
+                if (!exists) {
+                    plantStickers.push({
+                        image: rec.image,
+                        date: rec.date,
+                        memo: rec.memo
+                    });
+                }
             }
         });
     }
     // Add the oldest initial photo at the end
     const initialPhoto = plant.originalImage || plant.image;
-    if (initialPhoto && !plantPhotos.includes(initialPhoto)) {
-        plantPhotos.push(initialPhoto);
+    if (initialPhoto) {
+        const exists = plantStickers.some(s => s.image === initialPhoto);
+        if (!exists) {
+            plantStickers.push({
+                image: initialPhoto,
+                date: plant.adoptionDate || new Date().toISOString(),
+                memo: `🌱 [${plant.nickname}] 정원에 첫 입양 완료!`
+            });
+        }
     }
     
-    // Setup image carousel
-    currentCarouselIdx = 0;
-    setupDetailCarousel(plantPhotos);
+    // Setup image stickers garden
+    setupDetailCarousel(plantStickers);
     
     // Calculate D-day stats
     const daysRemaining = getDaysRemaining(plant);
@@ -1666,25 +1679,65 @@ function closeDetailModal() {
 
 let currentCarouselIdx = 0;
 
-function setupDetailCarousel(photos) {
+function setupDetailCarousel(stickers) {
     const imgContainer = document.querySelector('#detail-modal .detail-img-container');
     if (!imgContainer) return;
     
     imgContainer.innerHTML = '';
     
     // Centered flex layout for single sticker, left-aligned scrollable for multiple stickers
-    if (photos.length > 1) {
+    if (stickers.length > 1) {
         imgContainer.style.justifyContent = 'flex-start';
     } else {
         imgContainer.style.justifyContent = 'center';
     }
     
-    photos.forEach((photoSrc, idx) => {
+    stickers.forEach((sticker, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'sticker-wrapper';
+        wrapper.style.animationDelay = `${idx * 0.4}s`;
+        
         const img = document.createElement('img');
-        img.src = photoSrc;
+        img.src = sticker.image;
         img.alt = `식물 사진 ${idx + 1}`;
-        img.style.animationDelay = `${idx * 0.4}s`;
-        imgContainer.appendChild(img);
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'sticker-overlay';
+        
+        const d = new Date(sticker.date);
+        const dateStr = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+        
+        overlay.innerHTML = `
+            <span class="sticker-date">${dateStr}</span>
+            <span class="sticker-memo">${sticker.memo}</span>
+        `;
+        
+        wrapper.appendChild(img);
+        wrapper.appendChild(overlay);
+        
+        // Mobile Toggle active state on click
+        wrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasActive = wrapper.classList.contains('active');
+            
+            // Deactivate all first
+            document.querySelectorAll('#detail-modal .sticker-wrapper').forEach(w => {
+                w.classList.remove('active');
+            });
+            
+            if (!wasActive) {
+                wrapper.classList.add('active');
+            }
+        });
+        
+        imgContainer.appendChild(wrapper);
+    });
+    
+    // Clicking outside the wrapper deactivates any active overlays
+    document.addEventListener('click', () => {
+        document.querySelectorAll('#detail-modal .sticker-wrapper').forEach(w => {
+            w.classList.remove('active');
+        });
     });
     
     // Hide indicators because all stickers are displayed side-by-side

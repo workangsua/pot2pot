@@ -2085,12 +2085,78 @@ body {
 }
 
 .detail-img-container img {
-    max-width: 110px;
-    max-height: 90%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
     filter: drop-shadow(0 12px 24px rgba(0,0,0,0.15));
-    animation: floatPlant 4s ease-in-out infinite;
+    transition: filter 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.sticker-wrapper {
+    position: relative;
+    width: 110px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    cursor: pointer;
+    animation: floatPlant 4s ease-in-out infinite;
+}
+
+.sticker-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    padding: 6px;
+    pointer-events: none;
+    word-break: keep-all;
+}
+
+.sticker-overlay .sticker-date {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #CDFF62;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+}
+
+.sticker-overlay .sticker-memo {
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+}
+
+/* Hover and active states */
+@media (hover: hover) {
+    .sticker-wrapper:hover img {
+        filter: brightness(0.18) blur(1px) drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+    }
+    .sticker-wrapper:hover .sticker-overlay {
+        opacity: 1;
+    }
+}
+
+.sticker-wrapper.active img {
+    filter: brightness(0.18) blur(1px) drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+}
+.sticker-wrapper.active .sticker-overlay {
+    opacity: 1;
 }
 
 @keyframes floatPlant {
