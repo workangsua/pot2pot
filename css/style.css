@@ -2144,7 +2144,7 @@ body {
 /* Hover and active states */
 @media (hover: hover) {
     .sticker-wrapper:hover img {
-        filter: brightness(0.18) blur(1px);
+        filter: brightness(0.18);
     }
     .sticker-wrapper:hover .sticker-overlay {
         opacity: 1;
@@ -2152,7 +2152,7 @@ body {
 }
 
 .sticker-wrapper.active img {
-    filter: brightness(0.18) blur(1px);
+    filter: brightness(0.18);
 }
 .sticker-wrapper.active .sticker-overlay {
     opacity: 1;
