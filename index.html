@@ -665,7 +665,65 @@
                     </div>
                 </div>
 
+                <!-- ==========================================
+                     Modal Overlay: Unified Garden Calendar & Diary Modal
+                     ========================================== -->
+                <div id="garden-calendar-modal" class="modal-overlay">
+                    <div class="modal-sheet detail-sheet">
+                        
+                        <!-- Drag bar simulation -->
+                        <div class="modal-drag-handle"></div>
+                        
+                        <div class="modal-header">
+                            <h2 class="modal-title">🌱 우리 정원 기록 모아보기</h2>
+                            <button id="btn-close-garden-calendar" class="btn-close-modal">&times;</button>
+                        </div>
+                        
+                        <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column;">
+                            <!-- Tabs: Timeline vs Calendar -->
+                            <div class="detail-tabs" style="margin-bottom: 20px;">
+                                <button id="btn-garden-tab-timeline" class="tab-btn active" data-tab="garden-timeline">성장 다이어리</button>
+                                <button id="btn-garden-tab-calendar" class="tab-btn" data-tab="garden-calendar">관리 캘린더</button>
+                            </div>
 
+                            <!-- Tab Content: Timeline (Diary) -->
+                            <div id="tab-content-garden-timeline" class="tab-content active">
+                                <div id="garden-timeline-stream" class="timeline-stream">
+                                    <!-- Dynamic unified diary logs across all plants -->
+                                </div>
+                            </div>
+
+                            <!-- Tab Content: Calendar -->
+                            <div id="tab-content-garden-calendar" class="tab-content">
+                                <div class="calendar-header-row">
+                                    <button id="btn-garden-cal-prev" class="btn-cal-nav">&lt;</button>
+                                    <h4 id="garden-calendar-title">2026년 7월</h4>
+                                    <button id="btn-garden-cal-next" class="btn-cal-nav">&gt;</button>
+                                </div>
+                                <div class="calendar-grid-header">
+                                    <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+                                </div>
+                                <div id="garden-calendar-grid-body" class="calendar-grid-body">
+                                    <!-- Dynamic Calendar cells for all plants -->
+                                </div>
+                                <div class="calendar-legend">
+                                    <span><span class="cal-dot water" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>물주기</span>
+                                    <span><span class="cal-dot rotate" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>화분 돌리기</span>
+                                    <span><span class="cal-dot trim" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>하엽 정리</span>
+                                    <span><span class="cal-dot diary" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>일지</span>
+                                </div>
+                                
+                                <!-- Daily Details Section when clicking calendar day -->
+                                <div id="garden-calendar-day-details" class="calendar-day-details" style="display: none; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06);">
+                                    <h4 id="garden-selected-date-title" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: var(--text-dark);">선택된 날짜 활동</h4>
+                                    <div id="garden-selected-date-list" class="garden-selected-date-list" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <!-- List of events on this day -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Onboarding Overlay Screen -->
                 <div id="onboarding-screen" class="onboarding-screen active">

@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderArchive();
     renderBadges();
     updateUserBadgeUI();
+    initGardenCalendarFlow();
     
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
@@ -342,11 +343,11 @@ function initNavigation() {
         openRegisterModal();
     });
     
-    // Trophy Button click to go to settings
+    // Trophy Button click to open unified garden calendar modal
     const heroTrophyBtn = document.getElementById('btn-hero-trophy');
     if (heroTrophyBtn) {
         heroTrophyBtn.addEventListener('click', () => {
-            switchView('settings');
+            openGardenCalendarModal();
         });
     }
 }
@@ -1844,6 +1845,324 @@ function navigateCalendar(offset) {
     
     currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() + offset);
     renderCalendar(plant);
+}
+
+// --- Unified Garden Calendar & Diary Modal Logic ---
+let currentGardenCalendarMonth = new Date();
+
+function initGardenCalendarFlow() {
+    const modal = document.getElementById('garden-calendar-modal');
+    const closeBtn = document.getElementById('btn-close-garden-calendar');
+    if (!modal) return;
+    
+    closeBtn.addEventListener('click', closeGardenCalendarModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeGardenCalendarModal();
+    });
+    
+    // Tab switching
+    const tabTimeline = document.getElementById('btn-garden-tab-timeline');
+    const tabCalendar = document.getElementById('btn-garden-tab-calendar');
+    
+    if (tabTimeline) {
+        tabTimeline.addEventListener('click', () => {
+            switchGardenTab('garden-timeline');
+        });
+    }
+    if (tabCalendar) {
+        tabCalendar.addEventListener('click', () => {
+            switchGardenTab('garden-calendar');
+        });
+    }
+    
+    // Calendar prev/next buttons
+    const calPrev = document.getElementById('btn-garden-cal-prev');
+    const calNext = document.getElementById('btn-garden-cal-next');
+    
+    if (calPrev) {
+        calPrev.addEventListener('click', () => {
+            navigateGardenCalendar(-1);
+        });
+    }
+    if (calNext) {
+        calNext.addEventListener('click', () => {
+            navigateGardenCalendar(1);
+        });
+    }
+}
+
+function openGardenCalendarModal() {
+    const modal = document.getElementById('garden-calendar-modal');
+    if (!modal) return;
+    
+    currentGardenCalendarMonth = new Date();
+    modal.classList.add('active');
+    
+    // Default tab
+    switchGardenTab('garden-timeline');
+    renderGardenTimeline();
+    renderGardenCalendar();
+}
+
+function closeGardenCalendarModal() {
+    const modal = document.getElementById('garden-calendar-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function switchGardenTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('#garden-calendar-modal .tab-btn');
+    tabs.forEach(btn => {
+        const tabAttr = btn.getAttribute('data-tab');
+        if (tabAttr === tabName) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Update tab contents
+    const contents = document.querySelectorAll('#garden-calendar-modal .tab-content');
+    contents.forEach(content => {
+        if (content.id === `tab-content-${tabName}`) {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+}
+
+function renderGardenTimeline() {
+    const stream = document.getElementById('garden-timeline-stream');
+    if (!stream) return;
+    stream.innerHTML = '';
+    
+    // Aggregate all records from all plants
+    const allRecords = [];
+    AppState.plants.forEach(plant => {
+        if (plant.records) {
+            plant.records.forEach(rec => {
+                allRecords.push({
+                    ...rec,
+                    plantId: plant.id,
+                    plantNickname: plant.nickname,
+                    plantImage: plant.image,
+                    plantSpecies: plant.species
+                });
+            });
+        }
+    });
+    
+    const sortedRecords = allRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    if (sortedRecords.length === 0) {
+        stream.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding: 20px;">기록된 일지가 아직 없습니다.</div>';
+        return;
+    }
+    
+    sortedRecords.forEach(rec => {
+        const ev = document.createElement('div');
+        ev.className = `timeline-event ${rec.type}`;
+        
+        let typeLabel = '';
+        if (rec.type === 'adopt') { typeLabel = '정원 등록'; }
+        else if (rec.type === 'water') { typeLabel = '물주기 완료'; }
+        else if (rec.type === 'rotate') { typeLabel = '화분 돌리기'; }
+        else if (rec.type === 'trim') { typeLabel = '하엽 정리'; }
+        else if (rec.type === 'nutrient') { typeLabel = '영양제 투여'; }
+        else if (rec.type === 'repot') { typeLabel = '분갈이 완료'; }
+        else if (rec.type === 'prune') { typeLabel = '가지치기 완료'; }
+        else if (rec.type === 'diary') { typeLabel = '성장 일기'; }
+        
+        const dateStr = formatDate(new Date(rec.date));
+        
+        ev.innerHTML = `
+            <div class="timeline-node" title="${typeLabel}"></div>
+            <div class="timeline-plant-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <img src="${rec.plantImage}" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); object-fit: cover;">
+                <span class="timeline-plant-nickname" style="font-size: 0.78rem; font-weight: 700; color: var(--forest-primary);">${rec.plantNickname}</span>
+                <span style="font-size: 0.68rem; color: var(--text-muted);">(${rec.plantSpecies})</span>
+            </div>
+            <span class="timeline-time">${dateStr}</span>
+            <span class="timeline-title">${typeLabel}</span>
+            ${rec.memo ? `<p class="timeline-memo" style="margin-top: 4px; margin-bottom: 0;">${rec.memo}</p>` : ''}
+            ${rec.photo ? `
+                <div class="timeline-photo-wrapper" style="margin-top: 8px;">
+                    <img src="${rec.photo}" alt="성장 사진" style="width: 100%; border-radius: 12px; object-fit: cover; max-height: 200px;">
+                </div>
+            ` : ''}
+        `;
+        stream.appendChild(ev);
+    });
+}
+
+function renderGardenCalendar() {
+    const year = currentGardenCalendarMonth.getFullYear();
+    const month = currentGardenCalendarMonth.getMonth(); // 0-indexed
+    
+    const calTitle = document.getElementById('garden-calendar-title');
+    if (calTitle) {
+        calTitle.textContent = `${year}년 ${month + 1}월`;
+    }
+    
+    const gridBody = document.getElementById('garden-calendar-grid-body');
+    if (!gridBody) return;
+    gridBody.innerHTML = '';
+    
+    // Hide details section initially
+    const detailsContainer = document.getElementById('garden-calendar-day-details');
+    if (detailsContainer) {
+        detailsContainer.style.display = 'none';
+    }
+    
+    const firstDay = new Date(year, month, 1);
+    const startDayOfWeek = firstDay.getDay(); // 0: Sun, 6: Sat
+    
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevDaysInMonth = new Date(year, month, 0).getDate();
+    
+    // Aggregate all records from all plants
+    const allRecords = [];
+    AppState.plants.forEach(plant => {
+        if (plant.records) {
+            plant.records.forEach(rec => {
+                allRecords.push({
+                    ...rec,
+                    plantId: plant.id,
+                    plantNickname: plant.nickname,
+                    plantImage: plant.image,
+                    plantSpecies: plant.species
+                });
+            });
+        }
+    });
+    
+    // 1. Prev month days
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const dayNum = prevDaysInMonth - i;
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell inactive';
+        cell.textContent = dayNum;
+        gridBody.appendChild(cell);
+    }
+    
+    // 2. Active month days
+    const today = new Date();
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+        cell.textContent = d;
+        
+        const cellDate = new Date(year, month, d);
+        if (cellDate.getFullYear() === today.getFullYear() &&
+            cellDate.getMonth() === today.getMonth() &&
+            cellDate.getDate() === today.getDate()) {
+            cell.classList.add('today');
+        }
+        
+        // Find events on this day
+        const dayEvents = allRecords.filter(rec => {
+            const recDate = new Date(rec.date);
+            return recDate.getFullYear() === year &&
+                   recDate.getMonth() === month &&
+                   recDate.getDate() === d;
+        });
+        
+        if (dayEvents.length > 0) {
+            const dotsWrapper = document.createElement('div');
+            dotsWrapper.className = 'calendar-event-dots';
+            
+            // Collect unique event types on this day
+            const uniqueTypes = [...new Set(dayEvents.map(e => e.type))];
+            uniqueTypes.slice(0, 3).forEach(type => {
+                const dot = document.createElement('div');
+                dot.className = `cal-dot ${type}`;
+                dotsWrapper.appendChild(dot);
+            });
+            cell.appendChild(dotsWrapper);
+            
+            // Add click listener to show events of this day
+            cell.style.cursor = 'pointer';
+            cell.addEventListener('click', () => {
+                // Highlight active cell
+                document.querySelectorAll('#garden-calendar-grid-body .calendar-cell').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                cell.classList.add('selected');
+                
+                showGardenCalendarDayDetails(`${year}년 ${month + 1}월 ${d}일`, dayEvents);
+            });
+        }
+        
+        gridBody.appendChild(cell);
+    }
+    
+    // 3. Next month days
+    const totalCells = startDayOfWeek + daysInMonth;
+    const remainingCells = (7 - (totalCells % 7)) % 7;
+    for (let d = 1; d <= remainingCells; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell inactive';
+        cell.textContent = d;
+        gridBody.appendChild(cell);
+    }
+}
+
+function navigateGardenCalendar(offset) {
+    currentGardenCalendarMonth.setMonth(currentGardenCalendarMonth.getMonth() + offset);
+    renderGardenCalendar();
+}
+
+function showGardenCalendarDayDetails(dateLabel, events) {
+    const detailsContainer = document.getElementById('garden-calendar-day-details');
+    const title = document.getElementById('garden-selected-date-title');
+    const list = document.getElementById('garden-selected-date-list');
+    
+    if (!detailsContainer || !title || !list) return;
+    
+    title.textContent = `📅 ${dateLabel}의 정원 소식 (${events.length}건)`;
+    list.innerHTML = '';
+    
+    events.forEach(rec => {
+        let typeLabel = '';
+        if (rec.type === 'adopt') { typeLabel = '정원 등록'; }
+        else if (rec.type === 'water') { typeLabel = '💧 물주기'; }
+        else if (rec.type === 'rotate') { typeLabel = '🔄 화분 돌리기'; }
+        else if (rec.type === 'trim') { typeLabel = '✂️ 하엽 정리'; }
+        else if (rec.type === 'nutrient') { typeLabel = '💊 영양제 투여'; }
+        else if (rec.type === 'repot') { typeLabel = '🪴 분갈이'; }
+        else if (rec.type === 'prune') { typeLabel = '🌿 가지치기'; }
+        else if (rec.type === 'diary') { typeLabel = '📝 성장 일기'; }
+        
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.justifyContent = 'space-between';
+        item.style.padding = '10px 12px';
+        item.style.background = 'rgba(255, 255, 255, 0.03)';
+        item.style.borderRadius = '12px';
+        item.style.border = '1px solid rgba(255, 255, 255, 0.04)';
+        
+        item.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="${rec.plantImage}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-dark);">${rec.plantNickname}</span>
+                    ${rec.memo ? `<span style="font-size: 0.68rem; color: var(--text-muted);">${rec.memo}</span>` : ''}
+                </div>
+            </div>
+            <span style="font-size: 0.72rem; font-weight: 700; color: var(--forest-primary);">${typeLabel}</span>
+        `;
+        
+        list.appendChild(item);
+    });
+    
+    detailsContainer.style.display = 'block';
+    
+    // Smooth scroll down to details
+    detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function addCareActivity(type, memo = '') {
