@@ -2072,10 +2072,12 @@ function bindStickerDrag(sticker, playground) {
     let startY = 0;
     let initialLeft = 0;
     let initialTop = 0;
+    let dragDistance = 0;
     
     sticker.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         isDragging = true;
+        dragDistance = 0;
         sticker.classList.add('dragging');
         sticker.setPointerCapture(e.pointerId);
         
@@ -2095,6 +2097,9 @@ function bindStickerDrag(sticker, playground) {
         const parentRect = playground.getBoundingClientRect();
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
+        
+        // Track cumulative drag distance to separate clicks from drags
+        dragDistance += Math.sqrt(dx * dx + dy * dy);
         
         const dxPercent = (dx / parentRect.width) * 100;
         const dyPercent = (dy / parentRect.height) * 100;
@@ -2130,10 +2135,95 @@ function bindStickerDrag(sticker, playground) {
         
         layout[plantId] = { x: left, y: top };
         localStorage.setItem('pot2pot_greenhouse_layout', JSON.stringify(layout));
+        
+        // If the movement was extremely minimal (less than 6 pixels total), it's a tap/click!
+        if (dragDistance < 6) {
+            openStickerStackModal(plantId);
+        }
     };
     
     sticker.addEventListener('pointerup', endDrag);
     sticker.addEventListener('pointercancel', endDrag);
+}
+
+function openStickerStackModal(plantId) {
+    const plant = AppState.plants.find(p => p.id === plantId);
+    if (!plant) return;
+    
+    const motionModal = document.getElementById('greenhouse-motion-modal');
+    if (!motionModal) return;
+    
+    motionModal.classList.add('active');
+    
+    const titleEl = document.getElementById('motion-page-title');
+    if (titleEl) {
+        titleEl.textContent = `${plant.nickname}의 성장 아카이브`;
+    }
+    
+    const stickersArea = document.getElementById('motion-stickers-area');
+    if (!stickersArea) return;
+    
+    stickersArea.innerHTML = '';
+    
+    // Gather all stickers of this plant chronologically (oldest first so it is rendered at the bottom)
+    const plantPhotos = [];
+    
+    const initialPhoto = plant.originalImage || plant.image;
+    if (initialPhoto) {
+        plantPhotos.push(initialPhoto);
+    }
+    
+    if (plant.records) {
+        const sortedRecs = [...plant.records].sort((a, b) => new Date(a.date) - new Date(b.date));
+        sortedRecs.forEach(rec => {
+            if (rec.image && !plantPhotos.includes(rec.image)) {
+                plantPhotos.push(rec.image);
+            }
+        });
+    }
+    
+    plantPhotos.forEach((photoSrc, idx) => {
+        const img = document.createElement('img');
+        img.className = 'motion-sticker';
+        img.src = photoSrc;
+        img.alt = `${plant.nickname} sticker ${idx + 1}`;
+        
+        // Horizontal offset: -55px to 55px from screen center
+        const offsetLeft = Math.floor(Math.random() * 110 - 55);
+        img.style.left = `calc(50% + ${offsetLeft}px)`;
+        
+        // Vertical offset: 15% to 50%
+        const top = 15 + Math.random() * 35;
+        img.style.top = `${top}%`;
+        
+        // Rotation angles
+        const rotStart = Math.floor(Math.random() * 60 - 30);
+        const rotEnd = Math.floor(Math.random() * 40 - 20);
+        img.style.setProperty('--rot-start', `${rotStart}deg`);
+        img.style.setProperty('--rot-end', `${rotEnd}deg`);
+        
+        img.style.animationDelay = `${idx * 0.35}s`;
+        
+        // Click to drop again micro-interaction
+        img.addEventListener('click', () => {
+            img.style.animation = 'none';
+            img.offsetHeight; // trigger reflow
+            img.style.animation = `dropSticker 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards`;
+        });
+        
+        stickersArea.appendChild(img);
+    });
+}
+
+function closeStickerStackModal() {
+    const motionModal = document.getElementById('greenhouse-motion-modal');
+    if (motionModal) {
+        motionModal.classList.remove('active');
+    }
+    const stickersArea = document.getElementById('motion-stickers-area');
+    if (stickersArea) {
+        stickersArea.innerHTML = '';
+    }
 }
 
 function initGreenhouseFlow() {
@@ -2144,10 +2234,10 @@ function initGreenhouseFlow() {
         });
     }
     
-    const resetBtn = document.getElementById('btn-greenhouse-reset');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-            resetGreenhouseLayout();
+    const motionBackBtn = document.getElementById('btn-motion-back');
+    if (motionBackBtn) {
+        motionBackBtn.addEventListener('click', () => {
+            closeStickerStackModal();
         });
     }
     
@@ -2156,6 +2246,15 @@ function initGreenhouseFlow() {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeGreenhouseModal();
+            }
+        });
+    }
+    
+    const motionModal = document.getElementById('greenhouse-motion-modal');
+    if (motionModal) {
+        motionModal.addEventListener('click', (e) => {
+            if (e.target === motionModal) {
+                closeStickerStackModal();
             }
         });
     }

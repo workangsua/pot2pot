@@ -3444,7 +3444,43 @@ body {
     font-weight: 700;
     line-height: 1.5;
 }
+/* ==========================================
+   Greenhouse Sticker Stack Motion Page Styles
+   ========================================== */
+@keyframes dropSticker {
+    0% {
+        transform: translate(-50%, -100vh) rotate(var(--rot-start)) scale(1.5);
+        opacity: 0;
+    }
+    60% {
+        transform: translate(-50%, 10%) rotate(var(--rot-end)) scale(1.05);
+        opacity: 1;
+    }
+    80% {
+        transform: translate(-50%, -5%) rotate(var(--rot-end)) scale(0.98);
+    }
+    100% {
+        transform: translate(-50%, 0) rotate(var(--rot-end)) scale(1);
+    }
+}
 
+.motion-sticker {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 12px rgba(255,255,255,0.18));
+    animation: dropSticker 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+    cursor: pointer;
+    /* Translate -50% to make horizontal centering easier */
+    transform-origin: center center;
+}
 
-
-
+.motion-page-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
