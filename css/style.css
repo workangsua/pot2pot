@@ -3458,9 +3458,11 @@ body {
     }
     80% {
         transform: translate(-50%, -5%) rotate(var(--rot-end)) scale(0.98);
+        opacity: 1;
     }
     100% {
         transform: translate(-50%, 0) rotate(var(--rot-end)) scale(1);
+        opacity: 1;
     }
 }
 
