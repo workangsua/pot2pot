@@ -2182,6 +2182,32 @@ function openStickerStackModal(plantId) {
         });
     }
     
+    if (plantPhotos.length <= 1) {
+        // Render warning message
+        const warning = document.createElement('div');
+        warning.className = 'motion-empty-state';
+        warning.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: #888888; font-family: "Outfit", sans-serif; gap: 16px; padding: 0 40px;';
+        
+        const icon = document.createElement('span');
+        icon.style.fontSize = '3rem';
+        icon.textContent = '📝';
+        
+        const p1 = document.createElement('p');
+        p1.style.cssText = 'font-size: 0.95rem; font-weight: 700; line-height: 1.6; color: #ffffff; margin: 0;';
+        p1.textContent = '성장 아카이브 기록이 부족합니다.';
+        
+        const p2 = document.createElement('p');
+        p2.style.cssText = 'font-size: 0.75rem; line-height: 1.5; color: #888888; margin: 0; margin-top: -6px;';
+        p2.innerHTML = '식물의 성장 일지를 기록해서<br>멋진 누끼 스티커 아카이브를 모아보세요!';
+        
+        warning.appendChild(icon);
+        warning.appendChild(p1);
+        warning.appendChild(p2);
+        
+        stickersArea.appendChild(warning);
+        return;
+    }
+    
     plantPhotos.forEach((photoSrc, idx) => {
         const img = document.createElement('img');
         img.className = 'motion-sticker';
@@ -2203,13 +2229,6 @@ function openStickerStackModal(plantId) {
         img.style.setProperty('--rot-end', `${rotEnd}deg`);
         
         img.style.animationDelay = `${idx * 0.35}s`;
-        
-        // Click to drop again micro-interaction
-        img.addEventListener('click', () => {
-            img.style.animation = 'none';
-            img.offsetHeight; // trigger reflow
-            img.style.animation = `dropSticker 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards`;
-        });
         
         stickersArea.appendChild(img);
     });
