@@ -554,9 +554,27 @@ class PlantSegmenter {
         this.silCtx.globalCompositeOperation = 'source-over';
 
         // 3. Draw the thick white outline on the display canvas by offsetting the silhouette
-        // Calculate proportional outline thickness and shadow blur based on canvas width
-        const outlineRadius = Math.max(6, Math.round(this.width * 0.022)); // Proportional to canvas width (~2.2%)
-        const steps = Math.max(16, Math.min(32, Math.round(outlineRadius * 1.5))); // Smooth out circle offsets
+        // Calculate bounding box of the mask to keep the white outline thickness uniform in the browser
+        let minX = this.width;
+        let maxX = -1;
+        try {
+            const maskImgData = this.maskCtx.getImageData(0, 0, this.width, this.height);
+            const maskData = maskImgData.data;
+            for (let y = 0; y < this.height; y += 4) {
+                for (let x = 0; x < this.width; x += 4) {
+                    const alpha = maskData[((y * this.width + x) * 4) + 3];
+                    if (alpha > 8) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                    }
+                }
+            }
+        } catch (e) {}
+        
+        const maskWidth = (maxX !== -1) ? (maxX - minX + 1) : this.width;
+        // Proportional to mask width (~3.8%) so that when scaled to 100px in the browser, outline is always ~3.8px
+        const outlineRadius = Math.max(6, Math.round(maskWidth * 0.038));
+        const steps = Math.max(16, Math.min(32, Math.round(outlineRadius * 1.5)));
         
         const shadowBlur = Math.max(4, Math.round(this.width * 0.012));
         const shadowOffsetY = Math.max(2, Math.round(this.width * 0.008));

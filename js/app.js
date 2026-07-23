@@ -2214,13 +2214,45 @@ function openStickerStackModal(plantId) {
         img.src = photoSrc;
         img.alt = `${plant.nickname} sticker ${idx + 1}`;
         
-        // Horizontal offset: -55px to 55px from screen center
-        const offsetLeft = Math.floor(Math.random() * 110 - 55);
-        img.style.left = `calc(50% + ${offsetLeft}px)`;
+        // Define non-overlapping coordinates based on total photo count
+        let leftVal = '50%';
+        let topVal = '30%';
         
-        // Vertical offset: 15% to 50%
-        const top = 15 + Math.random() * 35;
-        img.style.top = `${top}%`;
+        if (plantPhotos.length === 2) {
+            const slots = [
+                { left: 'calc(50% - 65px)', top: '30%' },
+                { left: 'calc(50% + 65px)', top: '30%' }
+            ];
+            leftVal = slots[idx].left;
+            topVal = slots[idx].top;
+        } else if (plantPhotos.length === 3) {
+            const slots = [
+                { left: 'calc(50% - 75px)', top: '40%' },
+                { left: 'calc(50% + 75px)', top: '40%' },
+                { left: '50%', top: '15%' }
+            ];
+            leftVal = slots[idx].left;
+            topVal = slots[idx].top;
+        } else if (plantPhotos.length === 4) {
+            const slots = [
+                { left: 'calc(50% - 75px)', top: '42%' },
+                { left: 'calc(50% + 75px)', top: '42%' },
+                { left: 'calc(50% - 50px)', top: '18%' },
+                { left: 'calc(50% + 50px)', top: '18%' }
+            ];
+            leftVal = slots[idx].left;
+            topVal = slots[idx].top;
+        } else {
+            const row = Math.floor(idx / 3);
+            const col = idx % 3;
+            const xOffset = (col - 1) * 85;
+            const yOffset = 15 + row * 22;
+            leftVal = `calc(50% + ${xOffset}px)`;
+            topVal = `${yOffset}%`;
+        }
+        
+        img.style.left = leftVal;
+        img.style.top = topVal;
         
         // Rotation angles
         const rotStart = Math.floor(Math.random() * 60 - 30);
