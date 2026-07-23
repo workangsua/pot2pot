@@ -829,6 +829,35 @@
                     </div>
                 </div>
 
+                <!-- Greenhouse Decorator Modal -->
+                <div id="greenhouse-modal" class="modal-overlay">
+                    <div class="modal-sheet">
+                        <div class="modal-drag-handle"></div>
+                        <header class="modal-header">
+                            <button id="btn-greenhouse-reset" class="modal-back-btn" style="visibility: visible; font-size: 0.72rem; padding: 6px 12px; width: auto; height: auto; border-radius: 12px; font-weight: 700; background: var(--sand-dark); border: none; color: var(--forest-deep);">초기화</button>
+                            <h3 id="greenhouse-modal-title">나만의 가상 온실</h3>
+                            <button id="btn-greenhouse-close" class="modal-close-btn">&times;</button>
+                        </header>
+                        
+                        <div class="modal-body" style="padding: 12px 20px 24px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; height: calc(100% - 60px);">
+                            <p style="font-size: 0.72rem; color: var(--sand-dark); text-align: center; margin-top: -6px; margin-bottom: 4px; font-weight: 600;">
+                                식물 스티커를 드래그해서 선반과 창틀에 자유롭게 배치해 보세요! 🪴
+                            </p>
+                            
+                            <div id="greenhouse-playground" class="greenhouse-playground">
+                                <!-- Plant stickers will be populated and absolutely positioned here -->
+                                <div id="greenhouse-empty-state" class="greenhouse-empty-state">
+                                    <p>등록된 마이팟 식물이 없습니다.<br>먼저 식물을 등록해 주세요!</p>
+                                </div>
+                            </div>
+                            
+                            <div style="font-size: 0.65rem; color: var(--sand-dark); text-align: center; opacity: 0.8; font-weight: 600;">
+                                * 각 스티커는 엇박자로 둥둥 떠다니며 터치/드래그로 위치가 자동 저장됩니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Onboarding Overlay Screen -->
                 <div id="onboarding-screen" class="onboarding-screen active">
                     <div class="onboarding-content">

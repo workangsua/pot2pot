@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pot2pot-cache-v24';
+const CACHE_NAME = 'pot2pot-cache-v25';
 
 // Assets to cache initially
 const ASSETS_TO_CACHE = [
@@ -13,7 +13,8 @@ const ASSETS_TO_CACHE = [
   '/assets/apple-touch-icon.png',
   '/assets/monstera.png',
   '/assets/cactus.png',
-  '/assets/snake.png'
+  '/assets/snake.png',
+  '/assets/greenhouse_bg.jpg'
 ];
 
 // Install Event: cache initial assets

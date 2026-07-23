@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initGardenCalendarFlow();
     initActionSelectionFlow();
     initGrowthRecordFlow();
+    initGreenhouseFlow();
     
     // Set default date for date picker to today
     document.getElementById('plant-adoption').valueAsDate = new Date();
@@ -345,11 +346,11 @@ function initNavigation() {
         openActionSelectionModal();
     });
     
-    // Trophy Button click to open unified garden calendar modal
+    // Trophy Button click to open virtual greenhouse room decorator modal
     const heroTrophyBtn = document.getElementById('btn-hero-trophy');
     if (heroTrophyBtn) {
         heroTrophyBtn.addEventListener('click', () => {
-            openGardenCalendarModal();
+            openGreenhouseModal();
         });
     }
 }
@@ -1964,6 +1965,199 @@ function closeGardenCalendarModal() {
     const modal = document.getElementById('garden-calendar-modal');
     if (modal) {
         modal.classList.remove('active');
+    }
+}
+
+// --- Virtual Greenhouse Room Decorator Logic ---
+const GREENHOUSE_SLOTS = [
+    { x: 18, y: 5 },   // Top shelf
+    { x: 23, y: 27 },  // Middle shelf
+    { x: 18, y: 47 },  // Bottom shelf
+    { x: 60, y: 53 },  // Window sill left
+    { x: 78, y: 53 },  // Window sill right
+    { x: 42, y: 72 }   // Floor center
+];
+
+function openGreenhouseModal() {
+    const modal = document.getElementById('greenhouse-modal');
+    if (!modal) return;
+    
+    modal.classList.add('active');
+    
+    const playground = document.getElementById('greenhouse-playground');
+    if (!playground) return;
+    
+    // Clear existing stickers (except the empty state element)
+    const emptyState = document.getElementById('greenhouse-empty-state');
+    playground.innerHTML = '';
+    playground.appendChild(emptyState);
+    
+    if (!AppState.plants || AppState.plants.length === 0) {
+        emptyState.style.display = 'flex';
+        return;
+    }
+    
+    emptyState.style.display = 'none';
+    
+    // Load layout
+    let layout = {};
+    try {
+        layout = JSON.parse(localStorage.getItem('pot2pot_greenhouse_layout')) || {};
+    } catch (e) {}
+    
+    AppState.plants.forEach((plant, idx) => {
+        const sticker = document.createElement('div');
+        sticker.className = 'greenhouse-sticker';
+        sticker.setAttribute('data-id', plant.id);
+        sticker.style.animationDelay = `${idx * 0.35}s`;
+        
+        const img = document.createElement('img');
+        img.src = plant.image;
+        img.alt = plant.nickname;
+        
+        const nameLabel = document.createElement('div');
+        nameLabel.className = 'greenhouse-sticker-name';
+        nameLabel.textContent = plant.nickname;
+        
+        sticker.appendChild(img);
+        sticker.appendChild(nameLabel);
+        
+        // Position
+        let x = 0;
+        let y = 0;
+        
+        if (layout[plant.id] !== undefined) {
+            x = layout[plant.id].x;
+            y = layout[plant.id].y;
+        } else {
+            const slotIdx = idx % GREENHOUSE_SLOTS.length;
+            x = GREENHOUSE_SLOTS[slotIdx].x;
+            y = GREENHOUSE_SLOTS[slotIdx].y;
+            
+            if (idx >= GREENHOUSE_SLOTS.length) {
+                const multiplier = Math.floor(idx / GREENHOUSE_SLOTS.length);
+                x += multiplier * 4;
+                y += multiplier * 4;
+            }
+            
+            // Auto save default coordinates
+            layout[plant.id] = { x, y };
+        }
+        
+        sticker.style.left = `${x}%`;
+        sticker.style.top = `${y}%`;
+        
+        playground.appendChild(sticker);
+        bindStickerDrag(sticker, playground);
+    });
+    
+    localStorage.setItem('pot2pot_greenhouse_layout', JSON.stringify(layout));
+}
+
+function closeGreenhouseModal() {
+    const modal = document.getElementById('greenhouse-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function resetGreenhouseLayout() {
+    localStorage.removeItem('pot2pot_greenhouse_layout');
+    openGreenhouseModal();
+}
+
+function bindStickerDrag(sticker, playground) {
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
+    
+    sticker.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        isDragging = true;
+        sticker.classList.add('dragging');
+        sticker.setPointerCapture(e.pointerId);
+        
+        const leftPercent = parseFloat(sticker.style.left) || 0;
+        const topPercent = parseFloat(sticker.style.top) || 0;
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = leftPercent;
+        initialTop = topPercent;
+    });
+    
+    sticker.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        
+        const parentRect = playground.getBoundingClientRect();
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        const dxPercent = (dx / parentRect.width) * 100;
+        const dyPercent = (dy / parentRect.height) * 100;
+        
+        let newLeft = initialLeft + dxPercent;
+        let newTop = initialTop + dyPercent;
+        
+        // Boundaries constraint (sticker size: 65px x 75px)
+        const wPercent = (65 / parentRect.width) * 100;
+        const hPercent = (75 / parentRect.height) * 100;
+        
+        newLeft = Math.max(0, Math.min(newLeft, 100 - wPercent));
+        newTop = Math.max(0, Math.min(newTop, 100 - hPercent));
+        
+        sticker.style.left = `${newLeft}%`;
+        sticker.style.top = `${newTop}%`;
+    });
+    
+    const endDrag = (e) => {
+        if (!isDragging) return;
+        sticker.releasePointerCapture(e.pointerId);
+        sticker.classList.remove('dragging');
+        isDragging = false;
+        
+        const plantId = sticker.getAttribute('data-id');
+        const left = parseFloat(sticker.style.left) || 0;
+        const top = parseFloat(sticker.style.top) || 0;
+        
+        let layout = {};
+        try {
+            layout = JSON.parse(localStorage.getItem('pot2pot_greenhouse_layout')) || {};
+        } catch (err) {}
+        
+        layout[plantId] = { x: left, y: top };
+        localStorage.setItem('pot2pot_greenhouse_layout', JSON.stringify(layout));
+    };
+    
+    sticker.addEventListener('pointerup', endDrag);
+    sticker.addEventListener('pointercancel', endDrag);
+}
+
+function initGreenhouseFlow() {
+    const closeBtn = document.getElementById('btn-greenhouse-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            closeGreenhouseModal();
+        });
+    }
+    
+    const resetBtn = document.getElementById('btn-greenhouse-reset');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            resetGreenhouseLayout();
+        });
+    }
+    
+    const modal = document.getElementById('greenhouse-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeGreenhouseModal();
+            }
+        });
     }
 }
 
